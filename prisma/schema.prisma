@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String
+  communications Communication[]
+  password  String
+  role      Role       @default(MANAGER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  // Relations
+  auditLogs AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  entity    String
+  entityId  String
+  createdAt DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  LEASING_AGENT
+  ACCOUNTANT
+}
+
+model Property {
+  id            String     @id @default(cuid())
+  name          String
+  address       String
+  type          String     @default("apartment")
+  price         Int        @default(0)
+  bedrooms      Int        @default(0)
+  bathrooms     Float      @default(0)
+  area          Int        @default(0)
+  status        String     @default("vacant")
+  description   String?
+  features      String[]
+  yearBuilt     Int?
+  parkingSpaces Int?
+  image         String?
+  units         Unit[]
+  documents     Document[]
+  expenses      Expense[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Unit {
+  id          String               @id @default(cuid())
+  propertyId  String
+  unitNumber  String
+  bedrooms    Int
+  bathrooms   Int
+  sizeSqft    Int?
+  status      UnitStatus           @default(VACANT)
+  leases      Lease[]
+  workOrders  WorkOrder[]
+  media       Media[]
+  maintenance MaintenanceHistory[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@unique([propertyId, unitNumber])
+}
+
+enum UnitStatus {
+  OCCUPIED
+  VACANT
+  MAINTENANCE
+}
+
+model Tenant {
+  id               String          @id @default(cuid())
+  name             String
+  email            String?         @unique
+  phone            String?
+  emergencyContact String?
+  leases           Lease[]
+  communications   Communication[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Lease {
+  id              String      @id @default(cuid())
+  unitId          String
+  tenantId        String
+  startDate       DateTime
+  endDate         DateTime
+  securityDeposit Int?
+  rentAmount      Int
+  status          LeaseStatus @default(ACTIVE)
+  payments        Payment[]
+  documents       Document[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  unit   Unit   @relation(fields: [unitId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+enum LeaseStatus {
+  ACTIVE
+  TERMINATED
+  EXPIRED
+  PENDING
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  leaseId   String
+  amount    Int
+  dueDate   DateTime
+  paidAt    DateTime?
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model Expense {
+  id         String   @id @default(cuid())
+  propertyId String
+  amount     Int
+  category   String
+  note       String?
+  receiptUrl String?
+  incurredAt DateTime
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+}
+
+model WorkOrder {
+  id          String          @id @default(cuid())
+  unitId      String
+  vendorId    String?
+  title       String
+  description String?
+  status      WorkOrderStatus @default(NEW)
+  photos      Media[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  unit   Unit    @relation(fields: [unitId], references: [id])
+  vendor Vendor? @relation(fields: [vendorId], references: [id])
+}
+
+enum WorkOrderStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+model Vendor {
+  id         String      @id @default(cuid())
+  name       String
+  contact    String?
+  rateInfo   String?
+  insured    Boolean     @default(false)
+  workOrders WorkOrder[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  leaseId    String?
+  propertyId String?
+  url        String
+  type       String?
+  createdAt  DateTime @default(now())
+
+  lease    Lease?    @relation(fields: [leaseId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  unitId      String?
+  workOrderId String?
+  url         String
+  type        String?
+  createdAt   DateTime @default(now())
+
+  unit      Unit?      @relation(fields: [unitId], references: [id])
+  workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
+}
+
+model Communication {
+  id              String    @id @default(cuid())
+  tenantId        String
+  userId          String?
+  type            String    // email/call/meeting/note
+  channel         String
+  summary         String
+  content         String
+  followUpRequired Boolean   @default(false)
+  followUpDate    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  user            User?     @relation(fields: [userId], references: [id])
+}
+
+model MaintenanceHistory {
+  id          String   @id @default(cuid())
+  unitId      String
+  note        String?
+  cost        Int?
+  performedAt DateTime
+  createdAt   DateTime @default(now())
+
+  unit Unit @relation(fields: [unitId], references: [id])
+}
