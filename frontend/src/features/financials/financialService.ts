@@ -4,30 +4,27 @@ import { Payment, Expense, FinancialMetrics } from '../../types/financials';
 
 export const financialService = {
   // Payments
-  getPayments: async (filters = {}): Promise<Payment[]> => {
-    const response = await api.get('/api/payments', { params: filters });
-    return response.data;
+  getPayments: async (filters: Record<string, any> = {}): Promise<Payment[]> => {
+    const query = new URLSearchParams(filters).toString();
+    return api.get<Payment[]>(`/payments?${query}`);
   },
 
   createPayment: async (paymentData: Omit<Payment, 'id'>): Promise<Payment> => {
-    const response = await api.post('/api/payments', paymentData);
-    return response.data;
+    return api.post<Payment>('/payments', paymentData);
   },
 
   // Expenses
-  getExpenses: async (filters = {}): Promise<Expense[]> => {
-    const response = await api.get('/api/expenses', { params: filters });
-    return response.data;
+  getExpenses: async (filters: Record<string, any> = {}): Promise<Expense[]> => {
+    const query = new URLSearchParams(filters).toString();
+    return api.get<Expense[]>(`/expenses?${query}`);
   },
 
   createExpense: async (expenseData: Omit<Expense, 'id'>): Promise<Expense> => {
-    const response = await api.post('/api/expenses', expenseData);
-    return response.data;
+    return api.post<Expense>('/expenses', expenseData);
   },
 
   // Metrics
   getFinancialMetrics: async (): Promise<FinancialMetrics> => {
-    const response = await api.get('/api/financials/metrics');
-    return response.data;
+    return api.get<FinancialMetrics>('/financials/metrics');
   }
 };

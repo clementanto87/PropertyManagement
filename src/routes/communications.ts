@@ -1,17 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateToken } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Get all communications for the authenticated user (Property Manager)
-router.get('/communications', authenticateToken, async (req: Request, res: Response) => {
+router.get('/communications', authenticate, async (req: Request, res: Response) => {
   try {
-    const userId = req.user.id;
+    const userId = (req as AuthRequest).user!.id;
+    const { tenantId, limit } = req.query;
+
+    const where: any = tenantId ? { tenantId: tenantId as string } : { userId };
+    const take = limit ? parseInt(limit as string) : undefined;
+
     const communications = await prisma.communication.findMany({
-      where: { userId },
+      where,
       orderBy: { createdAt: 'desc' },
+      ...(take && { take }),
       include: {
         tenant: {
           select: {
@@ -29,7 +35,7 @@ router.get('/communications', authenticateToken, async (req: Request, res: Respo
         },
       },
     });
-    res.json(communications);
+    res.json({ items: communications });
   } catch (error) {
     console.error('Error fetching all communications:', error);
     res.status(500).json({ error: 'Failed to fetch communications' });
@@ -37,7 +43,7 @@ router.get('/communications', authenticateToken, async (req: Request, res: Respo
 });
 
 // Get all communications for a tenant
-router.get('/tenants/:tenantId/communications', authenticateToken, async (req: Request, res: Response) => {
+router.get('/tenants/:tenantId/communications', authenticate, async (req: Request, res: Response) => {
   try {
     const { tenantId } = req.params;
     const communications = await prisma.communication.findMany({
@@ -61,10 +67,10 @@ router.get('/tenants/:tenantId/communications', authenticateToken, async (req: R
 });
 
 // Create a new communication
-router.post('/communications', authenticateToken, async (req: Request, res: Response) => {
+router.post('/communications', authenticate, async (req: Request, res: Response) => {
   try {
     const { tenantId, type, channel, summary, content, followUpRequired, followUpDate } = req.body;
-    const userId = req.user.id;
+    const userId = (req as AuthRequest).user!.id;
 
     const communication = await prisma.communication.create({
       data: {
@@ -96,7 +102,7 @@ router.post('/communications', authenticateToken, async (req: Request, res: Resp
 });
 
 // Update a communication
-router.put('/communications/:id', authenticateToken, async (req: Request, res: Response) => {
+router.put('/communications/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { type, channel, summary, content, followUpRequired, followUpDate } = req.body;
@@ -130,7 +136,7 @@ router.put('/communications/:id', authenticateToken, async (req: Request, res: R
 });
 
 // Delete a communication
-router.delete('/communications/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/communications/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await prisma.communication.delete({

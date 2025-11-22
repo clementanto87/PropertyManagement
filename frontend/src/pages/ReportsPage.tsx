@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart3, PieChart, LineChart, Download, Filter, Building2, DollarSign, Users, Home, User, Bell, Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
@@ -8,7 +8,45 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select-component';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Bar, Pie, Line } from 'react-chartjs-2';
+import { propertyService } from '@/features/properties/propertyService';
+import { Property } from '@/types/property';
+import { workOrderService, WorkOrder } from '@/api/workOrderService';
+import { expenseService, Expense } from '@/api/expenseService';
+import { leaseService, Lease } from '@/api/leaseService';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+type Unit = {
+  id: string;
+  status: 'OCCUPIED' | 'VACANT' | 'MAINTENANCE';
+  propertyId: string;
+};
 
 const ReportsPage = () => {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -18,6 +56,93 @@ const ReportsPage = () => {
 
   const [reportType, setReportType] = useState('financial');
   const [propertyFilter, setPropertyFilter] = useState('all');
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [propsData, woData, expData, leaseData, unitsData] = await Promise.all([
+        propertyService.getProperties(),
+        workOrderService.getWorkOrders(),
+        expenseService.getExpenses(),
+        leaseService.getLeases(),
+        api.get<{ items: Unit[] }>('/units')
+      ]);
+      setProperties(propsData || []);
+      setWorkOrders(woData.items || []);
+      setExpenses(expData.items || []);
+      setLeases(leaseData.items || []);
+      setUnits(unitsData.items || []);
+    } catch (error) {
+      console.error('Failed to load report data:', error);
+      toast.error('Failed to load report data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Financial Metrics ---
+  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+  const monthlyIncome = leases
+    .filter(l => l.status === 'ACTIVE')
+    .reduce((sum, item) => sum + item.rentAmount, 0);
+  const netProfit = monthlyIncome - totalExpenses;
+
+  // --- Occupancy Metrics ---
+  // Calculate based on fetched units
+  const totalUnits = units.length;
+  const occupiedUnits = units.filter(u => u.status === 'OCCUPIED').length;
+  const vacantUnits = totalUnits - occupiedUnits;
+  const occupancyRate = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
+
+  // --- Maintenance Metrics ---
+  // Map 'NEW' and 'ASSIGNED' to Pending concept
+  const pendingRequests = workOrders.filter(wo => wo.status === 'NEW' || wo.status === 'ASSIGNED').length;
+  // Map 'IN_PROGRESS' and 'ON_HOLD' to In Progress concept
+  const inProgressRequests = workOrders.filter(wo => wo.status === 'IN_PROGRESS' || wo.status === 'ON_HOLD').length;
+  const completedRequests = workOrders.filter(wo => wo.status === 'COMPLETED').length;
+
+  // --- Charts Data ---
+  const occupancyChartData = {
+    labels: ['Occupied', 'Vacant'],
+    datasets: [
+      {
+        data: [occupiedUnits, vacantUnits],
+        backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(245, 158, 11, 0.6)'],
+        borderColor: ['rgba(16, 185, 129, 1)', 'rgba(245, 158, 11, 1)'],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const maintenanceChartData = {
+    labels: ['Pending', 'In Progress', 'Completed'],
+    datasets: [
+      {
+        label: 'Work Orders',
+        data: [pendingRequests, inProgressRequests, completedRequests],
+        backgroundColor: [
+          'rgba(245, 158, 11, 0.6)',
+          'rgba(59, 130, 246, 0.6)',
+          'rgba(16, 185, 129, 0.6)',
+        ],
+        borderColor: [
+          'rgba(245, 158, 11, 1)',
+          'rgba(59, 130, 246, 1)',
+          'rgba(16, 185, 129, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
   const renderReportContent = () => {
     switch (reportType) {
@@ -27,15 +152,14 @@ const ReportsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Total Income</h3>
+                  <h3 className="text-sm font-medium text-gray-500">Projected Income</h3>
                   <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">$24,780</div>
+                <div className="text-2xl font-bold text-gray-900">${monthlyIncome.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">+12%</span>
-                  <span className="text-xs text-gray-400 ml-2">from last month</span>
+                  <span className="text-xs text-gray-400">Monthly Projection</span>
                 </div>
               </div>
 
@@ -46,10 +170,9 @@ const ReportsPage = () => {
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">$8,450</div>
+                <div className="text-2xl font-bold text-gray-900">${totalExpenses.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700">+5%</span>
-                  <span className="text-xs text-gray-400 ml-2">from last month</span>
+                  <span className="text-xs text-gray-400">All Time</span>
                 </div>
               </div>
 
@@ -60,10 +183,9 @@ const ReportsPage = () => {
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">$16,330</div>
+                <div className="text-2xl font-bold text-gray-900">${netProfit.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">+15%</span>
-                  <span className="text-xs text-gray-400 ml-2">from last month</span>
+                  <span className="text-xs text-gray-400">Estimate</span>
                 </div>
               </div>
             </div>
@@ -71,21 +193,9 @@ const ReportsPage = () => {
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-gray-900">Income vs Expenses</h3>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                    <span className="text-sm text-gray-600">Income</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                    <span className="text-sm text-gray-600">Expenses</span>
-                  </div>
-                </div>
               </div>
-              <div className="h-80 bg-gray-50/50 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-gray-400">
-                <LineChart className="w-16 h-16 opacity-20 mb-4" />
-                <span className="text-sm font-medium">Chart visualization would render here</span>
-                <span className="text-xs mt-1">Using chart.js or recharts</span>
+              <div className="h-80 flex justify-center items-center text-gray-400 bg-gray-50/50 rounded-xl border border-gray-100">
+                <p>Chart visualization coming soon (requires historical data)</p>
               </div>
             </div>
           </div>
@@ -102,11 +212,7 @@ const ReportsPage = () => {
                     <Building2 className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">24</div>
-                <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">+2</span>
-                  <span className="text-xs text-gray-400 ml-2">new this month</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-900">{properties.length}</div>
               </div>
 
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -116,9 +222,9 @@ const ReportsPage = () => {
                     <Home className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">18</div>
+                <div className="text-2xl font-bold text-gray-900">{occupiedUnits}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">75%</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{occupancyRate}%</span>
                   <span className="text-xs text-gray-400 ml-2">occupancy rate</span>
                 </div>
               </div>
@@ -130,9 +236,9 @@ const ReportsPage = () => {
                     <Home className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">6</div>
+                <div className="text-2xl font-bold text-gray-900">{vacantUnits}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">25%</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">{100 - occupancyRate}%</span>
                   <span className="text-xs text-gray-400 ml-2">vacancy rate</span>
                 </div>
               </div>
@@ -140,21 +246,10 @@ const ReportsPage = () => {
 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Property Occupancy</h3>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
-                    <span className="text-sm text-gray-600">Occupied</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-gray-300 mr-2"></div>
-                    <span className="text-sm text-gray-600">Available</span>
-                  </div>
-                </div>
+                <h3 className="text-lg font-bold text-gray-900">Occupancy Status</h3>
               </div>
-              <div className="h-80 bg-gray-50/50 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-gray-400">
-                <BarChart3 className="w-16 h-16 opacity-20 mb-4" />
-                <span className="text-sm font-medium">Occupancy chart visualization</span>
+              <div className="h-80 flex justify-center">
+                <Pie data={occupancyChartData} options={{ maintainAspectRatio: false }} />
               </div>
             </div>
           </div>
@@ -171,11 +266,7 @@ const ReportsPage = () => {
                     <Users className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">5</div>
-                <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700">2 Urgent</span>
-                  <span className="text-xs text-gray-400 ml-2">needs attention</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-900">{pendingRequests}</div>
               </div>
 
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -185,11 +276,7 @@ const ReportsPage = () => {
                     <Users className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">3</div>
-                <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Active</span>
-                  <span className="text-xs text-gray-400 ml-2">being worked on</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-900">{inProgressRequests}</div>
               </div>
 
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -199,11 +286,7 @@ const ReportsPage = () => {
                     <Users className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">12</div>
-                <div className="flex items-center mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">This Month</span>
-                  <span className="text-xs text-gray-400 ml-2">successfully closed</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-900">{completedRequests}</div>
               </div>
             </div>
 
@@ -211,43 +294,39 @@ const ReportsPage = () => {
               <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-gray-900">Recent Maintenance Requests</h3>
-                  <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                    View All
-                  </Button>
                 </div>
                 <div className="space-y-4">
-                  {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                  {workOrders.slice(0, 5).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
                       <div className="flex items-center space-x-4">
                         <div className="p-2.5 rounded-lg bg-gray-100 text-gray-600">
                           <Home className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">Leaking Faucet Repair</p>
-                          <p className="text-sm text-gray-500">Property #{item} • Bathroom</p>
+                          <p className="font-medium text-gray-900">{item.title}</p>
+                          <p className="text-sm text-gray-500">{item.unit?.property?.title || 'Unknown Property'}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold text-gray-900">${(item * 120).toFixed(2)}</p>
-                        <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${item === 1
-                            ? 'bg-blue-50 text-blue-700 border-blue-100'
-                            : item === 2
-                              ? 'bg-amber-50 text-amber-700 border-amber-100'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${item.status === 'IN_PROGRESS' || item.status === 'ON_HOLD'
+                          ? 'bg-blue-50 text-blue-700 border-blue-100'
+                          : item.status === 'NEW' || item.status === 'ASSIGNED'
+                            ? 'bg-amber-50 text-amber-700 border-amber-100'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                           }`}>
-                          {item === 1 ? 'In Progress' : item === 2 ? 'Pending' : 'Completed'}
+                          {item.status.replace('_', ' ')}
                         </span>
                       </div>
                     </div>
                   ))}
+                  {workOrders.length === 0 && <p className="text-center text-gray-400">No work orders found.</p>}
                 </div>
               </div>
 
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-6">Status Distribution</h3>
-                <div className="h-64 bg-gray-50/50 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-gray-400">
-                  <PieChart className="w-12 h-12 opacity-20 mb-4" />
-                  <span className="text-sm font-medium">Pie chart visualization</span>
+                <div className="h-64 flex justify-center">
+                  <Pie data={maintenanceChartData} options={{ maintainAspectRatio: false }} />
                 </div>
               </div>
             </div>
@@ -258,6 +337,19 @@ const ReportsPage = () => {
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+        <div className="text-center p-8">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-500 animate-spin"></div>
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">Loading Reports</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -280,7 +372,6 @@ const ReportsPage = () => {
             <div className="flex items-center gap-3">
               <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
               </button>
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button variant="outline" className="gap-2">
@@ -332,15 +423,15 @@ const ReportsPage = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+              <Select value={propertyFilter} onValueChange={(value) => setPropertyFilter(value)}>
                 <SelectTrigger className="w-full sm:w-[200px] bg-white">
                   <SelectValue placeholder="Select property" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value="1">Downtown Apartments</SelectItem>
-                  <SelectItem value="2">Riverside Condos</SelectItem>
-                  <SelectItem value="3">Hillside Villas</SelectItem>
+                  {properties.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -369,7 +460,7 @@ const ReportsPage = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
+                <PopoverContent className="w-auto p-0 bg-white" align="end">
                   <Calendar
                     initialFocus
                     mode="range"

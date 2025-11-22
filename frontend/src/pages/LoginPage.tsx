@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
   Building2,
   Check,
   Chrome,
@@ -12,7 +12,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { setAuth, type AuthResponse } from '@/lib/auth';
+import { type AuthResponse } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 import { loadGoogleScript, renderGoogleButton, initializeGoogleSignIn } from '@/lib/googleAuth';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -21,6 +22,7 @@ const MICROSOFT_TENANT_ID = import.meta.env.VITE_MICROSOFT_TENANT_ID || 'common'
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -63,8 +65,8 @@ export default function LoginPage() {
       });
 
       // Store auth token and user
-      setAuth(response.token, response.user);
-      
+      login(response.token, response.user as any);
+
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
@@ -146,8 +148,8 @@ export default function LoginPage() {
       });
 
       // Store auth token and user
-      setAuth(response.token, response.user);
-      
+      login(response.token, response.user as any);
+
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
@@ -161,7 +163,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await api.post<AuthResponse>('/auth/login', {
         email,
@@ -169,8 +171,8 @@ export default function LoginPage() {
       });
 
       // Store auth token and user
-      setAuth(response.token, response.user);
-      
+      login(response.token, response.user as any);
+
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
@@ -288,11 +290,10 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setRememberMe(!rememberMe)}
                 disabled={loading || googleLoading || microsoftLoading}
-                className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${
-                  rememberMe
-                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-600'
-                    : 'border-gray-300 hover:border-blue-400'
-                } ${loading || googleLoading || microsoftLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${rememberMe
+                  ? 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-600'
+                  : 'border-gray-300 hover:border-blue-400'
+                  } ${loading || googleLoading || microsoftLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {rememberMe && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
               </button>
@@ -337,8 +338,8 @@ export default function LoginPage() {
             {/* Google Button */}
             <div className="relative">
               {GOOGLE_CLIENT_ID ? (
-                <div 
-                  ref={googleButtonRef} 
+                <div
+                  ref={googleButtonRef}
                   className="w-full"
                   style={{ minHeight: '48px' }}
                 >
@@ -362,7 +363,7 @@ export default function LoginPage() {
             </div>
 
             {/* Microsoft Button */}
-            
+
           </div>
 
           {/* Footer */}

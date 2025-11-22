@@ -23,6 +23,9 @@ import { tenantService, type Tenant } from '@/api/tenantService';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { DocumentList } from '@/components/documents/DocumentList';
+import { UploadDocumentDialog } from '@/components/documents/UploadDocumentDialog';
+import { Document, documentService } from '@/api/documentService';
 
 type Lease = {
     id: string;
@@ -66,7 +69,9 @@ export default function TenantDetailPage() {
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [leases, setLeases] = useState<Lease[]>([]);
     const [communications, setCommunications] = useState<Communication[]>([]);
+    const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showUploadDialog, setShowUploadDialog] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -94,6 +99,14 @@ export default function TenantDetailPage() {
                 setCommunications(commsResponse.items || []);
             } catch (error) {
                 console.error('Failed to load communications:', error);
+            }
+
+            // Load documents
+            try {
+                const docs = await documentService.getDocuments({ tenantId });
+                setDocuments(docs);
+            } catch (error) {
+                console.error('Failed to load documents:', error);
             }
         } catch (error) {
             console.error('Failed to load tenant:', error);
@@ -320,10 +333,10 @@ export default function TenantDetailPage() {
                                     <div key={payment.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${payment.status === 'PAID' ? 'bg-emerald-50' :
-                                                    payment.status === 'OVERDUE' ? 'bg-red-50' : 'bg-amber-50'
+                                                payment.status === 'OVERDUE' ? 'bg-red-50' : 'bg-amber-50'
                                                 }`}>
                                                 <DollarSign className={`w-5 h-5 ${payment.status === 'PAID' ? 'text-emerald-600' :
-                                                        payment.status === 'OVERDUE' ? 'text-red-600' : 'text-amber-600'
+                                                    payment.status === 'OVERDUE' ? 'text-red-600' : 'text-amber-600'
                                                     }`} />
                                             </div>
                                             <div>
@@ -334,7 +347,7 @@ export default function TenantDetailPage() {
                                             </div>
                                         </div>
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${payment.status === 'PAID' ? 'bg-emerald-50 text-emerald-700' :
-                                                payment.status === 'OVERDUE' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
+                                            payment.status === 'OVERDUE' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
                                             }`}>
                                             {payment.status}
                                         </span>
@@ -385,7 +398,32 @@ export default function TenantDetailPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Documents */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-gray-900">Documents</h3>
+                        <Button size="sm" className="gap-2" onClick={() => setShowUploadDialog(true)}>
+                            <FileText className="w-4 h-4" />
+                            Upload Document
+                        </Button>
+                    </div>
+                    <div className="p-6">
+                        <DocumentList
+                            documents={documents}
+                            onDocumentDeleted={() => id && loadAllData(id)}
+                        />
+                    </div>
+                </div>
             </div>
+
+            {/* Upload Document Dialog */}
+            <UploadDocumentDialog
+                open={showUploadDialog}
+                onOpenChange={setShowUploadDialog}
+                onDocumentUploaded={() => id && loadAllData(id)}
+                tenantId={id}
+            />
         </div>
     );
 }

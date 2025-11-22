@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
 import {
   Search,
   Bell,
@@ -14,101 +13,15 @@ import {
   Calendar,
   User,
   Building2,
-  Filter,
   MoreHorizontal,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  PauseCircle,
+  UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-type WorkOrderStatus = 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'URGENT';
-
-type WorkOrder = {
-  id: string;
-  title: string;
-  unitNumber: string;
-  address: string;
-  submittedBy: string;
-  submittedDate: string;
-  assignedTo?: string;
-  status: WorkOrderStatus;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  icon: React.ReactNode;
-};
-
-type ListResponse<T> = { items: T[] };
-
-// Premium placeholder data
-const PLACEHOLDER_WORK_ORDERS: WorkOrder[] = [
-  {
-    id: '1',
-    title: 'Leaky Faucet in Kitchen',
-    unitNumber: 'Unit 4B',
-    address: '123 Main St',
-    submittedBy: 'Jane Doe',
-    submittedDate: 'Oct 26',
-    status: 'NEW',
-    priority: 'MEDIUM',
-    icon: <Droplet className="w-5 h-5" />
-  },
-  {
-    id: '2',
-    title: 'Heating Not Working',
-    unitNumber: 'Unit 12A',
-    address: '456 Oak Ave',
-    submittedBy: 'John Smith',
-    submittedDate: 'Oct 25',
-    status: 'URGENT',
-    priority: 'HIGH',
-    icon: <Thermometer className="w-5 h-5" />
-  },
-  {
-    id: '3',
-    title: 'Broken Window Pane',
-    unitNumber: 'Unit 7C',
-    address: '789 Pine Ln',
-    submittedBy: 'Emily White',
-    submittedDate: 'Oct 24',
-    assignedTo: 'ProGlass Repair',
-    status: 'IN_PROGRESS',
-    priority: 'HIGH',
-    icon: <Square className="w-5 h-5" />
-  },
-  {
-    id: '4',
-    title: 'AC Unit Leaking',
-    unitNumber: 'Unit 2B',
-    address: '321 Maple Rd',
-    submittedBy: 'Mike Brown',
-    submittedDate: 'Oct 22',
-    status: 'COMPLETED',
-    priority: 'MEDIUM',
-    icon: <Snowflake className="w-5 h-5" />
-  },
-  {
-    id: '5',
-    title: 'Electrical Outlet Not Working',
-    unitNumber: 'Unit 9D',
-    address: '654 Elm St',
-    submittedBy: 'Sarah Johnson',
-    submittedDate: 'Oct 23',
-    status: 'NEW',
-    priority: 'HIGH',
-    icon: <AlertCircle className="w-5 h-5" />
-  },
-  {
-    id: '6',
-    title: 'Broken Door Lock',
-    unitNumber: 'Unit 15A',
-    address: '987 Cedar Blvd',
-    submittedBy: 'David Wilson',
-    submittedDate: 'Oct 21',
-    assignedTo: 'LockMaster Services',
-    status: 'IN_PROGRESS',
-    priority: 'HIGH',
-    icon: <Wrench className="w-5 h-5" />
-  }
-];
+import { workOrderService, WorkOrder, WorkOrderStatus } from '@/api/workOrderService';
+import { toast } from 'sonner';
 
 const getStatusBadge = (status: WorkOrderStatus) => {
   switch (status) {
@@ -119,11 +32,11 @@ const getStatusBadge = (status: WorkOrderStatus) => {
           New
         </span>
       );
-    case 'URGENT':
+    case 'ASSIGNED':
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
-          <AlertCircle className="w-3 h-3 mr-1" />
-          Urgent
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
+          <UserPlus className="w-3 h-3 mr-1" />
+          Assigned
         </span>
       );
     case 'IN_PROGRESS':
@@ -131,6 +44,13 @@ const getStatusBadge = (status: WorkOrderStatus) => {
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
           <Wrench className="w-3 h-3 mr-1" />
           In Progress
+        </span>
+      );
+    case 'ON_HOLD':
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">
+          <PauseCircle className="w-3 h-3 mr-1" />
+          On Hold
         </span>
       );
     case 'COMPLETED':
@@ -147,11 +67,35 @@ const getStatusBadge = (status: WorkOrderStatus) => {
 
 const getIconBackground = (status: WorkOrderStatus) => {
   switch (status) {
-    case 'URGENT': return 'bg-red-50 text-red-600';
+    case 'ON_HOLD': return 'bg-orange-50 text-orange-600';
     case 'IN_PROGRESS': return 'bg-amber-50 text-amber-600';
     case 'COMPLETED': return 'bg-emerald-50 text-emerald-600';
+    case 'ASSIGNED': return 'bg-purple-50 text-purple-600';
     default: return 'bg-blue-50 text-blue-600';
   }
+};
+
+const getWorkOrderIcon = (title: string) => {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes('faucet') || lowerTitle.includes('leak') || lowerTitle.includes('water')) {
+    return <Droplet className="w-5 h-5" />;
+  }
+  if (lowerTitle.includes('heating') || lowerTitle.includes('heat')) {
+    return <Thermometer className="w-5 h-5" />;
+  }
+  if (lowerTitle.includes('window')) {
+    return <Square className="w-5 h-5" />;
+  }
+  if (lowerTitle.includes('ac') || lowerTitle.includes('cooling')) {
+    return <Snowflake className="w-5 h-5" />;
+  }
+  if (lowerTitle.includes('electrical') || lowerTitle.includes('outlet')) {
+    return <AlertCircle className="w-5 h-5" />;
+  }
+  if (lowerTitle.includes('door') || lowerTitle.includes('lock')) {
+    return <Wrench className="w-5 h-5" />;
+  }
+  return <Wrench className="w-5 h-5" />;
 };
 
 export default function WorkOrdersPage() {
@@ -167,61 +111,21 @@ export default function WorkOrdersPage() {
 
   const loadWorkOrders = async () => {
     try {
-      const data = await api.get<ListResponse<any>>('/work-orders');
-      if (data.items && data.items.length > 0) {
-        const workOrders = data.items.map((wo: any) => ({
-          id: wo.id,
-          title: wo.title,
-          unitNumber: wo.unitId ? `Unit ${wo.unitId.slice(-2)}` : 'Unit N/A',
-          address: 'Property Address',
-          submittedBy: 'Tenant',
-          submittedDate: new Date(wo.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          assignedTo: wo.vendorId ? 'Assigned Vendor' : undefined,
-          status: (wo.status || 'NEW') as WorkOrderStatus,
-          priority: 'MEDIUM' as const,
-          icon: getWorkOrderIcon(wo.title)
-        }));
-        setItems(workOrders);
-      } else {
-        setItems(PLACEHOLDER_WORK_ORDERS);
-      }
+      const data = await workOrderService.getWorkOrders();
+      setItems(data.items || []);
     } catch (err) {
       console.error('Failed to load work orders:', err);
-      setItems(PLACEHOLDER_WORK_ORDERS);
+      toast.error('Failed to load work orders');
     } finally {
       setLoading(false);
     }
   };
 
-  const getWorkOrderIcon = (title: string) => {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('faucet') || lowerTitle.includes('leak') || lowerTitle.includes('water')) {
-      return <Droplet className="w-5 h-5" />;
-    }
-    if (lowerTitle.includes('heating') || lowerTitle.includes('heat')) {
-      return <Thermometer className="w-5 h-5" />;
-    }
-    if (lowerTitle.includes('window')) {
-      return <Square className="w-5 h-5" />;
-    }
-    if (lowerTitle.includes('ac') || lowerTitle.includes('cooling')) {
-      return <Snowflake className="w-5 h-5" />;
-    }
-    if (lowerTitle.includes('electrical') || lowerTitle.includes('outlet')) {
-      return <AlertCircle className="w-5 h-5" />;
-    }
-    if (lowerTitle.includes('door') || lowerTitle.includes('lock')) {
-      return <Wrench className="w-5 h-5" />;
-    }
-    return <Wrench className="w-5 h-5" />;
-  };
-
   const filteredItems = items.filter(item => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.submittedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.address.toLowerCase().includes(searchQuery.toLowerCase());
+      (item.unit?.unitNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.unit?.property?.title || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter = activeFilter === 'ALL' || item.status === activeFilter;
 
@@ -262,7 +166,6 @@ export default function WorkOrdersPage() {
             <div className="flex items-center gap-3">
               <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
               </button>
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button
@@ -284,23 +187,23 @@ export default function WorkOrdersPage() {
               <input
                 type="text"
                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm"
-                placeholder="Search by tenant, unit, or keyword..."
+                placeholder="Search by title, unit, or property..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200">
-              {(['NEW', 'IN_PROGRESS', 'COMPLETED'] as const).map((status) => (
+            <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200 overflow-x-auto">
+              {(['NEW', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setActiveFilter(status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeFilter === status
-                      ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeFilter === status
+                    ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                     }`}
                 >
-                  {status === 'NEW' ? 'New' : status === 'IN_PROGRESS' ? 'In Progress' : 'Completed'}
+                  {status === 'NEW' ? 'New' : status === 'ASSIGNED' ? 'Assigned' : status === 'IN_PROGRESS' ? 'In Progress' : 'Completed'}
                 </button>
               ))}
             </div>
@@ -347,7 +250,7 @@ export default function WorkOrdersPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className={`w-12 h-12 rounded-xl ${getIconBackground(order.status)} flex items-center justify-center flex-shrink-0`}>
-                      {order.icon}
+                      {getWorkOrderIcon(order.title)}
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
@@ -358,29 +261,30 @@ export default function WorkOrdersPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1.5">
-                          <Building2 className="w-4 h-4" />
-                          <span className="font-medium text-gray-700">{order.unitNumber}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-4 h-4" />
-                          <span>{order.submittedBy}</span>
-                        </div>
+                        {order.unit && (
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="w-4 h-4" />
+                            <span className="font-medium text-gray-700">
+                              Unit {order.unit.unitNumber}
+                              {order.unit.property && <span className="text-gray-500 font-normal"> • {order.unit.property.title}</span>}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-1.5">
                           <Calendar className="w-4 h-4" />
-                          <span>{order.submittedDate}</span>
+                          <span>{new Date(order.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {order.assignedTo && (
+                    {order.vendor && (
                       <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
                         <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                          {order.assignedTo.charAt(0)}
+                          {order.vendor.name.charAt(0)}
                         </div>
-                        <span className="text-sm font-medium text-gray-700">{order.assignedTo}</span>
+                        <span className="text-sm font-medium text-gray-700">{order.vendor.name}</span>
                       </div>
                     )}
                     <MoreHorizontal className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />

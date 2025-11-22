@@ -14,28 +14,19 @@ import {
     Users,
     TrendingUp,
     Building2,
-    Bell
+    Bell,
+    FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { propertyService } from '@/features/properties/propertyService';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { UnitManagementDialog, UnitStatus } from '@/components/UnitManagementDialog';
+import { DocumentList } from '@/components/documents/DocumentList';
+import { UploadDocumentDialog } from '@/components/documents/UploadDocumentDialog';
+import { Document, documentService } from '@/api/documentService';
 
-type Property = {
-    id: string;
-    name: string;
-    address: string;
-    type: string;
-    status: string;
-    price: number;
-    bedrooms: number;
-    bathrooms: number;
-    area: string;
-    image: string;
-    description?: string;
-    amenities?: string[];
-};
+import { Property } from '@/types/property';
 
 type Unit = {
     id: string;
@@ -57,9 +48,11 @@ export default function PropertyDetailPage() {
     const navigate = useNavigate();
     const [property, setProperty] = useState<Property | null>(null);
     const [units, setUnits] = useState<Unit[]>([]);
+    const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showUnitDialog, setShowUnitDialog] = useState(false);
+    const [showUploadDialog, setShowUploadDialog] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState<Unit | undefined>();
     const [unitToDelete, setUnitToDelete] = useState<string | null>(null);
 
@@ -81,6 +74,14 @@ export default function PropertyDetailPage() {
                 setUnits(unitsResponse.items || []);
             } catch (error) {
                 console.error('Failed to load units:', error);
+            }
+
+            // Load documents for this property
+            try {
+                const docs = await documentService.getDocuments({ propertyId });
+                setDocuments(docs);
+            } catch (error) {
+                console.error('Failed to load documents:', error);
             }
         } catch (error) {
             console.error('Failed to load property:', error);
@@ -209,7 +210,7 @@ export default function PropertyDetailPage() {
                         <div className="h-80 lg:h-full relative">
                             <img
                                 src={property.image}
-                                alt={property.name}
+                                alt={property.title}
                                 className="w-full h-full object-cover"
                             />
                             <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-medium ${property.status === 'vacant' ? 'bg-emerald-500 text-white' :
@@ -223,7 +224,7 @@ export default function PropertyDetailPage() {
                         {/* Property Info */}
                         <div className="p-8">
                             <div className="mb-6">
-                                <h2 className="text-3xl font-bold text-gray-900 mb-2">{property.name}</h2>
+                                <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
                                 <p className="text-gray-600 flex items-center gap-2">
                                     <MapPin className="w-5 h-5" />
                                     {property.address}
@@ -333,13 +334,14 @@ export default function PropertyDetailPage() {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {units.map((unit) => (
-                                    <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors group">
-                                        <div className="flex items-start justify-between mb-3">
+                                    <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors group relative">
+                                        <Link to={`/dashboard/units/${unit.id}`} className="absolute inset-0 z-0" />
+                                        <div className="flex items-start justify-between mb-3 relative z-10 pointer-events-none">
                                             <div>
                                                 <h4 className="font-semibold text-gray-900">Unit {unit.unitNumber}</h4>
                                                 <p className="text-sm text-gray-500">{unit.sizeSqft ? `${unit.sizeSqft} sq ft` : 'N/A'}</p>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 pointer-events-auto">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${unit.status === 'OCCUPIED' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
                                                     }`}>
                                                     {unit.status}
@@ -379,6 +381,23 @@ export default function PropertyDetailPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Documents Section */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-gray-900">Documents</h3>
+                        <Button size="sm" className="gap-2" onClick={() => setShowUploadDialog(true)}>
+                            <Plus className="w-4 h-4" />
+                            Upload Document
+                        </Button>
+                    </div>
+                    <div className="p-6">
+                        <DocumentList
+                            documents={documents}
+                            onDocumentDeleted={() => id && loadPropertyData(id)}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Delete Confirmation Dialog */}
@@ -395,7 +414,7 @@ export default function PropertyDetailPage() {
                             </div>
                         </div>
                         <p className="text-gray-600 mb-6">
-                            Are you sure you want to delete <strong>{property.name}</strong>? This will also delete all associated units and data.
+                            Are you sure you want to delete <strong>{property.title}</strong>? This will also delete all associated units and data.
                         </p>
                         <div className="flex gap-3">
                             <Button
@@ -461,6 +480,14 @@ export default function PropertyDetailPage() {
                     </div>
                 </div>
             )}
+
+            {/* Upload Document Dialog */}
+            <UploadDocumentDialog
+                open={showUploadDialog}
+                onOpenChange={setShowUploadDialog}
+                onDocumentUploaded={() => id && loadPropertyData(id)}
+                propertyId={id}
+            />
         </div>
     );
 }

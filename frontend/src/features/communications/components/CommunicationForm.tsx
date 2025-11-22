@@ -24,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select-component';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -71,7 +71,7 @@ export function CommunicationForm() {
       try {
         const response = await api.get(`/communications/${communicationId}`);
         const data = response.data;
-        
+
         form.reset({
           type: data.type,
           channel: data.channel,

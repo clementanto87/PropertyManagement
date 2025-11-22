@@ -50,7 +50,8 @@ export async function register(data: RegisterInput) {
     data: {
       email: data.email,
       name: data.name,
-      password: hashedPassword
+      password: hashedPassword,
+      role: data.role || 'MANAGER'
     }
   });
 

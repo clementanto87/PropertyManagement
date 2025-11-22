@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '@/lib/api';
 
 type Unit = { id: string; propertyId: string; unitNumber: string; bedrooms: number; bathrooms: number };
@@ -27,7 +28,11 @@ export default function UnitsPage() {
       <h2>Units</h2>
       <ul>
         {items.map((u) => (
-          <li key={u.id}>{u.unitNumber} — {u.bedrooms}bd/{u.bathrooms}ba</li>
+          <li key={u.id}>
+            <Link to={`/dashboard/units/${u.id}`} className="text-blue-600 hover:underline">
+              {u.unitNumber} — {u.bedrooms}bd/{u.bathrooms}ba
+            </Link>
+          </li>
         ))}
       </ul>
     </div>

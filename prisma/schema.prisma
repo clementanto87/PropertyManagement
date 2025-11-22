@@ -8,16 +8,22 @@ datasource db {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  name           String
-  communications Communication[]
+  id        String   @id @default(cuid())
+  email     String   @unique
   password  String
-  role      Role       @default(MANAGER)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  // Relations
-  auditLogs AuditLog[]
+  name      String?
+  role      Role     @default(MANAGER)
+  tenantId  String?  @unique
+  otpCode   String?
+  otpExpiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant         Tenant?         @relation(fields: [tenantId], references: [id])
+  auditLogs      AuditLog[]
+  communications Communication[]
+  posts          Post[]
+  amenityBookings AmenityBooking[]
 }
 
 model AuditLog {
@@ -34,8 +40,7 @@ model AuditLog {
 enum Role {
   ADMIN
   MANAGER
-  LEASING_AGENT
-  ACCOUNTANT
+  TENANT
 }
 
 model Property {
@@ -56,6 +61,8 @@ model Property {
   units         Unit[]
   documents     Document[]
   expenses      Expense[]
+  posts         Post[]
+  amenities     Amenity[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -71,6 +78,7 @@ model Unit {
   leases      Lease[]
   workOrders  WorkOrder[]
   media       Media[]
+  documents   Document[]
   maintenance MaintenanceHistory[]
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
@@ -87,30 +95,33 @@ enum UnitStatus {
 }
 
 model Tenant {
-  id               String          @id @default(cuid())
+  id               String             @id @default(cuid())
   name             String
-  email            String?         @unique
+  email            String?            @unique
   phone            String?
   emergencyContact String?
   leases           Lease[]
   communications   Communication[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  invitations      TenantInvitation[]
+  user             User?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }
 
 model Lease {
-  id              String      @id @default(cuid())
+  id              String           @id @default(cuid())
   unitId          String
   tenantId        String
   startDate       DateTime
   endDate         DateTime
   securityDeposit Int?
   rentAmount      Int
-  status          LeaseStatus @default(ACTIVE)
+  status          LeaseStatus      @default(ACTIVE)
   payments        Payment[]
   documents       Document[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  agreements      LeaseAgreement[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   unit   Unit   @relation(fields: [unitId], references: [id])
   tenant Tenant @relation(fields: [tenantId], references: [id])
@@ -124,13 +135,18 @@ enum LeaseStatus {
 }
 
 model Payment {
-  id        String        @id @default(cuid())
-  leaseId   String
-  amount    Int
-  dueDate   DateTime
-  paidAt    DateTime?
-  status    PaymentStatus @default(PENDING)
-  createdAt DateTime      @default(now())
+  id                     String         @id @default(cuid())
+  leaseId                String
+  amount                 Int
+  dueDate                DateTime
+  paidAt                 DateTime?
+  status                 PaymentStatus  @default(PENDING)
+  paymentMethod          PaymentMethod?
+  notes                  String?
+  receiptNumber          String?        @unique
+  stripePaymentIntentId  String?        @unique
+  stripeReceiptUrl       String?
+  createdAt              DateTime       @default(now())
 
   lease Lease @relation(fields: [leaseId], references: [id])
 }
@@ -139,6 +155,14 @@ enum PaymentStatus {
   PENDING
   PAID
   OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  BANK_TRANSFER
+  CREDIT_CARD
+  OTHER
 }
 
 model Expense {
@@ -192,12 +216,15 @@ model Document {
   id         String   @id @default(cuid())
   leaseId    String?
   propertyId String?
+  unitId     String?
+  title      String
   url        String
   type       String?
   createdAt  DateTime @default(now())
 
   lease    Lease?    @relation(fields: [leaseId], references: [id])
   property Property? @relation(fields: [propertyId], references: [id])
+  unit     Unit?     @relation(fields: [unitId], references: [id])
 }
 
 model Media {
@@ -213,20 +240,20 @@ model Media {
 }
 
 model Communication {
-  id              String    @id @default(cuid())
-  tenantId        String
-  userId          String?
-  type            String    // email/call/meeting/note
-  channel         String
-  summary         String
-  content         String
+  id               String    @id @default(cuid())
+  tenantId         String
+  userId           String?
+  type             String // email/call/meeting/note
+  channel          String
+  summary          String
+  content          String
   followUpRequired Boolean   @default(false)
-  followUpDate    DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  followUpDate     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  tenant          Tenant    @relation(fields: [tenantId], references: [id])
-  user            User?     @relation(fields: [userId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
 }
 
 model MaintenanceHistory {
@@ -238,4 +265,105 @@ model MaintenanceHistory {
   createdAt   DateTime @default(now())
 
   unit Unit @relation(fields: [unitId], references: [id])
+}
+
+model LeaseAgreement {
+  id              String           @id @default(cuid())
+  leaseId         String           @unique
+  templateContent String           @db.Text
+  status          AgreementStatus  @default(PENDING)
+  sentAt          DateTime?
+  signedAt        DateTime?
+  expiresAt       DateTime?
+  signatures      LeaseSignature[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+}
+
+enum AgreementStatus {
+  DRAFT
+  PENDING
+  SIGNED
+  EXPIRED
+  VOIDED
+}
+
+model LeaseSignature {
+  id              String          @id @default(cuid())
+  agreementId     String
+  signerType      SignerType
+  signerName      String
+  signerEmail     String
+  signatureData   String?         @db.Text
+  signatureMethod SignatureMethod @default(TYPED)
+  ipAddress       String?
+  signedAt        DateTime?
+  createdAt       DateTime        @default(now())
+
+  agreement LeaseAgreement @relation(fields: [agreementId], references: [id])
+}
+
+enum SignerType {
+  LANDLORD
+  TENANT
+}
+
+enum SignatureMethod {
+  TYPED
+  DRAWN
+}
+
+model TenantInvitation {
+  id         String    @id @default(cuid())
+  tenantId   String
+  email      String
+  token      String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   // ANNOUNCEMENT, EVENT, MARKETPLACE
+  authorId  String
+  propertyId String? // Optional: specific to a property
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+}
+
+model Amenity {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  propertyId  String
+  maxCapacity Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property Property         @relation(fields: [propertyId], references: [id])
+  bookings AmenityBooking[]
+}
+
+model AmenityBooking {
+  id        String   @id @default(cuid())
+  amenityId String
+  userId    String
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amenity Amenity @relation(fields: [amenityId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 }

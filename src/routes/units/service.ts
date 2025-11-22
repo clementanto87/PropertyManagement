@@ -15,7 +15,10 @@ export async function createUnit(data: CreateUnitInput) {
 }
 
 export async function getUnit(id: string) {
-  return prisma.unit.findUnique({ where: { id } });
+  return prisma.unit.findUnique({
+    where: { id },
+    include: { property: true }
+  });
 }
 
 export async function updateUnit(id: string, data: UpdateUnitInput) {

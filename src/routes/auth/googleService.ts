@@ -33,10 +33,10 @@ export async function verifyGoogleToken(idToken: string): Promise<GoogleTokenPay
   }
 
   try {
-    logger.info({ 
+    logger.info({
       clientIdLength: GOOGLE_CLIENT_ID.length,
       clientIdPrefix: GOOGLE_CLIENT_ID.substring(0, 30) + '...',
-      tokenLength: idToken.length 
+      tokenLength: idToken.length
     }, 'Verifying Google token');
 
     const ticket = await client.verifyIdToken({
@@ -62,12 +62,12 @@ export async function verifyGoogleToken(idToken: string): Promise<GoogleTokenPay
       sub: payload.sub
     };
   } catch (error) {
-    logger.error({ 
+    logger.error({
       error: error instanceof Error ? error.message : 'Unknown error',
       errorName: error instanceof Error ? error.name : 'Unknown',
       stack: error instanceof Error ? error.stack : undefined
     }, 'Google token verification failed');
-    
+
     if (error instanceof Error) {
       // Provide more specific error messages
       if (error.message.includes('Token used too early')) {
@@ -108,13 +108,14 @@ export async function loginOrRegisterWithGoogle(googleData: GoogleTokenPayload) 
       data: {
         email: googleData.email,
         name: googleData.name,
-        password: hashedPassword // Store a hashed random password
+        password: hashedPassword, // Store a hashed random password
+        role: 'MANAGER' // Default role for Google OAuth users
       }
     });
 
-    logger.info({ email: user.email, userId: user.id }, 'Created new user via Google OAuth');
+    logger.info({ email: user.email, userId: user.id, role: user.role }, 'Created new user via Google OAuth');
   } else {
-    logger.info({ email: user.email, userId: user.id }, 'User logged in via Google OAuth');
+    logger.info({ email: user.email, userId: user.id, role: user.role }, 'User logged in via Google OAuth');
   }
 
   // Generate JWT token

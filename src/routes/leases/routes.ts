@@ -7,8 +7,12 @@ import { parsePagination } from '../../utils/query';
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
-  const unitId = req.query.unitId ? z.string().cuid().parse(req.query.unitId) : undefined;
-  const tenantId = req.query.tenantId ? z.string().cuid().parse(req.query.tenantId) : undefined;
+  const unitId = req.query.unitId && typeof req.query.unitId === 'string'
+    ? z.string().cuid().safeParse(req.query.unitId).success ? req.query.unitId : undefined
+    : undefined;
+  const tenantId = req.query.tenantId && typeof req.query.tenantId === 'string'
+    ? z.string().cuid().safeParse(req.query.tenantId).success ? req.query.tenantId : undefined
+    : undefined;
   const { skip, take } = parsePagination(req.query as any);
   const items = await listLeases(unitId, tenantId, { skip, take });
   res.json({ items, page: Number(req.query.page ?? 1), limit: take });

@@ -1,50 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db/prisma';
+import { Role } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    role: Role;
+    tenantId?: string | null;
+  };
 }
 
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      throw new Error();
     }
 
-    const decoded = jwt.verify(token, secret) as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-      },
+      select: { id: true, role: true, tenantId: true },
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+      throw new Error();
     }
 
-    req.user = user;
+    (req as AuthRequest).user = user;
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Please authenticate.' });
   }
+};
+
+export const authorize = (roles: Role[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as AuthRequest).user;
+
+    if (!user || !roles.includes(user.role)) {
+      return res.status(403).json({ error: 'Access denied.' });
+    }
+
+    next();
+  };
 };
