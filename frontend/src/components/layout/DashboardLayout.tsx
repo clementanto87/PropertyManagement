@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   DoorOpen,
+  Shield,
 } from 'lucide-react';
 import { clearAuth } from '@/lib/auth';
 
@@ -35,6 +36,7 @@ const navigation = [
   { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarIcon, roles: ['ADMIN', 'MANAGER', 'TENANT'] },
   { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['ADMIN', 'MANAGER'] },
   { name: 'Communications', href: '/dashboard/communications', icon: MessageSquare, roles: ['ADMIN', 'MANAGER', 'TENANT'] },
+  { name: 'GDPR Management', href: '/dashboard/gdpr', icon: Shield, roles: ['ADMIN', 'MANAGER'] },
 ];
 
 export default function DashboardLayout() {

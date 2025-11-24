@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Calendar, MessageSquare, Phone, Mail, Clock, CheckCircle, XCircle, User, ArrowRight } from 'lucide-react';
+import { Calendar, MessageSquare, Phone, Mail, Clock, CheckCircle, XCircle, User, ArrowRight, Check } from 'lucide-react';
 import { api } from '@/lib/api';
 
 type Communication = {
@@ -27,11 +27,13 @@ type Communication = {
 export function CommunicationList({
   tenantId,
   filterType,
-  showFollowUpOnly
+  showFollowUpOnly,
+  searchQuery
 }: {
   tenantId?: string;
   filterType?: string;
   showFollowUpOnly?: boolean;
+  searchQuery?: string;
 }) {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,17 +44,31 @@ export function CommunicationList({
       try {
         setIsLoading(true);
         const endpoint = tenantId
-          ? `/communications/tenants/${tenantId}/communications`
+          ? `/tenants/${tenantId}/communications`
           : '/communications';
-        const response = await api.get(endpoint) as any;
-        let data = response.data;
-
-        if (filterType) {
-          data = data.filter((c: Communication) => c.type === filterType);
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (filterType && filterType !== 'all') {
+          params.append('type', filterType);
+        }
+        if (showFollowUpOnly) {
+          params.append('followUpOnly', 'true');
+        }
+        if (searchQuery) {
+          params.append('search', searchQuery);
         }
 
-        if (showFollowUpOnly) {
-          data = data.filter((c: Communication) => c.followUpRequired);
+        const queryString = params.toString();
+        const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+        
+        const response = await api.get<{ items: Communication[] } | Communication[]>(url);
+        // Handle both response formats: { items: [...] } or [...]
+        let data: Communication[] = [];
+        if (Array.isArray(response)) {
+          data = response;
+        } else if (response && typeof response === 'object' && 'items' in response) {
+          data = response.items || [];
         }
 
         setCommunications(data);
@@ -64,8 +80,13 @@ export function CommunicationList({
       }
     };
 
-    fetchCommunications();
-  }, [tenantId, filterType, showFollowUpOnly]);
+    // Debounce search query
+    const timeoutId = setTimeout(() => {
+      fetchCommunications();
+    }, searchQuery ? 300 : 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [tenantId, filterType, showFollowUpOnly, searchQuery]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -126,7 +147,7 @@ export function CommunicationList({
         {tenantId && (
           <div className="mt-6">
             <Link
-              to={`/tenants/${tenantId}/communications/new`}
+              to={`/dashboard/tenants/${tenantId}/communications/new`}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
             >
               <MessageSquare className="-ml-1 mr-2 h-4 w-4" />
@@ -194,10 +215,37 @@ export function CommunicationList({
               </div>
             )}
 
-            <div className="mt-4 pt-3 border-t border-gray-50 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+              {comm.followUpRequired && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.patch(`/communications/${comm.id}/complete-followup`, {});
+                      // Refresh the list
+                      const endpoint = tenantId
+                        ? `/tenants/${tenantId}/communications`
+                        : '/communications';
+                      const response = await api.get<{ items: Communication[] } | Communication[]>(endpoint);
+                      let data: Communication[] = [];
+                      if (Array.isArray(response)) {
+                        data = response;
+                      } else if (response && typeof response === 'object' && 'items' in response) {
+                        data = response.items || [];
+                      }
+                      setCommunications(data);
+                    } catch (err) {
+                      console.error('Error completing follow-up:', err);
+                    }
+                  }}
+                  className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 px-2 py-1 rounded hover:bg-emerald-50 transition-colors"
+                >
+                  <Check className="w-3 h-3" />
+                  Mark Complete
+                </button>
+              )}
               <Link
                 to={tenantId
-                  ? `/tenants/${tenantId}/communications/${comm.id}`
+                  ? `/dashboard/tenants/${tenantId}/communications/${comm.id}`
                   : `/dashboard/communications/${comm.id}`
                 }
                 className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center"

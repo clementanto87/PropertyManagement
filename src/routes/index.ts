@@ -16,6 +16,8 @@ import documentsRouter from './documents/routes';
 import paymentsRouter from './payments/routes';
 import calendarRouter from './calendar/routes';
 import pdfRouter from './pdf/routes';
+import emailTemplatesRouter from './email-templates/routes';
+import gdprRouter from './gdpr/routes';
 
 const router = Router();
 
@@ -48,5 +50,7 @@ router.use('/documents', documentsRouter);
 router.use('/payments', paymentsRouter);
 router.use('/calendar', calendarRouter);
 router.use('/pdf', pdfRouter);
+router.use('/email-templates', emailTemplatesRouter);
+router.use('/gdpr', gdprRouter);
 
 export default router;

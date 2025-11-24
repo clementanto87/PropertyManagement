@@ -30,11 +30,13 @@ import PaymentsPage from './pages/PaymentsPage';
 import CalendarPage from './pages/CalendarPage';
 import { CommunicationsPage } from './features/communications/components/CommunicationsPage';
 import { CommunicationDetail } from './features/communications/components/CommunicationDetail';
+import { CommunicationForm } from './features/communications/components/CommunicationForm';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import ProfilePage from './pages/ProfilePage';
 import LeaseAgreementPage from './pages/LeaseAgreementPage';
 import SignAgreementPage from './pages/SignAgreementPage';
 import TenantPortalSetupPage from './pages/TenantPortalSetupPage';
+import GDPRManagementPage from './pages/GDPRManagementPage';
 import { Outlet } from 'react-router-dom';
 
 import App from './App';
@@ -91,7 +93,11 @@ export const routes: RouteObject[] = [
               { index: true, element: <TenantsPage /> },
               { path: 'new', element: <NewTenantPage /> },
               { path: ':id', element: <TenantDetailPage /> },
-              { path: ':id/edit', element: <EditTenantPage /> }
+              { path: ':id/edit', element: <EditTenantPage /> },
+              { path: ':tenantId/communications', element: <CommunicationsPage /> },
+              { path: ':tenantId/communications/new', element: <CommunicationForm /> },
+              { path: ':tenantId/communications/:communicationId', element: <CommunicationDetail /> },
+              { path: ':tenantId/communications/:communicationId/edit', element: <CommunicationForm /> },
             ]
           },
           {
@@ -133,10 +139,16 @@ export const routes: RouteObject[] = [
             element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><ReportsPage /></ProtectedRoute>
           },
           {
+            path: 'gdpr',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><GDPRManagementPage /></ProtectedRoute>
+          },
+          {
             path: 'communications',
             children: [
               { index: true, element: <CommunicationsPage /> },
+              { path: 'new', element: <CommunicationForm /> },
               { path: ':communicationId', element: <CommunicationDetail /> },
+              { path: ':communicationId/edit', element: <CommunicationForm /> },
             ],
           },
         ]

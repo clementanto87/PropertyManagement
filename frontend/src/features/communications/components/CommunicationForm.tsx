@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,8 +70,7 @@ export function CommunicationForm() {
 
       setIsLoading(true);
       try {
-        const response = await api.get(`/communications/${communicationId}`);
-        const data = response.data;
+        const data = await api.get(`/communications/${communicationId}`);
 
         form.reset({
           type: data.type,
@@ -91,25 +91,35 @@ export function CommunicationForm() {
   }, [communicationId, isEdit, form]);
 
   const onSubmit = async (data: CommunicationFormValues) => {
-    if (!tenantId) return;
+    if (!tenantId) {
+      toast.error('Tenant ID is required');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       const payload = {
         ...data,
         tenantId,
-        followUpDate: data.followUpRequired ? data.followUpDate : null,
+        followUpDate: data.followUpRequired && data.followUpDate 
+          ? data.followUpDate.toISOString() 
+          : null,
       };
 
       if (isEdit && communicationId) {
         await api.put(`/communications/${communicationId}`, payload);
+        toast.success('Communication updated successfully');
       } else {
         await api.post('/communications', payload);
+        toast.success('Communication created successfully');
       }
 
-      navigate(`/tenants/${tenantId}/communications`);
-    } catch (error) {
+      // Navigate back to communications list
+      navigate(`/dashboard/tenants/${tenantId}/communications`);
+    } catch (error: any) {
       console.error('Error saving communication:', error);
+      const errorMessage = error?.message || 'Failed to save communication';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -123,18 +133,41 @@ export function CommunicationForm() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          {isEdit ? 'Edit Communication' : 'New Communication'}
-        </h2>
-        <p className="text-muted-foreground">
-          {isEdit ? 'Update the communication details' : 'Log a new communication with the tenant'}
-        </p>
+  if (!tenantId) {
+    return (
+      <div className="min-h-screen bg-gray-50/50 pb-20">
+        <div className="px-6 py-8 max-w-4xl mx-auto">
+          <div className="space-y-6">
+            <div className="text-center py-12">
+              <p className="text-red-500">Tenant ID is required</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => navigate('/dashboard/tenants')}
+              >
+                Back to Tenants
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
 
-      <Form {...form}>
+  return (
+    <div className="min-h-screen bg-gray-50/50 pb-20">
+      <div className="px-6 py-8 max-w-4xl mx-auto">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {isEdit ? 'Edit Communication' : 'New Communication'}
+            </h2>
+            <p className="text-muted-foreground">
+              {isEdit ? 'Update the communication details' : 'Log a new communication with the tenant'}
+            </p>
+          </div>
+
+          <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField
@@ -143,7 +176,7 @@ export function CommunicationForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select communication type" />
@@ -283,6 +316,8 @@ export function CommunicationForm() {
           </div>
         </form>
       </Form>
+        </div>
+      </div>
     </div>
   );
 }

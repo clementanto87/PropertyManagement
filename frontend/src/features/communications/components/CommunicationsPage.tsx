@@ -22,6 +22,8 @@ export function CommunicationsPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<CommunicationType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // If not in dashboard context and no tenantId, show error (though routing should prevent this)
   if (!tenantId && !location.pathname.includes('/communications')) {
@@ -41,7 +43,7 @@ export function CommunicationsPage() {
     <div className="min-h-screen bg-gray-50/50 pb-20">
       {/* Professional Sticky Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="px-6 py-4">
+        <div className="px-6 py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -69,7 +71,7 @@ export function CommunicationsPage() {
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               {tenantId && (
                 <Link
-                  to={`/tenants/${tenantId}/communications/new`}
+                  to={`/dashboard/tenants/${tenantId}/communications/new`}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
@@ -102,11 +104,20 @@ export function CommunicationsPage() {
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search logs..."
+                  placeholder="Search communications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full sm:w-64 bg-gray-50 focus:bg-white transition-colors"
                 />
               </div>
-              <button className="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 bg-white">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-3 py-2 border rounded-lg text-gray-600 bg-white transition-colors ${
+                  showFilters
+                    ? 'border-blue-500 bg-blue-50 text-blue-600'
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}
+              >
                 <Filter className="w-4 h-4" />
               </button>
             </div>
@@ -127,11 +138,31 @@ export function CommunicationsPage() {
               {activeTab === 'follow-up' && 'Pending Follow-ups'}
             </h2>
           </div>
+          {showFilters && (
+            <div className="px-6 pb-4 border-b border-gray-200 bg-gray-50/50">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="text-sm font-medium text-gray-700">Filters:</div>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-gray-600">Date Range:</label>
+                  <input
+                    type="date"
+                    className="px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-gray-400">to</span>
+                  <input
+                    type="date"
+                    className="px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           <div className="p-6">
             <CommunicationList
               tenantId={tenantId}
               filterType={activeTab === 'all' ? undefined : activeTab}
               showFollowUpOnly={activeTab === 'follow-up'}
+              searchQuery={searchQuery}
             />
           </div>
         </div>

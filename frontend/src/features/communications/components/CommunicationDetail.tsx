@@ -42,8 +42,8 @@ export function CommunicationDetail() {
       if (!communicationId) return;
 
       try {
-        const response = await api.get(`/communications/${communicationId}`);
-        setCommunication(response.data);
+        const data = await api.get(`/communications/${communicationId}`);
+        setCommunication(data);
       } catch (err) {
         setError('Failed to load communication');
         console.error('Error fetching communication:', err);
@@ -87,7 +87,7 @@ export function CommunicationDetail() {
         <Button
           variant="outline"
           className="mt-4"
-          onClick={() => navigate(`/tenants/${tenantId}/communications`)}
+          onClick={() => navigate(`/dashboard/tenants/${tenantId}/communications`)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Communications
@@ -97,12 +97,14 @@ export function CommunicationDetail() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
+    <div className="min-h-screen bg-gray-50/50 pb-20">
+      <div className="px-6 py-8 max-w-6xl mx-auto">
+        <div className="space-y-6">
+          <div className="flex flex-col space-y-2">
         <Button
           variant="ghost"
           className="w-fit p-0 hover:bg-transparent"
-          onClick={() => navigate(`/tenants/${tenantId}/communications`)}
+          onClick={() => navigate(`/dashboard/tenants/${tenantId}/communications`)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Communications
@@ -115,7 +117,7 @@ export function CommunicationDetail() {
           </div>
           <div className="flex items-center space-x-2">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/tenants/${tenantId}/communications/${communication.id}/edit`}>
+              <Link to={`/dashboard/tenants/${tenantId}/communications/${communication.id}/edit`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Link>
@@ -206,6 +208,7 @@ export function CommunicationDetail() {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </div>

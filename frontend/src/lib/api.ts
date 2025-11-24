@@ -59,6 +59,14 @@ export const api = {
       ...init
     });
   },
+  put: <T>(path: string, body: unknown, init?: RequestInit) => {
+    const isFormData = body instanceof FormData;
+    return request<T>(path, {
+      method: 'PUT',
+      body: isFormData ? body : JSON.stringify(body),
+      ...init
+    });
+  },
   delete: <T = void>(path: string) => request<T>(path, { method: 'DELETE' }),
   defaults: {
     baseURL: API_BASE

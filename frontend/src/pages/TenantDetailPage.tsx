@@ -26,6 +26,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { DocumentList } from '@/components/documents/DocumentList';
 import { UploadDocumentDialog } from '@/components/documents/UploadDocumentDialog';
 import { Document, documentService } from '@/api/documentService';
+import { CommunicationList } from '@/features/communications/components/CommunicationList';
+import { SendEmailDialog } from '@/components/communications/SendEmailDialog';
 
 type Lease = {
     id: string;
@@ -55,23 +57,15 @@ type Payment = {
     createdAt: string;
 };
 
-type Communication = {
-    id: string;
-    subject: string;
-    message: string;
-    type: string;
-    createdAt: string;
-};
-
 export default function TenantDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [leases, setLeases] = useState<Lease[]>([]);
-    const [communications, setCommunications] = useState<Communication[]>([]);
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [showUploadDialog, setShowUploadDialog] = useState(false);
+    const [showEmailDialog, setShowEmailDialog] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -91,14 +85,6 @@ export default function TenantDetailPage() {
                 setLeases(leasesResponse.items || []);
             } catch (error) {
                 console.error('Failed to load leases:', error);
-            }
-
-            // Load communications
-            try {
-                const commsResponse = await api.get<{ items: Communication[] }>(`/communications?tenantId=${tenantId}&limit=5`);
-                setCommunications(commsResponse.items || []);
-            } catch (error) {
-                console.error('Failed to load communications:', error);
             }
 
             // Load documents
@@ -362,40 +348,31 @@ export default function TenantDetailPage() {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="text-lg font-bold text-gray-900">Recent Communications</h3>
-                        <Button variant="outline" size="sm" className="gap-2">
-                            <MessageSquare className="w-4 h-4" />
-                            New Message
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => setShowEmailDialog(true)}
+                            >
+                                <Mail className="w-4 h-4" />
+                                Send Email
+                            </Button>
+                            <Link to={`/dashboard/tenants/${id}/communications`}>
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    View All
+                                </Button>
+                            </Link>
+                            <Link to={`/dashboard/tenants/${id}/communications/new`}>
+                                <Button size="sm" className="gap-2">
+                                    <MessageSquare className="w-4 h-4" />
+                                    New Message
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                     <div className="p-6">
-                        {communications.length === 0 ? (
-                            <div className="text-center py-8">
-                                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500">No communications yet</p>
-                                <p className="text-sm text-gray-400 mt-1">Start a conversation with this tenant</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {communications.map((comm) => (
-                                    <Link
-                                        key={comm.id}
-                                        to={`/dashboard/communications/${comm.id}`}
-                                        className="block p-4 border border-gray-100 rounded-lg hover:border-blue-300 hover:bg-blue-50/50 transition-colors"
-                                    >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h4 className="font-medium text-gray-900">{comm.subject}</h4>
-                                            <span className="text-xs text-gray-500">{formatDistanceToNow(new Date(comm.createdAt), { addSuffix: true })}</span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 line-clamp-2">{comm.message}</p>
-                                        <div className="mt-2">
-                                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700">
-                                                {comm.type}
-                                            </span>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
+                        <CommunicationList tenantId={id} filterType={undefined} showFollowUpOnly={false} />
                     </div>
                 </div>
 
@@ -423,6 +400,19 @@ export default function TenantDetailPage() {
                 onOpenChange={setShowUploadDialog}
                 onDocumentUploaded={() => id && loadAllData(id)}
                 tenantId={id}
+            />
+
+            {/* Send Email Dialog */}
+            <SendEmailDialog
+                open={showEmailDialog}
+                onOpenChange={setShowEmailDialog}
+                tenantId={id || ''}
+                tenantName={tenant?.name || ''}
+                tenantEmail={tenant?.email}
+                onEmailSent={() => {
+                    // Refresh the page to show new communication
+                    if (id) loadAllData(id);
+                }}
             />
         </div>
     );
