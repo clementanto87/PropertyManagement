@@ -11,7 +11,8 @@ import {
   Phone,
   Calendar,
   FileText,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 
 import { CommunicationList } from './CommunicationList';
@@ -24,6 +25,8 @@ export function CommunicationsPage() {
   const [activeTab, setActiveTab] = useState<CommunicationType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // If not in dashboard context and no tenantId, show error (though routing should prevent this)
   if (!tenantId && !location.pathname.includes('/communications')) {
@@ -38,6 +41,14 @@ export function CommunicationsPage() {
     { id: 'note', label: 'Notes', icon: FileText },
     { id: 'follow-up', label: 'Follow-ups', icon: Clock },
   ];
+
+  const clearFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSearchQuery('');
+  };
+
+  const hasActiveFilters = startDate || endDate || searchQuery;
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -89,8 +100,8 @@ export function CommunicationsPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as CommunicationType)}
                   className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.id
-                      ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                    ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                     }`}
                 >
                   <tab.icon className={`w-4 h-4 mr-2 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
@@ -112,14 +123,23 @@ export function CommunicationsPage() {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`px-3 py-2 border rounded-lg text-gray-600 bg-white transition-colors ${
-                  showFilters
+                className={`px-3 py-2 border rounded-lg text-gray-600 bg-white transition-colors ${showFilters
                     ? 'border-blue-500 bg-blue-50 text-blue-600'
                     : 'border-gray-200 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <Filter className="w-4 h-4" />
               </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1"
+                  title="Clear filters"
+                >
+                  <X className="w-4 h-4" />
+                  <span className="text-sm">Clear</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -139,19 +159,23 @@ export function CommunicationsPage() {
             </h2>
           </div>
           {showFilters && (
-            <div className="px-6 pb-4 border-b border-gray-200 bg-gray-50/50">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="text-sm font-medium text-gray-700">Filters:</div>
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-600">Date Range:</label>
+                  <label className="text-xs text-gray-600">From:</label>
                   <input
                     type="date"
-                    className="px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   />
                   <span className="text-xs text-gray-400">to</span>
                   <input
                     type="date"
-                    className="px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -163,6 +187,8 @@ export function CommunicationsPage() {
               filterType={activeTab === 'all' ? undefined : activeTab}
               showFollowUpOnly={activeTab === 'follow-up'}
               searchQuery={searchQuery}
+              startDate={startDate}
+              endDate={endDate}
             />
           </div>
         </div>

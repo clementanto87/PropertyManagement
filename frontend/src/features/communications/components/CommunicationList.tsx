@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Calendar, MessageSquare, Phone, Mail, Clock, CheckCircle, XCircle, User, ArrowRight, Check } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -28,12 +28,16 @@ export function CommunicationList({
   tenantId,
   filterType,
   showFollowUpOnly,
-  searchQuery
+  searchQuery,
+  startDate,
+  endDate
 }: {
   tenantId?: string;
   filterType?: string;
   showFollowUpOnly?: boolean;
   searchQuery?: string;
+  startDate?: string;
+  endDate?: string;
 }) {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +50,7 @@ export function CommunicationList({
         const endpoint = tenantId
           ? `/tenants/${tenantId}/communications`
           : '/communications';
-        
+
         // Build query parameters
         const params = new URLSearchParams();
         if (filterType && filterType !== 'all') {
@@ -58,10 +62,16 @@ export function CommunicationList({
         if (searchQuery) {
           params.append('search', searchQuery);
         }
+        if (startDate) {
+          params.append('startDate', startDate);
+        }
+        if (endDate) {
+          params.append('endDate', endDate);
+        }
 
         const queryString = params.toString();
         const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-        
+
         const response = await api.get<{ items: Communication[] } | Communication[]>(url);
         // Handle both response formats: { items: [...] } or [...]
         let data: Communication[] = [];
@@ -86,7 +96,7 @@ export function CommunicationList({
     }, searchQuery ? 300 : 0);
 
     return () => clearTimeout(timeoutId);
-  }, [tenantId, filterType, showFollowUpOnly, searchQuery]);
+  }, [tenantId, filterType, showFollowUpOnly, searchQuery, startDate, endDate]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -183,7 +193,9 @@ export function CommunicationList({
                   {comm.user.name}
                   <span className="mx-1.5">•</span>
                   <Clock className="w-3 h-3 mr-1" />
-                  {format(new Date(comm.createdAt), 'MMM d, yyyy h:mm a')}
+                  <span title={format(new Date(comm.createdAt), 'MMM d, yyyy h:mm a')}>
+                    {formatDistanceToNow(new Date(comm.createdAt), { addSuffix: true })}
+                  </span>
                 </div>
               </div>
             </div>
