@@ -84,4 +84,19 @@ export const paymentService = {
     deletePayment: async (id: string): Promise<void> => {
         return api.delete(`/payments/${id}`);
     },
+
+    downloadReceipt: async (id: string): Promise<Blob> => {
+        const token = localStorage.getItem('token'); // Or use getAuthToken() if exported
+        const response = await fetch(`${api.defaults.baseURL}/payments/${id}/receipt`, {
+            headers: {
+                ...(token && { Authorization: `Bearer ${token}` }),
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to download receipt');
+        }
+
+        return response.blob();
+    },
 };

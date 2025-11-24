@@ -58,6 +58,8 @@ model Property {
   yearBuilt     Int?
   parkingSpaces Int?
   image         String?
+  latitude      Float?
+  longitude     Float?
   units         Unit[]
   documents     Document[]
   expenses      Expense[]
@@ -254,6 +256,18 @@ model Communication {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   user   User?  @relation(fields: [userId], references: [id])
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  subject     String
+  body        String   @db.Text
+  category    String   // 'rent_reminder', 'maintenance', 'welcome', 'lease_renewal', 'move_out'
+  variables   Json     // Available variables like {{tenantName}}, {{rentAmount}}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model MaintenanceHistory {

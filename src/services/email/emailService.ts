@@ -318,3 +318,96 @@ export async function sendAgreementSignedNotification(
     text,
   });
 }
+
+export async function sendPaymentReceiptEmail(
+  to: string,
+  tenantName: string,
+  amount: number,
+  receiptNumber: string,
+  pdfBuffer: Buffer
+): Promise<void> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .success-icon { font-size: 48px; margin-bottom: 20px; }
+        .info-box { background: white; padding: 15px; border-left: 4px solid #10b981; margin: 20px 0; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="success-icon">💰</div>
+          <h1>Payment Received</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${tenantName},</p>
+          
+          <p>We have successfully received your payment of <strong>$${amount.toFixed(2)}</strong>.</p>
+          
+          <div class="info-box">
+            <p><strong>Receipt #:</strong> ${receiptNumber}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+          </div>
+          
+          <p>Please find your official receipt attached to this email.</p>
+          
+          <p>Best regards,<br>Property Management Team</p>
+        </div>
+        <div class="footer">
+          <p>This is an automated notification.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+    Payment Received
+    
+    Hello ${tenantName},
+    
+    We have successfully received your payment of $${amount.toFixed(2)}.
+    
+    Receipt #: ${receiptNumber}
+    Date: ${new Date().toLocaleDateString()}
+    
+    Please find your official receipt attached to this email.
+    
+    Best regards,
+    Property Management Team
+  `;
+
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    logger.warn({ to, subject: 'Payment Receipt' }, 'Email service not configured');
+    return;
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: EMAIL_FROM,
+      to,
+      subject: `Payment Receipt - ${receiptNumber}`,
+      html,
+      text,
+      attachments: [
+        {
+          filename: `receipt-${receiptNumber}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf'
+        }
+      ]
+    });
+
+    logger.info('Receipt email sent successfully:', info.messageId);
+  } catch (error) {
+    logger.error({ error }, 'Failed to send receipt email');
+    // Don't throw here to avoid failing the payment process if email fails
+  }
+}

@@ -3,89 +3,89 @@ import { logger } from '../../utils/logger';
 import type { Lease, Tenant, Unit, Property } from '@prisma/client';
 
 interface LeaseWithRelations extends Lease {
-    tenant: Tenant;
-    unit: Unit & {
-        property: Property;
-    };
+  tenant: Tenant;
+  unit: Unit & {
+    property: Property;
+  };
 }
 
 interface LeaseSignature {
-    id: string;
-    agreementId: string;
-    signerType: 'LANDLORD' | 'TENANT';
-    signerName: string;
-    signerEmail: string;
-    signatureData: string | null;
-    signatureMethod: 'TYPED' | 'DRAWN';
-    ipAddress: string | null;
-    signedAt: Date | null;
-    createdAt: Date;
+  id: string;
+  agreementId: string;
+  signerType: 'LANDLORD' | 'TENANT';
+  signerName: string;
+  signerEmail: string;
+  signatureData: string | null;
+  signatureMethod: 'TYPED' | 'DRAWN';
+  ipAddress: string | null;
+  signedAt: Date | null;
+  createdAt: Date;
 }
 
 interface GeneratePDFOptions {
-    lease: LeaseWithRelations;
-    signatures?: LeaseSignature[];
-    agreementContent?: string;
+  lease: LeaseWithRelations;
+  signatures?: LeaseSignature[];
+  agreementContent?: string;
 }
 
 export async function generateLeaseAgreementPDF(options: GeneratePDFOptions): Promise<Buffer> {
-    const { lease, signatures = [], agreementContent } = options;
+  const { lease, signatures = [], agreementContent } = options;
 
-    const html = agreementContent || generateDefaultLeaseTemplate(lease, signatures);
+  const html = agreementContent || generateDefaultLeaseTemplate(lease, signatures);
 
-    try {
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
 
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '20mm',
-                right: '15mm',
-                bottom: '20mm',
-                left: '15mm',
-            },
-        });
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm',
+      },
+    });
 
-        await browser.close();
+    await browser.close();
 
-        logger.info({ leaseId: lease.id }, 'PDF generated successfully for lease');
-        return Buffer.from(pdfBuffer);
-    } catch (error) {
-        logger.error({ error }, 'Failed to generate PDF');
-        throw new Error('Failed to generate lease agreement PDF');
-    }
+    logger.info({ leaseId: lease.id }, 'PDF generated successfully for lease');
+    return Buffer.from(pdfBuffer);
+  } catch (error) {
+    logger.error({ error }, 'Failed to generate PDF');
+    throw new Error('Failed to generate lease agreement PDF');
+  }
 }
 
 function generateDefaultLeaseTemplate(
-    lease: LeaseWithRelations,
-    signatures: LeaseSignature[]
+  lease: LeaseWithRelations,
+  signatures: LeaseSignature[]
 ): string {
-    const landlordSignature = signatures.find(s => s.signerType === 'LANDLORD');
-    const tenantSignature = signatures.find(s => s.signerType === 'TENANT');
+  const landlordSignature = signatures.find(s => s.signerType === 'LANDLORD');
+  const tenantSignature = signatures.find(s => s.signerType === 'TENANT');
 
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(amount);
-    };
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
 
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -433,12 +433,261 @@ function generateDefaultLeaseTemplate(
 }
 
 export async function saveLeaseAgreementPDF(
-    lease: LeaseWithRelations,
-    signatures: LeaseSignature[],
-    filePath: string
+  lease: LeaseWithRelations,
+  signatures: LeaseSignature[],
+  filePath: string
 ): Promise<void> {
-    const pdfBuffer = await generateLeaseAgreementPDF({ lease, signatures });
-    const fs = await import('fs/promises');
-    await fs.writeFile(filePath, pdfBuffer);
-    logger.info(`PDF saved to: ${filePath}`);
+  const pdfBuffer = await generateLeaseAgreementPDF({ lease, signatures });
+  const fs = await import('fs/promises');
+  await fs.writeFile(filePath, pdfBuffer);
+  logger.info(`PDF saved to: ${filePath}`);
+}
+
+interface PaymentWithRelations {
+  id: string;
+  amount: number;
+  dueDate: Date;
+  paidAt: Date | null;
+  status: string;
+  receiptNumber: string | null;
+  paymentMethod: string | null;
+  lease: {
+    tenant: {
+      name: string;
+      email: string;
+    };
+    unit: {
+      unitNumber: string;
+      property: {
+        name: string;
+        address: string;
+      };
+    };
+  };
+}
+
+export async function generatePaymentReceiptPDF(payment: PaymentWithRelations): Promise<Buffer> {
+  const html = generateReceiptTemplate(payment);
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm',
+      },
+    });
+
+    await browser.close();
+
+    logger.info({ paymentId: payment.id }, 'Receipt PDF generated successfully');
+    return Buffer.from(pdfBuffer);
+  } catch (error) {
+    logger.error({ error }, 'Failed to generate receipt PDF');
+    throw new Error('Failed to generate receipt PDF');
+  }
+}
+
+function generateReceiptTemplate(payment: PaymentWithRelations): string {
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Receipt</title>
+  <style>
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+      border: 1px solid #eee;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 20px;
+    }
+    .company-info h1 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 24px;
+    }
+    .receipt-title {
+      text-align: right;
+    }
+    .receipt-title h2 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 32px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .receipt-details {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+    .info-section {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    .info-block h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .info-block p {
+      margin: 0;
+      font-weight: 500;
+    }
+    .payment-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+    .payment-table th {
+      text-align: left;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      color: #495057;
+    }
+    .payment-table td {
+      padding: 15px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .total-section {
+      text-align: right;
+      margin-bottom: 40px;
+    }
+    .total-label {
+      font-size: 16px;
+      font-weight: bold;
+      color: #666;
+      margin-right: 20px;
+    }
+    .total-amount {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      color: #888;
+      font-size: 12px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      background-color: #d4edda;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="company-info">
+        <h1>Property Management</h1>
+        <p>123 Real Estate Ave<br>Business City, ST 12345</p>
+      </div>
+      <div class="receipt-title">
+        <h2>Receipt</h2>
+        <div class="receipt-details">
+          <p>Receipt #: ${payment.receiptNumber || 'PENDING'}</p>
+          <p>Date: ${formatDate(payment.paidAt)}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-block">
+        <h3>Bill To</h3>
+        <p>${payment.lease.tenant.name}</p>
+        <p>${payment.lease.tenant.email}</p>
+      </div>
+      <div class="info-block">
+        <h3>Property Details</h3>
+        <p>${payment.lease.unit.property.name}</p>
+        <p>${payment.lease.unit.property.address}</p>
+        <p>Unit ${payment.lease.unit.unitNumber}</p>
+      </div>
+    </div>
+
+    <table class="payment-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Payment Method</th>
+          <th>Status</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rent Payment - Due ${formatDate(payment.dueDate)}</td>
+          <td>${payment.paymentMethod || 'N/A'}</td>
+          <td><span class="status-badge">${payment.status}</span></td>
+          <td style="text-align: right;">${formatCurrency(payment.amount)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <span class="total-label">Total Paid:</span>
+      <span class="total-amount">${formatCurrency(payment.amount)}</span>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for your payment.</p>
+      <p>If you have any questions about this receipt, please contact our support team.</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
 }

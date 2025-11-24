@@ -5,8 +5,11 @@ import { CreditCard, CheckCircle2, Plus, Loader2, Download } from 'lucide-react'
 import { tenant } from '../services/api';
 import { motion } from 'framer-motion';
 import { PaymentModal } from '../components/PaymentModal';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 export function PaymentsPage() {
+  const { t } = useTranslation();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -88,11 +91,11 @@ export function PaymentsPage() {
     <div className="space-y-8 animate-in fade-in duration-500" >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Payments</h1>
-          <p className="text-muted-foreground mt-1">Manage your rent and view payment history.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t('payments.title')}</h1>
+          <p className="text-muted-foreground dark:text-gray-400 mt-1">{t('payments.subtitle')}</p>
         </div>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> Make Payment
+          <Plus className="mr-2 h-4 w-4" /> {t('payments.makePayment')}
         </Button>
       </div>
 
@@ -100,9 +103,9 @@ export function PaymentsPage() {
       {nextPayment ? (
         <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-none shadow-xl">
           <CardHeader>
-            <CardTitle className="text-blue-100">Next Payment</CardTitle>
+            <CardTitle className="text-blue-100">{t('payments.nextPayment')}</CardTitle>
             <CardDescription className="text-blue-200">
-              Due on {nextPayment.dueDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              {t('payments.dueOn', { date: nextPayment.dueDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -115,14 +118,14 @@ export function PaymentsPage() {
               className="w-full sm:w-auto"
               onClick={() => handlePayNow({ id: payments[0]?.id, amount: nextPayment.amount, dueDate: nextPayment.dueDate })}
             >
-              Pay Now <CreditCard className="ml-2 h-4 w-4" />
+              {t('payments.payNow')} <CreditCard className="ml-2 h-4 w-4" />
             </Button>
           </CardFooter>
         </Card>
       ) : (
-        <Card className="bg-gradient-to-br from-gray-100 to-gray-200 border-none shadow-xl">
+        <Card className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-none shadow-xl">
           <CardContent className="p-8 text-center">
-            <p className="text-gray-600">No payment history available to calculate next payment.</p>
+            <p className="text-gray-600 dark:text-gray-300">{t('payments.noHistory')}</p>
           </CardContent>
         </Card>
       )
@@ -131,24 +134,24 @@ export function PaymentsPage() {
       {/* Payment Methods */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment Methods</CardTitle>
-          <CardDescription>Manage your saved payment methods.</CardDescription>
+          <CardTitle>{t('payments.paymentMethods')}</CardTitle>
+          <CardDescription>{t('payments.manageMethods')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+          <div className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-4">
-              <div className="bg-white p-2 rounded border">
-                <CreditCard className="h-6 w-6 text-gray-700" />
+              <div className="bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600">
+                <CreditCard className="h-6 w-6 text-gray-700 dark:text-gray-300" />
               </div>
               <div>
-                <p className="font-medium">Visa ending in 4242</p>
-                <p className="text-sm text-muted-foreground">Expires 12/24</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Visa ending in 4242</p>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Expires 12/24</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm">Edit</Button>
+            <Button variant="ghost" size="sm">{t('common.edit')}</Button>
           </div>
           <Button variant="outline" className="w-full border-dashed">
-            <Plus className="mr-2 h-4 w-4" /> Add New Method
+            <Plus className="mr-2 h-4 w-4" /> {t('payments.addNewMethod')}
           </Button>
         </CardContent>
       </Card>
@@ -156,32 +159,32 @@ export function PaymentsPage() {
       {/* Payment History */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-          <CardDescription>A record of all your past payments.</CardDescription>
+          <CardTitle>{t('payments.paymentHistory')}</CardTitle>
+          <CardDescription>{t('payments.historyDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-border overflow-hidden">
+          <div className="rounded-md border border-border dark:border-gray-700 overflow-hidden">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-500 font-medium border-b border-border">
+              <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium border-b border-border dark:border-gray-700">
                 <tr>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Method</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{t('payments.date')}</th>
+                  <th className="px-4 py-3">{t('payments.description')}</th>
+                  <th className="px-4 py-3">{t('payments.method')}</th>
+                  <th className="px-4 py-3">{t('payments.amount')}</th>
+                  <th className="px-4 py-3">{t('payments.status')}</th>
+                  <th className="px-4 py-3 text-right">{t('payments.actions')}</th>
                 </tr>
               </thead>
               <motion.tbody
-                className="divide-y divide-border bg-white"
+                className="divide-y divide-border dark:divide-gray-700 bg-white dark:bg-gray-900"
                 variants={container}
                 initial="hidden"
                 animate="show"
               >
                 {payments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                      No payment history found.
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground dark:text-gray-400">
+                      {t('payments.noHistory')}
                     </td>
                   </tr>
                 ) : (
@@ -189,15 +192,15 @@ export function PaymentsPage() {
                     <motion.tr
                       key={payment.id}
                       variants={item}
-                      className="hover:bg-gray-50/50 transition-colors"
+                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
                     >
-                      <td className="px-4 py-3 font-medium">{new Date(payment.createdAt).toLocaleDateString()}</td>
-                      <td className="px-4 py-3">Rent for {new Date(payment.dueDate).toLocaleString('default', { month: 'long', year: 'numeric' })}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{payment.paymentMethod || 'N/A'}</td>
-                      <td className="px-4 py-3 font-medium">${payment.amount.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{new Date(payment.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{t('payments.rentFor', { month: new Date(payment.dueDate).toLocaleString('default', { month: 'long', year: 'numeric' }) })}</td>
+                      <td className="px-4 py-3 text-muted-foreground dark:text-gray-400">{payment.paymentMethod || t('common.none')}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">${payment.amount.toLocaleString()}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${payment.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                          payment.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${payment.status === 'PAID' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                          payment.status === 'PENDING' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                           }`}>
                           {payment.status === 'PAID' && <CheckCircle2 className="mr-1 h-3 w-3" />}
                           {payment.status}
@@ -214,7 +217,7 @@ export function PaymentsPage() {
                             onClick={() => handlePayNow({ id: payment.id, amount: payment.amount, dueDate: payment.dueDate })}
                           >
                             <CreditCard className="mr-1 h-3 w-3" />
-                            Pay Now
+                            {t('payments.payNow')}
                           </Button>
                         )}
                       </td>

@@ -162,10 +162,13 @@ export const updatePayment = async (id: string, data: any) => {
     });
 };
 
+import { generatePaymentReceiptPDF } from '../../services/pdf/pdfGenerator';
+import { sendPaymentReceiptEmail } from '../../services/email/emailService';
+
 export const recordPayment = async (id: string, data: RecordPaymentInput) => {
     const receiptNumber = await generateReceiptNumber();
 
-    return prisma.payment.update({
+    const payment = await prisma.payment.update({
         where: { id },
         data: {
             paidAt: new Date(data.paidAt),
@@ -178,14 +181,60 @@ export const recordPayment = async (id: string, data: RecordPaymentInput) => {
             lease: {
                 include: {
                     tenant: true,
+                    unit: {
+                        include: {
+                            property: true
+                        }
+                    }
                 },
             },
         },
     });
+
+    // Generate and send receipt asynchronously
+    try {
+        const pdfBuffer = await generatePaymentReceiptPDF(payment as any); // Cast to any to avoid strict type checking issues with Prisma types vs Interface
+        if (payment.lease.tenant.email) {
+            await sendPaymentReceiptEmail(
+                payment.lease.tenant.email,
+                payment.lease.tenant.name,
+                Number(payment.amount),
+                receiptNumber,
+                pdfBuffer
+            );
+        }
+    } catch (error) {
+        console.error('Failed to generate/send receipt:', error);
+        // Don't fail the request if receipt generation fails
+    }
+
+    return payment;
 };
 
 export const deletePayment = async (id: string) => {
     return prisma.payment.delete({
         where: { id },
     });
+};
+
+export const getPaymentReceipt = async (id: string) => {
+    const payment = await prisma.payment.findUnique({
+        where: { id },
+        include: {
+            lease: {
+                include: {
+                    tenant: true,
+                    unit: {
+                        include: {
+                            property: true
+                        }
+                    }
+                },
+            },
+        },
+    });
+
+    if (!payment) return null;
+
+    return generatePaymentReceiptPDF(payment as any);
 };

@@ -1,54 +1,114 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, TouchableOpacity, TouchableOpacityProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, radius } from '../../theme/tokens';
+import { useTheme } from '../../contexts/ThemeContext';
 
-interface CardProps {
-    children: React.ReactNode;
-    variant?: 'default' | 'gradient';
-    style?: ViewStyle;
-    gradientColors?: string[];
+type CardVariant = 'elevated' | 'outlined' | 'filled' | 'gradient';
+type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+
+interface CardProps extends TouchableOpacityProps {
+  children: React.ReactNode;
+  variant?: CardVariant;
+  padding?: CardPadding;
+  style?: ViewStyle;
+  gradientColors?: string[];
+  onPress?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
-    children,
-    variant = 'default',
-    style,
-    gradientColors = ['#3B82F6', '#2563EB'],
+  children,
+  variant = 'elevated',
+  padding = 'md',
+  style,
+  gradientColors = ['#3B82F6', '#2563EB'],
+  onPress,
+  ...rest
 }) => {
-    if (variant === 'gradient') {
-        return (
-            <View style={[styles.container, style]}>
-                <LinearGradient
-                    colors={gradientColors}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.gradient}
-                >
-                    {children}
-                </LinearGradient>
-            </View>
-        );
-    }
+  const { theme } = useTheme();
 
-    return <View style={[styles.container, styles.default, style]}>{children}</View>;
+  // Safety check
+  if (!theme || !theme.colors) {
+    return null;
+  }
+
+  const getVariantStyle = (): ViewStyle => {
+    switch (variant) {
+      case 'elevated':
+        return {
+          backgroundColor: theme.colors.surface || theme.colors.card || '#FFFFFF',
+          ...(theme.shadows?.md || {}),
+        };
+      case 'outlined':
+        return {
+          backgroundColor: theme.colors.surface || theme.colors.card || '#FFFFFF',
+          borderWidth: 1,
+          borderColor: theme.colors.border || '#E2E8F0',
+        };
+      case 'filled':
+        return {
+          backgroundColor: theme.colors.primaryMuted || '#DBEAFE',
+        };
+      case 'gradient':
+        return {
+          overflow: 'hidden',
+        };
+      default:
+        return {};
+    }
+  };
+
+  const getPadding = () => {
+    switch (padding) {
+      case 'none':
+        return 0;
+      case 'sm':
+        return theme.spacing?.sm || 8;
+      case 'lg':
+        return theme.spacing?.lg || 24;
+      case 'md':
+      default:
+        return theme.spacing?.md || 16;
+    }
+  };
+
+  const cardContent = (
+    <View
+      style={[
+        {
+          borderRadius: theme.radius?.md || 12,
+          overflow: 'hidden',
+          padding: getPadding(),
+        },
+        getVariantStyle(),
+        style,
+      ]}
+    >
+      {variant === 'gradient' ? (
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+      <View style={{ position: 'relative', zIndex: 1 }}>{children}</View>
+    </View>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8} {...rest}>
+        {cardContent}
+      </TouchableOpacity>
+    );
+  }
+
+  return cardContent;
 };
 
 const styles = StyleSheet.create({
-    container: {
-        borderRadius: radius.lg,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    default: {
-        backgroundColor: colors.surface,
-        padding: spacing.lg,
-    },
-    gradient: {
-        padding: spacing.lg,
-    },
+  container: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
 });

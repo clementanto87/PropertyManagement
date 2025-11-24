@@ -1,12 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const api = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: 30000, // 30 seconds
 });
 
 // Add a request interceptor to attach the token
@@ -19,6 +20,31 @@ api.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to handle errors
+api.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+        // Handle 401 Unauthorized - token expired or invalid
+        if (error.response?.status === 401) {
+            // Clear auth data
+            localStorage.removeItem('tenant_token');
+            localStorage.removeItem('tenant_user');
+            
+            // Only redirect if not already on login page
+            if (window.location.pathname !== '/auth/login') {
+                window.location.href = '/auth/login';
+            }
+        }
+        
+        // Handle network errors
+        if (!error.response) {
+            console.error('Network error:', error.message);
+        }
+        
+        return Promise.reject(error);
+    }
 );
 
 export const auth = {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,53 +6,47 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Animated,
+  Platform,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, radius, typography, shadows } from '../theme/tokens';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useMaintenanceRequests } from '../hooks/useApi';
+
+// Haptics is optional
+let Haptics: any = null;
+try {
+  Haptics = require('expo-haptics');
+} catch (e) {
+  // Haptics not available
+}
 
 export const MaintenanceScreen = () => {
-  const requests = [
-    {
-      id: 1,
-      title: 'Kitchen Faucet Repair',
-      description: 'Leaking faucet in kitchen sink',
-      status: 'in_progress',
-      priority: 'high',
-      date: '2 days ago',
-      assignee: 'John Doe',
-      scheduled: 'Today 2PM',
-    },
-    {
-      id: 2,
-      title: 'AC Not Cooling',
-      description: 'Air conditioner not working properly',
-      status: 'pending',
-      priority: 'urgent',
-      date: '1 week ago',
-      assignee: null,
-      scheduled: null,
-    },
-    {
-      id: 3,
-      title: 'Light Bulb Replacement',
-      description: 'Bedroom ceiling light needs replacement',
-      status: 'completed',
-      priority: 'low',
-      date: '2 weeks ago',
-      assignee: 'Jane Smith',
-      scheduled: null,
-    },
-  ];
+  const navigation = useNavigation();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  const { data: requests, isLoading, refetch } = useMaintenanceRequests();
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'in_progress':
+    switch (status.toUpperCase()) {
+      case 'IN_PROGRESS':
         return { bg: colors.warningLight, text: colors.warning };
-      case 'pending':
+      case 'PENDING':
         return { bg: colors.errorLight, text: colors.error };
-      case 'completed':
+      case 'COMPLETED':
         return { bg: colors.successLight, text: colors.success };
       default:
         return { bg: colors.primaryMuted, text: colors.primary };
@@ -60,7 +54,7 @@ export const MaintenanceScreen = () => {
   };
 
   const getPriorityEmoji = (priority: string) => {
-    switch (priority) {
+    switch (priority.toLowerCase()) {
       case 'urgent':
         return '🔴';
       case 'high':
@@ -74,116 +68,219 @@ export const MaintenanceScreen = () => {
     }
   };
 
+  // Calculate stats from real data
+  const stats = React.useMemo(() => {
+    if (!requests) return { active: 0, pending: 0, completed: 0 };
+    return {
+      active: requests.filter((r: any) => r.status === 'IN_PROGRESS').length,
+      pending: requests.filter((r: any) => r.status === 'PENDING').length,
+      completed: requests.filter((r: any) => r.status === 'COMPLETED').length,
+    };
+  }, [requests]);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const handlePress = () => {
+    if (Platform.OS === 'ios' && Haptics) {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (e) {
+        // Haptics not available
+      }
+    }
+  };
+
+  const handleNewRequest = () => {
+    handlePress();
+    navigation.navigate('NewRequest' as never);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <LinearGradient colors={colors.gradientOrange} style={styles.header}>
-        <Text style={styles.headerTitle}>Maintenance</Text>
-        <Text style={styles.headerSubtitle}>Track your service requests</Text>
-      </LinearGradient>
+      {/* Animated Header */}
+      <Animated.View
+        style={[
+          styles.headerContainer,
+          { opacity: headerOpacity }
+        ]}
+      >
+        <LinearGradient
+          colors={colors.gradientOrange as any}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <Text style={styles.headerTitle}>Maintenance</Text>
+          <Text style={styles.headerSubtitle}>Track your service requests</Text>
+        </LinearGradient>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        decelerationRate="normal"
-        bounces={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
       >
         {/* New Request Button */}
-        <Button
-          title="+ New Request"
-          onPress={() => { }}
-          style={styles.newRequestButton}
-        />
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          <Button
+            title="+ New Request"
+            onPress={handleNewRequest}
+            style={styles.newRequestButton}
+          />
+        </Animated.View>
 
         {/* Quick Stats */}
-        <View style={styles.statsContainer}>
+        <Animated.View
+          style={[
+            styles.statsContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statNumber}>{stats.active}</Text>
             <Text style={styles.statLabel}>Active</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>1</Text>
+            <Text style={styles.statNumber}>{stats.pending}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{stats.completed}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Requests List */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Requests</Text>
 
-          {requests.map((request) => {
-            const statusColor = getStatusColor(request.status);
-            return (
-              <Card key={request.id} style={styles.requestCard}>
-                <View style={styles.requestHeader}>
-                  <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
-                    <Text style={[styles.statusText, { color: statusColor.text }]}>
-                      {request.status.replace('_', ' ').toUpperCase()}
-                    </Text>
-                  </View>
-                  <View style={styles.priorityBadge}>
-                    <Text style={styles.priorityEmoji}>{getPriorityEmoji(request.priority)}</Text>
-                    <Text style={styles.priorityText}>{request.priority}</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.requestTitle}>{request.title}</Text>
-                <Text style={styles.requestDescription}>{request.description}</Text>
-
-                <View style={styles.requestFooter}>
-                  <Text style={styles.requestDate}>📅 {request.date}</Text>
-                  {request.assignee && (
-                    <View style={styles.assigneeContainer}>
-                      <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>
-                          {request.assignee.split(' ').map(n => n[0]).join('')}
+          {isLoading ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: colors.muted }}>Loading requests...</Text>
+            </View>
+          ) : !requests || requests.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateEmoji}>🔧</Text>
+              <Text style={styles.emptyStateText}>No maintenance requests found</Text>
+              <Text style={styles.emptyStateSubtext}>Everything seems to be working perfectly!</Text>
+            </View>
+          ) : (
+            requests.map((request: any, index: number) => {
+              const statusColor = getStatusColor(request.status);
+              return (
+                <Animated.View
+                  key={request.id}
+                  style={{
+                    opacity: fadeAnim,
+                    transform: [{ translateY: slideAnim }],
+                  }}
+                >
+                  <Card style={styles.requestCard}>
+                    <View style={styles.requestHeader}>
+                      <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
+                        <Text style={[styles.statusText, { color: statusColor.text }]}>
+                          {request.status.replace('_', ' ').toUpperCase()}
                         </Text>
                       </View>
-                      <Text style={styles.assigneeName}>{request.assignee}</Text>
+                      <View style={styles.priorityBadge}>
+                        <Text style={styles.priorityEmoji}>{getPriorityEmoji(request.priority)}</Text>
+                        <Text style={styles.priorityText}>{request.priority}</Text>
+                      </View>
                     </View>
-                  )}
-                </View>
 
-                {request.scheduled && (
-                  <View style={styles.scheduledBanner}>
-                    <Text style={styles.scheduledText}>⏰ Scheduled: {request.scheduled}</Text>
-                  </View>
-                )}
+                    <Text style={styles.requestTitle}>{request.title}</Text>
+                    <Text style={styles.requestDescription}>{request.description}</Text>
 
-                <TouchableOpacity style={styles.viewButton}>
-                  <Text style={styles.viewButtonText}>View Details →</Text>
-                </TouchableOpacity>
-              </Card>
-            );
-          })}
+                    <View style={styles.requestFooter}>
+                      <Text style={styles.requestDate}>📅 {new Date(request.createdAt).toLocaleDateString()}</Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.viewButton}
+                      onPress={handlePress}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.viewButtonText}>View Details →</Text>
+                    </TouchableOpacity>
+                  </Card>
+                </Animated.View>
+              );
+            })
+          )}
         </View>
 
         {/* Help Card */}
-        <Card variant="gradient" gradientColors={colors.gradientPurple} style={styles.helpCard}>
-          <Text style={styles.helpIcon}>💡</Text>
-          <Text style={styles.helpTitle}>Need Emergency Help?</Text>
-          <Text style={styles.helpText}>
-            For urgent issues like gas leaks or flooding, call our 24/7 emergency line
-          </Text>
-          <TouchableOpacity style={styles.callButton}>
-            <LinearGradient
-              colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.2)']}
-              style={styles.callButtonGradient}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          <Card variant="gradient" gradientColors={colors.gradientPurple as any} style={styles.helpCard}>
+            <Text style={styles.helpIcon}>💡</Text>
+            <Text style={styles.helpTitle}>Need Emergency Help?</Text>
+            <Text style={styles.helpText}>
+              For urgent issues like gas leaks or flooding, call our 24/7 emergency line
+            </Text>
+            <TouchableOpacity
+              style={styles.callButton}
+              onPress={handlePress}
+              activeOpacity={0.8}
             >
-              <Text style={styles.callButtonText}>📞 Call Emergency Line</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Card>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.2)']}
+                style={styles.callButtonGradient}
+              >
+                <Text style={styles.callButtonText}>📞 Call Emergency Line</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Card>
+        </Animated.View>
 
         <View style={{ height: spacing.xl }} />
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -193,21 +290,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   header: {
-    paddingTop: 60,
-    paddingBottom: spacing.xl,
+    paddingTop: 50,
+    paddingBottom: spacing.lg,
     paddingHorizontal: spacing.lg,
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
+    minHeight: 140,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.9)',
   },
   scrollView: {
@@ -215,6 +320,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    paddingTop: 160,
   },
   newRequestButton: {
     marginBottom: spacing.lg,
@@ -390,5 +496,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    gap: spacing.md,
+  },
+  emptyStateEmoji: {
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: colors.muted,
+    textAlign: 'center',
   },
 });

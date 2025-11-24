@@ -1,108 +1,168 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
-import { DashboardScreen } from '../screens/DashboardScreen';
+import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Platform, View, StyleSheet, Text } from 'react-native';
+import { HomeNavigator } from './HomeNavigator';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
-import { MaintenanceScreen } from '../screens/MaintenanceScreen';
-import { DocumentsScreen } from '../screens/DocumentsScreen';
+import { MaintenanceNavigator } from './MaintenanceNavigator';
+import { DocumentsNavigator } from './DocumentsNavigator';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { colors, radius } from '../theme/tokens';
+import { useTheme } from '../contexts/ThemeContext';
+import { colors, shadows, spacing, radius } from '../theme/tokens';
 
 const Tab = createBottomTabNavigator();
 
-const TabIcon = ({ emoji, focused }: { emoji: string; focused: boolean }) => (
-  <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-    <Text style={[styles.icon, focused && styles.iconActive]}>{emoji}</Text>
-  </View>
-);
+type TabBarIconProps = {
+  focused: boolean;
+  color: string;
+  size: number;
+};
 
 export const AppNavigator = () => {
+  const { theme, isDark } = useTheme();
+
+  // Safety check for theme.colors
+  if (!theme || !theme.colors) {
+    return null;
+  }
+
+  const getTabBarIcon = (routeName: string) => {
+    return ({ color, size, focused }: TabBarIconProps) => {
+      let iconName: string = 'home';
+
+      switch (routeName) {
+        case 'Home':
+          iconName = focused ? 'home' : 'home-outline';
+          break;
+        case 'Payments':
+          iconName = focused ? 'card' : 'card-outline';
+          break;
+        case 'Maintenance':
+          iconName = focused ? 'build' : 'build-outline';
+          break;
+        case 'Documents':
+          iconName = focused ? 'document-text' : 'document-text-outline';
+          break;
+        case 'Profile':
+          iconName = focused ? 'person' : 'person-outline';
+          break;
+      }
+
+      return (
+        <View style={focused ? styles.iconContainer : styles.iconContainerInactive}>
+          <Ionicons
+            name={iconName as any}
+            size={focused ? 24 : 22}
+            color={focused ? colors.primary : color}
+          />
+        </View>
+      );
+    };
+  };
+
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: styles.tabBarLabel,
-        tabBarItemStyle: styles.tabBarItem,
-      }}
+        tabBarActiveTintColor: theme.colors?.primary || colors.primary,
+        tabBarInactiveTintColor: theme.colors?.muted || colors.muted,
+        tabBarStyle: {
+          backgroundColor: Platform.OS === 'ios'
+            ? 'rgba(255, 255, 255, 0.95)'
+            : theme.colors?.surface || '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: colors.divider,
+          height: Platform.OS === 'ios' ? 90 : 72,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          paddingTop: Platform.OS === 'ios' ? 8 : 8,
+          position: 'absolute',
+          ...(Platform.OS === 'android' ? shadows.lg : {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+          }),
+          elevation: Platform.OS === 'android' ? 8 : 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          marginTop: 2,
+          marginBottom: Platform.OS === 'ios' ? 0 : 2,
+          letterSpacing: 0.2,
+        },
+        tabBarIcon: getTabBarIcon(route.name),
+        tabBarHideOnKeyboard: true,
+        tabBarShowLabel: true,
+        tabBarItemStyle: {
+          paddingVertical: 4,
+        },
+      })}
     >
       <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
+        name="Home"
+        component={HomeNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+          title: 'Home',
+          tabBarBadge: undefined,
         }}
       />
       <Tab.Screen
         name="Payments"
         component={PaymentsScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="💳" focused={focused} />,
-        }}
+        options={{ title: 'Payments' }}
       />
       <Tab.Screen
         name="Maintenance"
-        component={MaintenanceScreen}
+        component={MaintenanceNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🔧" focused={focused} />,
+          title: 'Maintenance',
+          tabBarLabel: 'Maintenance',
+          tabBarBadge: 2,
+          tabBarBadgeStyle: {
+            backgroundColor: colors.error,
+            fontSize: 9,
+            fontWeight: '700',
+            minWidth: 18,
+            height: 18,
+            borderRadius: 9,
+            borderWidth: 2,
+            borderColor: Platform.OS === 'ios'
+              ? 'rgba(255, 255, 255, 0.95)'
+              : theme.colors?.surface || '#FFFFFF',
+          },
         }}
       />
       <Tab.Screen
         name="Documents"
-        component={DocumentsScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📄" focused={focused} />,
-        }}
+        component={DocumentsNavigator}
+        options={{ title: 'Documents' }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
-        }}
+        options={{ title: 'Profile' }}
       />
     </Tab.Navigator>
   );
 };
 
 const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 8,
-    paddingBottom: 24,
-    height: 88,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  tabBarLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  tabBarItem: {
-    paddingTop: 4,
-  },
   iconContainer: {
-    width: 48,
-    height: 32,
+    backgroundColor: colors.primaryMuted,
+    borderRadius: radius.md,
+    padding: spacing.xs + 2,
+    marginBottom: 2,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
   },
-  iconContainerActive: {
-    backgroundColor: colors.primaryMuted,
-  },
-  icon: {
-    fontSize: 24,
-    opacity: 0.6,
-  },
-  iconActive: {
-    opacity: 1,
+  iconContainerInactive: {
+    marginBottom: 2,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

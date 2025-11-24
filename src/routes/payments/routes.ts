@@ -4,6 +4,7 @@ import {
     createPayment,
     deletePayment,
     getPaymentById,
+    getPaymentReceipt,
     getPayments,
     recordPayment,
     updatePayment,
@@ -28,6 +29,20 @@ router.get('/', async (req: Request, res: Response) => {
 
     const items = await getPayments(filters);
     res.json({ items });
+});
+
+// Download payment receipt (must come before /:id to avoid route conflict)
+router.get('/:id/receipt', async (req: Request, res: Response) => {
+    const id = z.string().cuid().parse(req.params.id);
+    const pdfBuffer = await getPaymentReceipt(id);
+
+    if (!pdfBuffer) {
+        return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="receipt-${id}.pdf"`);
+    res.send(pdfBuffer);
 });
 
 // Get payment by ID

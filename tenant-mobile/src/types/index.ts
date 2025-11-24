@@ -102,3 +102,6 @@ export interface Communication {
     type: 'tenant' | 'manager' | 'system';
   }>;
 }
+
+// Export all API types
+export * from './api';

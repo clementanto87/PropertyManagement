@@ -12,7 +12,7 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         const result = await requestOtp(parse.data.email);
-        res.json(result);
+        res.json({ success: true, data: result });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Login failed';
         res.status(400).json({ error: 'AuthenticationError', message });
@@ -27,7 +27,7 @@ router.post('/verify', async (req: Request, res: Response) => {
         }
 
         const result = await verifyOtp(parse.data.email, parse.data.otp);
-        res.json(result);
+        res.json({ success: true, data: result });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Verification failed';
         res.status(401).json({ error: 'AuthenticationError', message });

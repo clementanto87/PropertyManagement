@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,64 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Animated,
+  Platform,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, radius, typography, shadows } from '../theme/tokens';
 import { Card } from '../components/ui/Card';
+import { useDocuments, useDownloadDocument } from '../hooks/useApi';
+
+// Haptics is optional
+let Haptics: any = null;
+try {
+  Haptics = require('expo-haptics');
+} catch (e) {
+  // Haptics not available
+}
 
 export const DocumentsScreen = () => {
-  const documents = [
-    { id: 1, name: 'Lease Agreement', type: 'PDF', size: '2.4 MB', date: 'Jun 1, 2025', category: 'lease' },
-    { id: 2, name: 'Move-in Inspection', type: 'PDF', size: '1.8 MB', date: 'Jun 1, 2025', category: 'inspection' },
-    { id: 3, name: 'Rent Receipt - Nov', type: 'PDF', size: '156 KB', date: 'Nov 1, 2025', category: 'receipt' },
-    { id: 4, name: 'Rent Receipt - Oct', type: 'PDF', size: '156 KB', date: 'Oct 1, 2025', category: 'receipt' },
-    { id: 5, name: 'Property Rules', type: 'PDF', size: '890 KB', date: 'Jun 1, 2025', category: 'other' },
-  ];
+  const navigation = useNavigation();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const { data: documentsData, isLoading, refetch } = useDocuments();
+  const { mutate: downloadDocument } = useDownloadDocument();
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
+
+  const filteredDocuments = React.useMemo(() => {
+    if (!documentsData) return [];
+    if (!selectedCategory) return documentsData;
+    return documentsData.filter(doc => doc.category.toLowerCase() === selectedCategory.toLowerCase());
+  }, [documentsData, selectedCategory]);
+
+  const getCategoryIcon = (category: string): string => {
+    switch (category.toLowerCase()) {
       case 'lease':
-        return '📋';
+        return 'document-text';
       case 'inspection':
-        return '🔍';
+        return 'search';
       case 'receipt':
-        return '🧾';
+        return 'receipt';
       default:
-        return '📄';
+        return 'document';
     }
   };
 
   const getCategoryColor = (category: string) => {
-    switch (category) {
+    switch (category.toLowerCase()) {
       case 'lease':
         return colors.primaryMuted;
       case 'inspection':
@@ -46,131 +75,299 @@ export const DocumentsScreen = () => {
     }
   };
 
+  const getCategoryCount = (category: string) => {
+    if (!documentsData) return 0;
+    return documentsData.filter(doc => doc.category.toLowerCase() === category.toLowerCase()).length;
+  };
+
+  const handleDownload = (doc: any) => {
+    handlePress();
+    // In a real app, this would download the file or open it
+    // For now, we'll just show an alert or log it
+    // downloadDocument(doc.id);
+    Alert.alert('Download', `Downloading ${doc.name}...`);
+  };
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const handlePress = () => {
+    if (Platform.OS === 'ios' && Haptics) {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (e) {
+        // Haptics not available
+      }
+    }
+  };
+
+  const toggleCategory = (category: string) => {
+    handlePress();
+    if (selectedCategory === category) {
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(category);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <LinearGradient colors={colors.gradientPurple} style={styles.header}>
-        <Text style={styles.headerTitle}>Documents</Text>
-        <Text style={styles.headerSubtitle}>Your important files</Text>
-      </LinearGradient>
+      {/* Animated Header */}
+      <Animated.View
+        style={[
+          styles.headerContainer,
+          { opacity: headerOpacity }
+        ]}
+      >
+        <LinearGradient
+          colors={colors.gradientPurple as any}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <Text style={styles.headerTitle}>Documents</Text>
+          <Text style={styles.headerSubtitle}>Your important files</Text>
+        </LinearGradient>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        decelerationRate="normal"
-        bounces={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
       >
-        {/* Storage Info */}
-        <Card style={styles.storageCard}>
-          <View style={styles.storageHeader}>
-            <Text style={styles.storageTitle}>Storage Used</Text>
-            <Text style={styles.storageAmount}>5.4 MB / 50 MB</Text>
-          </View>
-          <View style={styles.storageBar}>
-            <View style={[styles.storageProgress, { width: '11%' }]} />
-          </View>
-          <Text style={styles.storageText}>89% available</Text>
-        </Card>
-
         {/* Categories */}
-        <View style={styles.section}>
+        <Animated.View
+          style={[
+            styles.section,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
           <Text style={styles.sectionTitle}>Categories</Text>
           <View style={styles.categoriesGrid}>
-            <TouchableOpacity style={styles.categoryCard}>
+            <TouchableOpacity
+              style={[
+                styles.categoryCard,
+                selectedCategory === 'lease' && styles.categoryCardActive
+              ]}
+              onPress={() => toggleCategory('lease')}
+              activeOpacity={0.7}
+            >
               <View style={[styles.categoryIcon, { backgroundColor: colors.primaryMuted }]}>
-                <Text style={styles.categoryEmoji}>📋</Text>
+                <Ionicons name="document-text" size={28} color={colors.primary} />
               </View>
               <Text style={styles.categoryLabel}>Lease</Text>
-              <Text style={styles.categoryCount}>2</Text>
+              <Text style={styles.categoryCount}>{getCategoryCount('lease')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.categoryCard}>
+            <TouchableOpacity
+              style={[
+                styles.categoryCard,
+                selectedCategory === 'receipt' && styles.categoryCardActive
+              ]}
+              onPress={() => toggleCategory('receipt')}
+              activeOpacity={0.7}
+            >
               <View style={[styles.categoryIcon, { backgroundColor: colors.successLight }]}>
-                <Text style={styles.categoryEmoji}>🧾</Text>
+                <Ionicons name="receipt" size={28} color={colors.success} />
               </View>
               <Text style={styles.categoryLabel}>Receipts</Text>
-              <Text style={styles.categoryCount}>11</Text>
+              <Text style={styles.categoryCount}>{getCategoryCount('receipt')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.categoryCard}>
+            <TouchableOpacity
+              style={[
+                styles.categoryCard,
+                selectedCategory === 'inspection' && styles.categoryCardActive
+              ]}
+              onPress={() => toggleCategory('inspection')}
+              activeOpacity={0.7}
+            >
               <View style={[styles.categoryIcon, { backgroundColor: colors.warningLight }]}>
-                <Text style={styles.categoryEmoji}>🔍</Text>
+                <Ionicons name="search" size={28} color={colors.warning} />
               </View>
               <Text style={styles.categoryLabel}>Inspections</Text>
-              <Text style={styles.categoryCount}>3</Text>
+              <Text style={styles.categoryCount}>{getCategoryCount('inspection')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.categoryCard}>
+            <TouchableOpacity
+              style={[
+                styles.categoryCard,
+                selectedCategory === 'other' && styles.categoryCardActive
+              ]}
+              onPress={() => toggleCategory('other')}
+              activeOpacity={0.7}
+            >
               <View style={[styles.categoryIcon, { backgroundColor: '#F3E8FF' }]}>
-                <Text style={styles.categoryEmoji}>📄</Text>
+                <Ionicons name="document" size={28} color={colors.primary} />
               </View>
               <Text style={styles.categoryLabel}>Other</Text>
-              <Text style={styles.categoryCount}>5</Text>
+              <Text style={styles.categoryCount}>{getCategoryCount('other')}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Recent Documents */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>All Documents</Text>
-            <TouchableOpacity>
+            <Text style={styles.sectionTitle}>
+              {selectedCategory
+                ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Documents`
+                : 'All Documents'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                handlePress();
+                navigation.navigate('UploadDocument' as never);
+              }}
+              activeOpacity={0.7}
+            >
               <Text style={styles.uploadButton}>+ Upload</Text>
             </TouchableOpacity>
           </View>
 
-          {documents.map((doc) => (
-            <Card key={doc.id} style={styles.documentCard}>
-              <View style={styles.documentContent}>
-                <View style={[styles.docIcon, { backgroundColor: getCategoryColor(doc.category) }]}>
-                  <Text style={styles.docEmoji}>{getCategoryIcon(doc.category)}</Text>
-                </View>
-                <View style={styles.docInfo}>
-                  <Text style={styles.docName}>{doc.name}</Text>
-                  <View style={styles.docMeta}>
-                    <Text style={styles.docSize}>{doc.size}</Text>
-                    <Text style={styles.docDot}>•</Text>
-                    <Text style={styles.docDate}>{doc.date}</Text>
+          {isLoading ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: colors.muted }}>Loading documents...</Text>
+            </View>
+          ) : !filteredDocuments || filteredDocuments.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateEmoji}>📂</Text>
+              <Text style={styles.emptyStateText}>No documents found</Text>
+              <Text style={styles.emptyStateSubtext}>
+                {selectedCategory
+                  ? `No documents in ${selectedCategory} category`
+                  : 'Upload documents to keep them safe and organized'}
+              </Text>
+            </View>
+          ) : (
+            filteredDocuments.map((doc, index) => (
+              <Animated.View
+                key={doc.id}
+                style={{
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                }}
+              >
+                <Card style={styles.documentCard}>
+                  <View style={styles.documentContent}>
+                    <View style={[styles.docIcon, { backgroundColor: getCategoryColor(doc.category) }]}>
+                      <Ionicons
+                        name={getCategoryIcon(doc.category) as any}
+                        size={22}
+                        color={doc.category.toLowerCase() === 'lease' ? colors.primary :
+                          doc.category.toLowerCase() === 'receipt' ? colors.success :
+                            doc.category.toLowerCase() === 'inspection' ? colors.warning : colors.primary}
+                      />
+                    </View>
+                    <View style={styles.docInfo}>
+                      <Text
+                        style={styles.docName}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {doc.name}
+                      </Text>
+                      <View style={styles.docMeta}>
+                        <Text style={styles.docSize}>{doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown'}</Text>
+                        <Text style={styles.docDot}>•</Text>
+                        <Text style={styles.docDate}>{new Date(doc.uploadedAt).toLocaleDateString()}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.docActions}>
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => handleDownload(doc)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="eye-outline" size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => handleDownload(doc)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="download-outline" size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-              </View>
-              <View style={styles.docActions}>
-                <TouchableOpacity style={styles.actionButton}>
-                  <Text style={styles.actionIcon}>👁️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton}>
-                  <Text style={styles.actionIcon}>⬇️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton}>
-                  <Text style={styles.actionIcon}>📤</Text>
-                </TouchableOpacity>
-              </View>
-            </Card>
-          ))}
+                </Card>
+              </Animated.View>
+            ))
+          )}
         </View>
 
         {/* Upload Card */}
-        <Card variant="gradient" gradientColors={colors.gradientBlue} style={styles.uploadCard}>
-          <Text style={styles.uploadIcon}>📤</Text>
-          <Text style={styles.uploadTitle}>Upload Documents</Text>
-          <Text style={styles.uploadText}>
-            Share important documents with your property manager
-          </Text>
-          <TouchableOpacity style={styles.uploadActionButton}>
-            <LinearGradient
-              colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.2)']}
-              style={styles.uploadActionGradient}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          <Card variant="gradient" gradientColors={colors.gradientBlue as any} style={styles.uploadCard}>
+            <View style={styles.uploadIconContainer}>
+              <Ionicons name="cloud-upload-outline" size={48} color="#FFFFFF" />
+            </View>
+            <Text style={styles.uploadTitle}>Upload Documents</Text>
+            <Text style={styles.uploadText}>
+              Share important documents with your property manager
+            </Text>
+            <TouchableOpacity
+              style={styles.uploadActionButton}
+              onPress={() => {
+                handlePress();
+                navigation.navigate('UploadDocument' as never);
+              }}
+              activeOpacity={0.8}
             >
-              <Text style={styles.uploadActionText}>Choose Files</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Card>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.2)']}
+                style={styles.uploadActionGradient}
+              >
+                <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={styles.uploadActionText}>Choose Files</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Card>
+        </Animated.View>
 
         <View style={{ height: spacing.xl }} />
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -180,21 +377,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   header: {
-    paddingTop: 60,
-    paddingBottom: spacing.xl,
+    paddingTop: 50,
+    paddingBottom: spacing.lg,
     paddingHorizontal: spacing.lg,
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
+    minHeight: 140,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.9)',
   },
   scrollView: {
@@ -202,41 +407,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
-  },
-  storageCard: {
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  storageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  storageTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.ink,
-  },
-  storageAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  storageBar: {
-    height: 8,
-    backgroundColor: colors.background,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-  },
-  storageProgress: {
-    height: '100%',
-    backgroundColor: colors.primary,
-  },
-  storageText: {
-    fontSize: 12,
-    color: colors.muted,
+    paddingTop: 160,
   },
   section: {
     marginBottom: spacing.xl,
@@ -275,9 +446,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  categoryEmoji: {
-    fontSize: 28,
-  },
   categoryLabel: {
     fontSize: 12,
     fontWeight: '500',
@@ -292,34 +460,32 @@ const styles = StyleSheet.create({
   documentCard: {
     padding: spacing.lg,
     marginBottom: spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   documentContent: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
   },
   docIcon: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
-  },
-  docEmoji: {
-    fontSize: 24,
+    flexShrink: 0,
   },
   docInfo: {
     flex: 1,
+    minWidth: 0,
+    marginRight: spacing.md,
   },
   docName: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.ink,
     marginBottom: 4,
+    lineHeight: 22,
   },
   docMeta: {
     flexDirection: 'row',
@@ -340,25 +506,31 @@ const styles = StyleSheet.create({
   },
   docActions: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.xs,
+    flexShrink: 0,
+    alignItems: 'center',
   },
   actionButton: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: radius.sm,
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  actionIcon: {
-    fontSize: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   uploadCard: {
     alignItems: 'center',
     padding: spacing.xl,
   },
-  uploadIcon: {
-    fontSize: 48,
+  uploadIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: spacing.md,
   },
   uploadTitle: {
@@ -383,10 +555,36 @@ const styles = StyleSheet.create({
   uploadActionGradient: {
     paddingVertical: spacing.md,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   uploadActionText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  categoryCardActive: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: radius.md,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    gap: spacing.md,
+  },
+  emptyStateEmoji: {
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: colors.muted,
+    textAlign: 'center',
   },
 });

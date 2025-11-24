@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, Calendar, Filter, Receipt } from 'lucide-react';
+import { DollarSign, Calendar, Filter, Receipt, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -49,6 +49,24 @@ export default function PaymentsPage() {
     const handleRecordPayment = (payment: Payment) => {
         setSelectedPayment(payment);
         setShowRecordDialog(true);
+    };
+
+    const handleDownloadReceipt = async (paymentId: string) => {
+        try {
+            const blob = await paymentService.downloadReceipt(paymentId);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `receipt-${paymentId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('Receipt downloaded successfully');
+        } catch (error) {
+            console.error('Failed to download receipt:', error);
+            toast.error('Failed to download receipt');
+        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -159,10 +177,23 @@ export default function PaymentsPage() {
                                                     Record Payment
                                                 </Button>
                                             )}
-                                            {payment.status === 'PAID' && payment.paidAt && (
-                                                <span className="text-sm text-gray-500">
-                                                    Paid {format(new Date(payment.paidAt), 'MMM dd')}
-                                                </span>
+                                            {payment.status === 'PAID' && (
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {payment.paidAt && (
+                                                        <span className="text-sm text-gray-500">
+                                                            Paid {format(new Date(payment.paidAt), 'MMM dd')}
+                                                        </span>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleDownloadReceipt(payment.id)}
+                                                        className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    >
+                                                        <Download className="h-4 w-4 mr-1" />
+                                                        Receipt
+                                                    </Button>
+                                                </div>
                                             )}
                                         </TableCell>
                                     </TableRow>

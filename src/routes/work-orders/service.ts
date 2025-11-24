@@ -7,6 +7,14 @@ export async function listWorkOrders(unitId?: string, status?: string, opts?: { 
       ...(unitId ? { unitId } : {}),
       ...(status ? { status: status as any } : {})
     },
+    include: {
+      unit: {
+        include: {
+          property: true
+        }
+      },
+      vendor: true
+    },
     orderBy: { createdAt: 'desc' },
     skip: opts?.skip,
     take: opts?.take
@@ -18,11 +26,32 @@ export async function createWorkOrder(data: CreateWorkOrderInput) {
 }
 
 export async function getWorkOrder(id: string) {
-  return prisma.workOrder.findUnique({ where: { id } });
+  return prisma.workOrder.findUnique({
+    where: { id },
+    include: {
+      unit: {
+        include: {
+          property: true
+        }
+      },
+      vendor: true
+    }
+  });
 }
 
 export async function updateWorkOrder(id: string, data: UpdateWorkOrderInput) {
-  return prisma.workOrder.update({ where: { id }, data });
+  return prisma.workOrder.update({
+    where: { id },
+    data,
+    include: {
+      unit: {
+        include: {
+          property: true
+        }
+      },
+      vendor: true
+    }
+  });
 }
 
 export async function deleteWorkOrder(id: string) {
