@@ -36,6 +36,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 import { emailTemplateService, type EmailTemplate } from '@/api/emailTemplateService';
 import { communicationEmailService } from '@/api/communicationEmailService';
+import { api } from '@/lib/api';
 
 const sendEmailSchema = z.object({
     templateId: z.string().optional(),
@@ -108,11 +109,33 @@ export function SendEmailDialog({
     const onSubmit = async (data: SendEmailFormValues) => {
         setIsSending(true);
         try {
+            // Fetch tenant data to populate variables
+            const tenant = await api.get<any>(`/tenants/${tenantId}`);
+
+            // Build variables object from tenant data
+            const variables: Record<string, string> = {
+                tenantName: tenant.name || '',
+                tenantEmail: tenant.email || '',
+                tenantPhone: tenant.phone || '',
+                propertyAddress: tenant.unit?.property?.address || '',
+                unitNumber: tenant.unit?.unitNumber || '',
+                leaseStartDate: tenant.lease?.startDate ? new Date(tenant.lease.startDate).toLocaleDateString() : '',
+                leaseEndDate: tenant.lease?.endDate ? new Date(tenant.lease.endDate).toLocaleDateString() : '',
+                rentAmount: tenant.lease?.rentAmount?.toString() || '',
+                securityDeposit: tenant.lease?.securityDeposit?.toString() || '',
+                // Add more common variables as needed
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 30 days from now
+                amount: tenant.lease?.rentAmount?.toString() || '',
+                inspectionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 7 days from now
+                depositReturnDays: '30',
+            };
+
             await communicationEmailService.sendEmail({
                 tenantId,
                 templateId: data.templateId,
                 subject: data.subject,
                 body: data.body,
+                variables, // Send variables for replacement
                 logAsCommunication: data.logAsCommunication,
             });
 
@@ -156,10 +179,12 @@ export function SendEmailDialog({
                                         <FormLabel>Email Template (Optional)</FormLabel>
                                         <Select
                                             onValueChange={(value) => {
-                                                field.onChange(value);
-                                                handleTemplateChange(value);
+                                                field.onChange(value === 'none' ? undefined : value);
+                                                if (value !== 'none') {
+                                                    handleTemplateChange(value);
+                                                }
                                             }}
-                                            value={field.value}
+                                            value={field.value || 'none'}
                                             disabled={isLoadingTemplates || isSending}
                                         >
                                             <FormControl>
@@ -175,7 +200,7 @@ export function SendEmailDialog({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="">No template (Custom email)</SelectItem>
+                                                <SelectItem value="none">No template (Custom email)</SelectItem>
                                                 {templates.map((template) => (
                                                     <SelectItem key={template.id} value={template.id}>
                                                         {template.name} - {template.category}
