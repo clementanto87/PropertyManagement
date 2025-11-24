@@ -12,7 +12,7 @@ router.get('/communications', authenticate, async (req: Request, res: Response) 
     const { tenantId, limit, search, type, followUpOnly, startDate, endDate } = req.query;
 
     const where: any = tenantId ? { tenantId: tenantId as string } : { userId };
-    
+
     // Add search filter
     if (search) {
       where.OR = [
@@ -77,7 +77,7 @@ router.get('/communications', authenticate, async (req: Request, res: Response) 
 router.get('/tenants/:tenantId/communications', authenticate, async (req: Request, res: Response) => {
   try {
     const { tenantId } = req.params;
-    const { search, type, followUpOnly } = req.query;
+    const { search, type, followUpOnly, startDate, endDate } = req.query;
     const user = (req as AuthRequest).user!;
 
     // If user is a tenant, only allow them to see their own communications
@@ -104,6 +104,22 @@ router.get('/tenants/:tenantId/communications', authenticate, async (req: Reques
     // Add follow-up filter
     if (followUpOnly === 'true') {
       where.followUpRequired = true;
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate as string);
+      }
+      if (endDate) {
+        // Set end date to end of day if it's just a date string
+        const end = new Date(endDate as string);
+        if (endDate.toString().length === 10) { // YYYY-MM-DD
+          end.setHours(23, 59, 59, 999);
+        }
+        where.createdAt.lte = end;
+      }
     }
 
     const communications = await prisma.communication.findMany({
@@ -137,12 +153,12 @@ router.get('/tenants/:tenantId/communications', authenticate, async (req: Reques
 router.get('/communications/my-communications', authenticate, async (req: Request, res: Response) => {
   try {
     const user = (req as AuthRequest).user!;
-    
+
     if (user.role !== 'TENANT' || !user.tenantId) {
       return res.status(403).json({ error: 'Access denied. Tenant account required.' });
     }
 
-    const { search, type, followUpOnly } = req.query;
+    const { search, type, followUpOnly, startDate, endDate } = req.query;
 
     const where: any = { tenantId: user.tenantId };
 
@@ -163,6 +179,21 @@ router.get('/communications/my-communications', authenticate, async (req: Reques
     // Add follow-up filter
     if (followUpOnly === 'true') {
       where.followUpRequired = true;
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate as string);
+      }
+      if (endDate) {
+        const end = new Date(endDate as string);
+        if (endDate.toString().length === 10) {
+          end.setHours(23, 59, 59, 999);
+        }
+        where.createdAt.lte = end;
+      }
     }
 
     const communications = await prisma.communication.findMany({
