@@ -34,6 +34,23 @@ import {
 } from '@/components/ui/select-component';
 import { emailTemplateService, type EmailTemplate } from '@/api/emailTemplateService';
 
+const AVAILABLE_VARIABLES = [
+    { name: 'tenantName', description: 'Full Name' },
+    { name: 'tenantEmail', description: 'Email Address' },
+    { name: 'tenantPhone', description: 'Phone Number' },
+    { name: 'propertyName', description: 'Property Name' },
+    { name: 'propertyAddress', description: 'Property Address' },
+    { name: 'unitNumber', description: 'Unit Number' },
+    { name: 'leaseStartDate', description: 'Lease Start' },
+    { name: 'leaseEndDate', description: 'Lease End' },
+    { name: 'rentAmount', description: 'Monthly Rent' },
+    { name: 'securityDeposit', description: 'Security Deposit' },
+    { name: 'dueDate', description: 'Payment Due Date' },
+    { name: 'amount', description: 'Payment Amount' },
+    { name: 'inspectionDate', description: 'Inspection Date' },
+    { name: 'depositReturnDays', description: 'Return Days' },
+];
+
 const templateSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     category: z.string().min(1, 'Category is required'),
@@ -199,6 +216,23 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSave }: Em
                                     <FormDescription>
                                         Use {'{{'} and {'}}'}  for variables. Use \n for line breaks.
                                     </FormDescription>
+
+                                    <div className="mt-2 rounded-md bg-gray-50 p-3 text-xs">
+                                        <p className="mb-2 font-medium text-gray-700">Available Variables:</p>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
+                                            {AVAILABLE_VARIABLES.map((variable) => (
+                                                <div key={variable.name} className="group flex items-center gap-1.5">
+                                                    <code className="rounded bg-gray-200 px-1 py-0.5 font-mono text-gray-800">
+                                                        {`{{${variable.name}}}`}
+                                                    </code>
+                                                    <span className="text-gray-500 truncate" title={variable.description}>
+                                                        - {variable.description}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
