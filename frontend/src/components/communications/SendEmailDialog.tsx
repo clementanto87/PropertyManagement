@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import Textarea from '@/components/ui/textarea';
 import {
     Dialog,
     DialogContent,
@@ -68,7 +68,7 @@ export function SendEmailDialog({
     const [isSending, setIsSending] = useState(false);
 
     const form = useForm<SendEmailFormValues>({
-        resolver: zodResolver(sendEmailSchema),
+        resolver: zodResolver(sendEmailSchema) as any,
         defaultValues: {
             templateId: undefined,
             subject: '',

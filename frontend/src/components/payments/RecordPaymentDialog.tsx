@@ -28,7 +28,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select-component';
-import { Textarea } from '@/components/ui/textarea';
+import Textarea from '@/components/ui/textarea';
 import { paymentService, Payment } from '@/api/paymentService';
 import { toast } from 'sonner';
 import { format } from 'date-fns';

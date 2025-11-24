@@ -5,7 +5,7 @@ import './Landing3D.css';
 
 // --- UI COMPONENTS ---
 
-const GlassCard = ({ icon: Icon, title, text }) => (
+const GlassCard = ({ icon: Icon, title, text }: { icon: any; title: string; text: string }) => (
     <motion.div
         whileHover={{ y: -10, scale: 1.02 }}
         className="glass-card"
