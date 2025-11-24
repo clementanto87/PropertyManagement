@@ -217,18 +217,31 @@ export function EmailTemplateDialog({ open, onOpenChange, template, onSave }: Em
                                         Use {'{{'} and {'}}'}  for variables. Use \n for line breaks.
                                     </FormDescription>
 
-                                    <div className="mt-2 rounded-md bg-gray-50 p-3 text-xs">
-                                        <p className="mb-2 font-medium text-gray-700">Available Variables:</p>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
+                                    <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50/50 p-4">
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <p className="text-sm font-medium text-gray-900">Available Variables</p>
+                                            <span className="text-xs text-gray-500">Click to copy</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
                                             {AVAILABLE_VARIABLES.map((variable) => (
-                                                <div key={variable.name} className="group flex items-center gap-1.5">
-                                                    <code className="rounded bg-gray-200 px-1 py-0.5 font-mono text-gray-800">
+                                                <button
+                                                    key={variable.name}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const text = `{{${variable.name}}}`;
+                                                        navigator.clipboard.writeText(text);
+                                                        toast.success(`Copied ${text} to clipboard`);
+                                                    }}
+                                                    className="group relative flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                    title={`${variable.description} - Click to copy`}
+                                                >
+                                                    <code className="font-mono font-semibold text-blue-600 group-hover:text-blue-700">
                                                         {`{{${variable.name}}}`}
                                                     </code>
-                                                    <span className="text-gray-500 truncate" title={variable.description}>
-                                                        - {variable.description}
+                                                    <span className="ml-2 text-gray-500 group-hover:text-blue-600">
+                                                        {variable.description}
                                                     </span>
-                                                </div>
+                                                </button>
                                             ))}
                                         </div>
                                     </div>
