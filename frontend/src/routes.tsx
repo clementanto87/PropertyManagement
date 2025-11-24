@@ -37,6 +37,7 @@ import LeaseAgreementPage from './pages/LeaseAgreementPage';
 import SignAgreementPage from './pages/SignAgreementPage';
 import TenantPortalSetupPage from './pages/TenantPortalSetupPage';
 import GDPRManagementPage from './pages/GDPRManagementPage';
+import EmailTemplatesPage from './pages/EmailTemplatesPage';
 import { Outlet } from 'react-router-dom';
 
 import App from './App';
@@ -150,6 +151,10 @@ export const routes: RouteObject[] = [
               { path: ':communicationId', element: <CommunicationDetail /> },
               { path: ':communicationId/edit', element: <CommunicationForm /> },
             ],
+          },
+          {
+            path: 'email-templates',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><EmailTemplatesPage /></ProtectedRoute>
           },
         ]
       },
