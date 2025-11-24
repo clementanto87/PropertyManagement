@@ -36,7 +36,23 @@ export async function createTenant(data: CreateTenantInput) {
 }
 
 export async function getTenant(id: string) {
-  return prisma.tenant.findUnique({ where: { id } });
+  return prisma.tenant.findUnique({
+    where: { id },
+    include: {
+      leases: {
+        include: {
+          unit: {
+            include: {
+              property: true
+            }
+          }
+        },
+        orderBy: {
+          startDate: 'desc'
+        }
+      }
+    }
+  });
 }
 
 export async function updateTenant(id: string, data: UpdateTenantInput) {

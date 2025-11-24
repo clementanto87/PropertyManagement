@@ -112,20 +112,31 @@ export function SendEmailDialog({
             // Fetch tenant data to populate variables
             const tenant = await api.get<any>(`/tenants/${tenantId}`);
 
+            // Find active lease (or most recent)
+            const activeLease = tenant.leases?.[0];
+            const unit = activeLease?.unit;
+            const property = unit?.property;
+
             // Build variables object from tenant data
             const variables: Record<string, string> = {
                 tenantName: tenant.name || '',
                 tenantEmail: tenant.email || '',
                 tenantPhone: tenant.phone || '',
-                propertyAddress: tenant.unit?.property?.address || '',
-                unitNumber: tenant.unit?.unitNumber || '',
-                leaseStartDate: tenant.lease?.startDate ? new Date(tenant.lease.startDate).toLocaleDateString() : '',
-                leaseEndDate: tenant.lease?.endDate ? new Date(tenant.lease.endDate).toLocaleDateString() : '',
-                rentAmount: tenant.lease?.rentAmount?.toString() || '',
-                securityDeposit: tenant.lease?.securityDeposit?.toString() || '',
-                // Add more common variables as needed
+
+                // Property & Unit details
+                propertyName: property?.name || '',
+                propertyAddress: property?.address || '',
+                unitNumber: unit?.unitNumber || '',
+
+                // Lease details
+                leaseStartDate: activeLease?.startDate ? new Date(activeLease.startDate).toLocaleDateString() : '',
+                leaseEndDate: activeLease?.endDate ? new Date(activeLease.endDate).toLocaleDateString() : '',
+                rentAmount: activeLease?.rentAmount?.toString() || '',
+                securityDeposit: activeLease?.securityDeposit?.toString() || '',
+
+                // Common variables
                 dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 30 days from now
-                amount: tenant.lease?.rentAmount?.toString() || '',
+                amount: activeLease?.rentAmount?.toString() || '',
                 inspectionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 7 days from now
                 depositReturnDays: '30',
             };
