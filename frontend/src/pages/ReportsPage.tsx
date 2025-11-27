@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart3, PieChart, LineChart, Download, Filter, Building2, DollarSign, Users, Home, User, Bell, Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 
@@ -370,9 +371,7 @@ const ReportsPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationBell />
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />

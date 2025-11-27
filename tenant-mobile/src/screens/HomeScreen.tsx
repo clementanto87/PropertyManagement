@@ -8,6 +8,7 @@ import { RefreshControl } from '../components/ui/RefreshControl';
 import { useToast } from '../components/ui/Toast';
 import { useTheme } from '../contexts/ThemeContext';
 import { useDashboard } from '../hooks/useApi';
+import { apiClient } from '../lib/api';
 import { colors, spacing, radius, shadows } from '../theme/tokens';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityTimeline } from '../components/ActivityTimeline';
@@ -71,6 +72,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const [greeting, setGreeting] = useState(getGreeting());
   const [greetingEmoji, setGreetingEmoji] = useState(getGreetingEmoji());
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await apiClient.get<{ unreadCount: number }>('/notifications?limit=1');
+      setUnreadCount(response.data.unreadCount);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Update greeting every minute
   useEffect(() => {
@@ -166,15 +183,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               </View>
               <H1 style={styles.welcomeTitle}>{userName}!</H1>
             </View>
-            <TouchableOpacity
-              style={styles.avatarContainer}
-              onPress={handlePress}
-              activeOpacity={0.8}
-            >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{userInitials}</Text>
-              </View>
-            </TouchableOpacity>
+            <View style={styles.headerRight}>
+              <TouchableOpacity
+                style={styles.notificationButton}
+                onPress={() => navigation.navigate('Notifications')}
+              >
+                <Ionicons name="notifications-outline" size={24} color="#FFFFFF" />
+                {unreadCount > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.avatarContainer}
+                onPress={handlePress}
+                activeOpacity={0.8}
+              >
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{userInitials}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
           <Body1 style={styles.subtitle}>
             {propertyName}
@@ -550,6 +580,34 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  notificationButton: {
+    padding: spacing.xs,
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 2,
   },
   avatarContainer: {
     alignItems: 'center',

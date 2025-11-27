@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { expenseService, Expense } from '@/api/expenseService';
 import { toast } from 'sonner';
@@ -80,9 +81,7 @@ export default function ExpensesPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationBell />
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button
                 onClick={() => navigate('/dashboard/expenses/new')}

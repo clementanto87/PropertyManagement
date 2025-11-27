@@ -6,6 +6,7 @@ import { Role } from '@prisma/client';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
+    name: string | null;
     role: Role;
     tenantId?: string | null;
   };
@@ -22,7 +23,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, role: true, tenantId: true },
+      select: { id: true, name: true, role: true, tenantId: true },
     });
 
     if (!user) {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -15,7 +15,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Check localStorage first, then system preference
     const stored = localStorage.getItem('tenant_theme') as Theme | null;
     if (stored) return stored;
-    
+
     // Check system preference
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';

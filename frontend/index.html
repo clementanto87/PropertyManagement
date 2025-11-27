@@ -1,12 +1,17 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Property Management</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://ssl.gstatic.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https://*.googleusercontent.com https://*.basemaps.cartocdn.com; connect-src 'self' https://*.googleapis.com https://accounts.google.com http://localhost:3000; frame-src 'self' https://accounts.google.com https://content.googleapis.com;" />
+  <title>Property Management</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -57,4 +57,19 @@ export const communicationService = {
     );
     return data;
   },
+
+  async getChatMessages(): Promise<Communication[]> {
+    const { data } = await apiClient.get<Communication[]>(
+      '/communications/messages/list'
+    );
+    return data;
+  },
+
+  async sendChatMessage(content: string): Promise<Communication> {
+    const { data } = await apiClient.post<Communication>(
+      '/communications/messages',
+      { content }
+    );
+    return data;
+  },
 };

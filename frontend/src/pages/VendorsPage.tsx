@@ -14,6 +14,7 @@ import {
   Wrench,
   Filter
 } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { vendorService, Vendor } from '@/api/vendorService';
 import { toast } from 'sonner';
@@ -78,9 +79,7 @@ export default function VendorsPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationBell />
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button
                 onClick={() => navigate('/dashboard/vendors/new')}
@@ -192,8 +191,8 @@ export default function VendorsPage() {
 
                 <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${vendor.insured
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                      : 'bg-amber-50 text-amber-700 border border-amber-100'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
                     }`}>
                     {vendor.insured ? (
                       <>

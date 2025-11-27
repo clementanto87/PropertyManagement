@@ -19,6 +19,7 @@ import {
   PauseCircle,
   UserPlus
 } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { workOrderService, WorkOrder, WorkOrderStatus } from '@/api/workOrderService';
 import { toast } from 'sonner';
@@ -164,9 +165,7 @@ export default function WorkOrdersPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-              </button>
+              <NotificationBell />
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Button
                 onClick={() => navigate('/dashboard/work-orders/new')}

@@ -7,7 +7,11 @@ export const apiClient = axios.create({
   timeout: 10000
 });
 
-// TODO: plug auth tokens once the tenant auth flow is wired.
+// Add auth token to requests
 apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('tenant_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });

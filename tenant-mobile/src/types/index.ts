@@ -103,5 +103,19 @@ export interface Communication {
   }>;
 }
 
+export interface Message {
+  id: string;
+  content: string;
+  direction: 'INBOUND' | 'OUTBOUND';
+  createdAt: string;
+  isRead: boolean;
+  user?: {
+    name: string;
+  };
+  tenant?: {
+    name: string;
+  };
+}
+
 // Export all API types
 export * from './api';

@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select-component';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import { emailTemplateService, type EmailTemplate } from '@/api/emailTemplateService';
+import { templateService, type Template } from '@/api/templateService';
 import { communicationEmailService } from '@/api/communicationEmailService';
 import { api } from '@/lib/api';
 
@@ -64,7 +64,7 @@ export function SendEmailDialog({
     tenantEmail,
     onEmailSent,
 }: SendEmailDialogProps) {
-    const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+    const [templates, setTemplates] = useState<Template[]>([]);
     const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
     const [isSending, setIsSending] = useState(false);
 
@@ -88,7 +88,7 @@ export function SendEmailDialog({
     const loadTemplates = async () => {
         setIsLoadingTemplates(true);
         try {
-            const response = await emailTemplateService.getTemplates({ isActive: true });
+            const response = await templateService.getTemplates({ type: 'EMAIL', isActive: true });
             setTemplates(response.items);
         } catch (error) {
             console.error('Failed to load templates:', error);
@@ -101,7 +101,7 @@ export function SendEmailDialog({
     const handleTemplateChange = (templateId: string) => {
         const template = templates.find((t) => t.id === templateId);
         if (template) {
-            form.setValue('subject', template.subject);
+            form.setValue('subject', template.subject || '');
             form.setValue('body', template.body);
         }
     };

@@ -18,6 +18,7 @@ import {
     CreditCard,
     Home
 } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { tenantService, type Tenant } from '@/api/tenantService';
 import { api } from '@/lib/api';
@@ -151,11 +152,16 @@ export default function TenantDetailPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                                <Bell className="w-5 h-5" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                            </button>
+                            <NotificationBell />
                             <div className="h-8 w-px bg-gray-200 mx-1"></div>
+                            <Button
+                                onClick={() => navigate(`/dashboard/tenants/${id}/communications`)}
+                                variant="outline"
+                                className="gap-2"
+                            >
+                                <MessageSquare className="w-4 h-4" />
+                                Message
+                            </Button>
                             <Button
                                 onClick={() => navigate(`/dashboard/tenants/${id}/edit`)}
                                 className="bg-gray-900 hover:bg-gray-800 text-white gap-2"
@@ -363,10 +369,10 @@ export default function TenantDetailPage() {
                                     View All
                                 </Button>
                             </Link>
-                            <Link to={`/dashboard/tenants/${id}/communications/new`}>
+                            <Link to={`/dashboard/tenants/${id}/communications?tab=message`}>
                                 <Button size="sm" className="gap-2">
                                     <MessageSquare className="w-4 h-4" />
-                                    New Message
+                                    Messages
                                 </Button>
                             </Link>
                         </div>

@@ -16,7 +16,7 @@ interface PaymentFormProps {
     onCancel: () => void;
 }
 
-function PaymentForm({ clientSecret, amount, onSuccess, onCancel }: PaymentFormProps) {
+function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);

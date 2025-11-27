@@ -48,7 +48,7 @@ export function CommunicationList({
       try {
         setIsLoading(true);
         const endpoint = tenantId
-          ? `/tenants/${tenantId}/communications`
+          ? `/communications/tenants/${tenantId}`
           : '/communications';
 
         // Build query parameters
@@ -190,7 +190,7 @@ export function CommunicationList({
                 </div>
                 <div className="flex items-center mt-1 text-xs text-gray-500">
                   <User className="w-3 h-3 mr-1" />
-                  {comm.user.name}
+                  {comm.user?.name || 'System'}
                   <span className="mx-1.5">•</span>
                   <Clock className="w-3 h-3 mr-1" />
                   <span title={format(new Date(comm.createdAt), 'MMM d, yyyy h:mm a')}>

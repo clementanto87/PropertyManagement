@@ -147,7 +147,7 @@ router.post('/confirm', async (req: Request, res: Response) => {
             where: { id: payment.id },
             data: {
                 status: 'PAID',
-                paymentMethod: paymentIntent.payment_method_types[0] || 'card',
+                paymentMethod: (paymentIntent.payment_method_types[0] === 'card' ? 'CREDIT_CARD' : 'OTHER'),
                 paidAt: new Date()
             }
         });
@@ -155,7 +155,7 @@ router.post('/confirm', async (req: Request, res: Response) => {
         res.json({
             success: true,
             payment: updatedPayment,
-            receiptUrl: paymentIntent.charges.data[0]?.receipt_url
+            receiptUrl: (paymentIntent as any).charges?.data[0]?.receipt_url
         });
     } catch (err) {
         console.error('Confirm payment error:', err);

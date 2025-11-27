@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { FileText, Download, Eye, Loader2, Search, Filter, File, Image, Calendar } from 'lucide-react';
+import { FileText, Download, Eye, Loader2, Search, File, Image, Calendar } from 'lucide-react';
 import { tenant } from '../services/api';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -131,11 +131,10 @@ export function DocumentsPage() {
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                filterType === type
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
-              }`}
+              className={`px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${filterType === type
+                ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-md'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400'
+                }`}
             >
               {type === 'ALL' ? t('documents.allDocuments') : type}
             </button>
@@ -200,17 +199,17 @@ export function DocumentsPage() {
                   </div>
                 </CardContent>
                 <div className="p-4 bg-white/50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1" 
+                  <Button
+                    variant="outline"
+                    className="flex-1"
                     size="sm"
                     onClick={() => handleDownload(doc)}
                   >
                     <Eye className="mr-2 h-4 w-4" /> {t('documents.view')}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1" 
+                  <Button
+                    variant="outline"
+                    className="flex-1"
                     size="sm"
                     onClick={() => {
                       if (doc.url) {

@@ -3,6 +3,7 @@ import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform, View, StyleSheet, Text } from 'react-native';
 import { HomeNavigator } from './HomeNavigator';
+import { MessagesScreen } from '../screens/MessagesScreen';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
 import { MaintenanceNavigator } from './MaintenanceNavigator';
 import { DocumentsNavigator } from './DocumentsNavigator';
@@ -33,6 +34,9 @@ export const AppNavigator = () => {
       switch (routeName) {
         case 'Home':
           iconName = focused ? 'home' : 'home-outline';
+          break;
+        case 'Messages':
+          iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           break;
         case 'Payments':
           iconName = focused ? 'card' : 'card-outline';
@@ -106,6 +110,11 @@ export const AppNavigator = () => {
           title: 'Home',
           tabBarBadge: undefined,
         }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{ title: 'Messages' }}
       />
       <Tab.Screen
         name="Payments"

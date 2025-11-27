@@ -42,7 +42,7 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
 
         const created = await createDocument({
             ...parse.data,
-            url: req.file.path, // Store the file path
+            url: req.file.path as string, // Store the file path
             type: req.file.mimetype
         });
 
@@ -59,7 +59,7 @@ router.post('/', async (req: Request, res: Response) => {
     if (!parse.success) {
         return res.status(400).json({ error: 'ValidationError', issues: parse.error.issues });
     }
-    const created = await createDocument(parse.data);
+    const created = await createDocument(parse.data as any);
     res.status(201).json(created);
 });
 

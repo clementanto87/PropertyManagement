@@ -24,6 +24,7 @@ model User {
   communications Communication[]
   posts          Post[]
   amenityBookings AmenityBooking[]
+  notifications   Notification[]
 }
 
 model AuditLog {
@@ -108,6 +109,7 @@ model Tenant {
   user             User?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  notifications    Notification[]
 }
 
 model Lease {
@@ -251,6 +253,9 @@ model Communication {
   content          String
   followUpRequired Boolean   @default(false)
   followUpDate     DateTime?
+  direction        CommunicationDirection @default(OUTBOUND)
+  isRead           Boolean                @default(false)
+  readAt           DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -258,16 +263,28 @@ model Communication {
   user   User?  @relation(fields: [userId], references: [id])
 }
 
-model EmailTemplate {
-  id          String   @id @default(cuid())
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum TemplateType {
+  EMAIL
+  AGREEMENT
+  INVOICE
+}
+
+model Template {
+  id          String       @id @default(cuid())
+  type        TemplateType
   name        String
-  subject     String
-  body        String   @db.Text
-  category    String   // 'rent_reminder', 'maintenance', 'welcome', 'lease_renewal', 'move_out'
-  variables   Json     // Available variables like {{tenantName}}, {{rentAmount}}
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  subject     String?
+  body        String       @db.Text
+  category    String       // 'rent_reminder', 'maintenance', 'welcome', 'lease_renewal', 'move_out', 'invoice', 'agreement'
+  variables   Json         // Available variables like {{tenantName}}, {{rentAmount}}
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model MaintenanceHistory {
@@ -380,4 +397,20 @@ model AmenityBooking {
 
   amenity Amenity @relation(fields: [amenityId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?  // For Property Managers
+  tenantId  String?  // For Tenants
+  title     String
+  message   String
+  type      String   // 'MESSAGE', 'ALERT', etc.
+  metadata  Json?    // For storing extra data like count, senderId, etc.
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user   User?   @relation(fields: [userId], references: [id])
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
 }

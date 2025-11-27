@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   List
 } from 'lucide-react';
+import { NotificationBell } from '../components/layout/NotificationBell';
 import { Property, PropertyType } from '@/types/property';
 import { api } from '@/lib/api';
 import { propertyService } from '@/features/properties/propertyService';
@@ -162,10 +163,7 @@ export default function PropertiesPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-              </button>
+              <NotificationBell />
               <div className="h-8 w-px bg-gray-200 mx-1"></div>
               <Link
                 to="/dashboard/properties/add"
@@ -196,8 +194,8 @@ export default function PropertiesPage() {
               <button
                 type="button"
                 className={`inline-flex items-center px-4 py-2.5 border rounded-lg text-sm font-medium transition-colors ${showFilters
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
                 onClick={toggleFilters}
               >
@@ -399,10 +397,10 @@ function PropertyCard({ property }: { property: Property }) {
           </div>
         )}
         <div className={`absolute bottom-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-sm ${property.status === 'vacant'
-            ? 'bg-emerald-500/90 text-white'
-            : property.status === 'occupied'
-              ? 'bg-blue-500/90 text-white'
-              : 'bg-amber-500/90 text-white'
+          ? 'bg-emerald-500/90 text-white'
+          : property.status === 'occupied'
+            ? 'bg-blue-500/90 text-white'
+            : 'bg-amber-500/90 text-white'
           }`}>
           {property.status === 'vacant' ? 'Available' : property.status === 'occupied' ? 'Occupied' : 'Maintenance'}
         </div>
@@ -472,10 +470,10 @@ function PropertyListItem({ property }: { property: Property }) {
             alt={property.title}
           />
           <div className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-sm ${property.status === 'vacant'
-              ? 'bg-emerald-500/90 text-white'
-              : property.status === 'occupied'
-                ? 'bg-blue-500/90 text-white'
-                : 'bg-amber-500/90 text-white'
+            ? 'bg-emerald-500/90 text-white'
+            : property.status === 'occupied'
+              ? 'bg-blue-500/90 text-white'
+              : 'bg-amber-500/90 text-white'
             }`}>
             {property.status === 'vacant' ? 'Available' : property.status === 'occupied' ? 'Occupied' : 'Maintenance'}
           </div>

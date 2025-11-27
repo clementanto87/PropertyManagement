@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend } from 'chart.js';
 import PropertyMap from '../components/dashboard/PropertyMap';
+import { NotificationBell } from '../components/layout/NotificationBell';
 
 // Register ChartJS components
 ChartJS.register(
@@ -59,6 +60,10 @@ type Property = {
   status: 'OCCUPIED' | 'VACANT' | 'PARTIAL';
   occupancyRate: number;
   image?: string | null;
+  totalUnits?: number;
+  vacantUnits?: number;
+  occupiedUnits?: number;
+  maintenanceCount?: number;
 };
 
 type MaintenanceRequest = {
@@ -165,12 +170,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 relative">
-                <Bell className="w-5 h-5" />
-                {(urgentCount > 0 || expiringCount > 0) && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                )}
-              </button>
+              <NotificationBell />
               <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
                 <Settings className="w-4 h-4" />
                 Settings

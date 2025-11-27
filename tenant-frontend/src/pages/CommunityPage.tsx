@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { Users, Megaphone, Calendar, ShoppingBag, MessageCircle, Heart, Share2, Plus, Loader2, X, ThumbsUp } from 'lucide-react';
+import { Megaphone, Calendar, ShoppingBag, MessageCircle, Heart, Share2, Plus, Loader2, X } from 'lucide-react';
 import { tenant } from '../services/api';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -175,7 +175,7 @@ export function CommunityPage() {
             </div>
 
             {/* Content */}
-            <motion.div 
+            <motion.div
                 className="space-y-6"
                 initial="hidden"
                 animate="show"
@@ -226,11 +226,10 @@ export function CommunityPage() {
                                                 </CardDescription>
                                             </div>
                                         </div>
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                                            post.category === 'ANNOUNCEMENT' ? 'bg-blue-100 text-blue-800' :
-                                            post.category === 'EVENT' ? 'bg-purple-100 text-purple-800' :
-                                            'bg-green-100 text-green-800'
-                                        }`}>
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${post.category === 'ANNOUNCEMENT' ? 'bg-blue-100 text-blue-800' :
+                                                post.category === 'EVENT' ? 'bg-purple-100 text-purple-800' :
+                                                    'bg-green-100 text-green-800'
+                                            }`}>
                                             {post.category}
                                         </span>
                                     </div>

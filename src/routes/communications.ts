@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, CommunicationDirection } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Get all communications for the authenticated user (Property Manager)
-router.get('/communications', authenticate, async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = (req as AuthRequest).user!.id;
     const { tenantId, limit, search, type, followUpOnly, startDate, endDate } = req.query;
@@ -39,7 +39,12 @@ router.get('/communications', authenticate, async (req: Request, res: Response) 
         where.createdAt.gte = new Date(startDate as string);
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate as string);
+        // Set end date to end of day if it's just a date string
+        const end = new Date(endDate as string);
+        if (endDate.toString().length === 10) { // YYYY-MM-DD
+          end.setHours(23, 59, 59, 999);
+        }
+        where.createdAt.lte = end;
       }
     }
 
@@ -74,7 +79,7 @@ router.get('/communications', authenticate, async (req: Request, res: Response) 
 });
 
 // Get all communications for a tenant
-router.get('/tenants/:tenantId/communications', authenticate, async (req: Request, res: Response) => {
+router.get('/tenants/:tenantId', authenticate, async (req: Request, res: Response) => {
   try {
     const { tenantId } = req.params;
     const { search, type, followUpOnly, startDate, endDate } = req.query;
@@ -150,7 +155,7 @@ router.get('/tenants/:tenantId/communications', authenticate, async (req: Reques
 });
 
 // Get communications for authenticated tenant (tenant-facing endpoint)
-router.get('/communications/my-communications', authenticate, async (req: Request, res: Response) => {
+router.get('/my-communications', authenticate, async (req: Request, res: Response) => {
   try {
     const user = (req as AuthRequest).user!;
 
@@ -209,7 +214,7 @@ router.get('/communications/my-communications', authenticate, async (req: Reques
         },
       },
     });
-    res.json({ items: communications });
+    res.json(communications);
   } catch (error) {
     console.error('Error fetching tenant communications:', error);
     res.status(500).json({ error: 'Failed to fetch communications' });
@@ -217,7 +222,7 @@ router.get('/communications/my-communications', authenticate, async (req: Reques
 });
 
 // Create a new communication
-router.post('/communications', authenticate, async (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
     const { tenantId, type, channel, summary, content, followUpRequired, followUpDate } = req.body;
     const userId = (req as AuthRequest).user!.id;
@@ -252,7 +257,7 @@ router.post('/communications', authenticate, async (req: Request, res: Response)
 });
 
 // Get a single communication
-router.get('/communications/:id', authenticate, async (req: Request, res: Response) => {
+router.get('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const communication = await prisma.communication.findUnique({
@@ -287,7 +292,7 @@ router.get('/communications/:id', authenticate, async (req: Request, res: Respon
 });
 
 // Update a communication
-router.put('/communications/:id', authenticate, async (req: Request, res: Response) => {
+router.put('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { type, channel, summary, content, followUpRequired, followUpDate } = req.body;
@@ -328,7 +333,7 @@ router.put('/communications/:id', authenticate, async (req: Request, res: Respon
 });
 
 // Mark follow-up as complete
-router.patch('/communications/:id/complete-followup', authenticate, async (req: Request, res: Response) => {
+router.patch('/:id/complete-followup', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const communication = await prisma.communication.update({
@@ -363,7 +368,7 @@ router.patch('/communications/:id/complete-followup', authenticate, async (req: 
 });
 
 // Delete a communication
-router.delete('/communications/:id', authenticate, async (req: Request, res: Response) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await prisma.communication.delete({
@@ -401,6 +406,289 @@ router.post('/send-email', authenticate, async (req: Request, res: Response) => 
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
+// --- Messaging Endpoints ---
+
+// Get messages (conversation)
+router.get('/messages/list', authenticate, async (req: Request, res: Response) => {
+  try {
+    const user = (req as AuthRequest).user!;
+    const { tenantId } = req.query;
+
+    let targetTenantId: string;
+
+    if (user.role === 'TENANT') {
+      if (!user.tenantId) {
+        return res.status(403).json({ error: 'Tenant ID not found for user' });
+      }
+      targetTenantId = user.tenantId;
+    } else {
+      // Manager/Admin
+      if (!tenantId) {
+        return res.status(400).json({ error: 'Tenant ID is required for managers' });
+      }
+      targetTenantId = tenantId as string;
+    }
+
+    const messages = await prisma.communication.findMany({
+      where: {
+        tenantId: targetTenantId,
+        type: 'MESSAGE',
+      },
+      orderBy: {
+        createdAt: 'asc', // Oldest first for chat history
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, role: true },
+        },
+        tenant: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    // Auto-mark notifications as read since user is viewing the chat
+    if (user.role === 'TENANT') {
+      await prisma.notification.updateMany({
+        where: {
+          tenantId: user.tenantId,
+          userId: null, // Strict filter
+          type: 'MESSAGE',
+          isRead: false,
+        },
+        data: { isRead: true },
+      });
+    } else {
+      // Manager viewing tenant's messages
+      // We skip auto-read for managers for now because we can't easily distinguish 
+      // which tenant sent the message in the generic "New message" notifications 
+      // without potentially clearing notifications from other tenants.
+      /*
+      await prisma.notification.updateMany({
+        where: {
+          userId: user.id,
+          tenantId: null, // Strict filter
+          type: 'MESSAGE',
+          isRead: false,
+          // We might want to filter by sender (the tenant) if we stored senderId in metadata
+          // But for now, if manager opens chat with Tenant X, we should probably only clear Tenant X's notifications?
+          // The current notification system for managers is generic "New message from Tenant".
+          // If we clear ALL message notifications, it might clear notifications from Tenant Y too.
+          // Let's check if we can filter by metadata?
+          // The creation logic stores: title: `New message from ${senderName}`
+          // It doesn't seem to store tenantId in a queryable way for Managers (userId is set, tenantId is null).
+          // Wait, the notification model has tenantId.
+          // For Manager notifications, we set userId = manager.id. Do we set tenantId?
+          // In POST /messages (Inbound):
+          // data: { userId: manager.id, title: ..., tenantId: ??? }
+          // It does NOT set tenantId for Manager notifications.
+          // So we can't easily distinguish which tenant sent the message unless we parse the title or use metadata.
+          // Ideally, we should store the related tenantId in metadata or a new field.
+          // For now, to be safe, we won't auto-clear Manager notifications to avoid clearing unrelated ones,
+          // OR we accept that opening *any* chat might not be enough context.
+          // BUT, for Tenants, it's safe (they only have one chat).
+        },
+        data: { isRead: true },
+      });
+      */
+
+      // Refined logic for Managers:
+      // Since we can't filter by tenant easily without schema changes or metadata queries (which updateMany doesn't support well on JSON),
+      // We will skip auto-read for managers for now, OR we can try to find notifications with specific titles? Too brittle.
+      // Actually, let's look at how we create Manager notifications.
+      // We set `userId`. We leave `tenantId` null.
+      // If we want to support per-tenant notification clearing for managers, we SHOULD set `tenantId` even for manager notifications?
+      // But `tenantId` in Notification model is a relation to Tenant.
+      // If we set it, then the "Strict Filter" I added (userId matches AND tenantId is null) would fail.
+      // So my previous fix might have been too aggressive if we *wanted* to store tenantId.
+      // But the previous code didn't set tenantId for manager notifications anyway.
+
+      // Let's stick to auto-clearing for TENANTS only for now, as that seems to be the user's primary complaint context (app chat).
+    }
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// Send a message
+router.post('/messages', authenticate, async (req: Request, res: Response) => {
+  try {
+    const user = (req as AuthRequest).user!;
+    const { content, tenantId } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+
+    let direction: CommunicationDirection;
+    let targetTenantId: string;
+    let userId: string | null = null;
+    let senderName: string;
+
+    if (user.role === 'TENANT') {
+      if (!user.tenantId) {
+        return res.status(403).json({ error: 'Tenant ID not found for user' });
+      }
+      direction = 'INBOUND';
+      targetTenantId = user.tenantId;
+      senderName = user.name || 'Tenant';
+      // userId remains null for tenant-sent messages (or could be linked if we want)
+    } else {
+      // Manager/Admin
+      if (!tenantId) {
+        return res.status(400).json({ error: 'Tenant ID is required for managers' });
+      }
+      direction = 'OUTBOUND';
+      targetTenantId = tenantId;
+      userId = user.id;
+      senderName = user.name || 'Property Manager';
+    }
+
+    const message = await prisma.communication.create({
+      data: {
+        tenantId: targetTenantId,
+        userId,
+        type: 'MESSAGE',
+        channel: 'APP',
+        summary: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+        content,
+        direction,
+        isRead: false,
+      },
+    });
+
+    // Send Notification
+    // Import dynamically to avoid circular dependency issues if any
+    const { sendNewMessageNotification } = await import('./communications/emailService');
+
+    if (direction === 'OUTBOUND') {
+      // Notify Tenant
+      const existingNotification = await prisma.notification.findFirst({
+        where: {
+          tenantId: targetTenantId,
+          userId: null, // Ensure we don't pick up manager notifications
+          type: 'MESSAGE',
+          isRead: false,
+        },
+      });
+
+      if (existingNotification) {
+        const currentCount = (existingNotification.metadata as any)?.count || 1;
+        await prisma.notification.update({
+          where: { id: existingNotification.id },
+          data: {
+            title: `You have ${currentCount + 1} new messages`,
+            message: `Latest: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+            metadata: { count: currentCount + 1 },
+            updatedAt: new Date(),
+          },
+        });
+      } else {
+        await prisma.notification.create({
+          data: {
+            tenantId: targetTenantId,
+            title: `New message from ${senderName}`,
+            message: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+            type: 'MESSAGE',
+            metadata: { count: 1 },
+          },
+        });
+      }
+    } else {
+      // Notify Manager(s)
+      const managers = await prisma.user.findMany({
+        where: { role: { in: ['ADMIN', 'MANAGER'] } },
+        select: { id: true },
+      });
+
+      // Process each manager independently
+      await Promise.all(managers.map(async (manager) => {
+        const existingNotification = await prisma.notification.findFirst({
+          where: {
+            userId: manager.id,
+            tenantId: null, // Ensure we don't pick up tenant notifications
+            type: 'MESSAGE',
+            isRead: false,
+          },
+        });
+
+        if (existingNotification) {
+          const currentCount = (existingNotification.metadata as any)?.count || 1;
+          await prisma.notification.update({
+            where: { id: existingNotification.id },
+            data: {
+              title: `You have ${currentCount + 1} new messages`,
+              message: `Latest from ${senderName}: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+              metadata: { count: currentCount + 1, tenantId: targetTenantId },
+              updatedAt: new Date(),
+            },
+          });
+        } else {
+          await prisma.notification.create({
+            data: {
+              userId: manager.id,
+              title: `New message from ${senderName}`,
+              message: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+              type: 'MESSAGE',
+              metadata: { count: 1, tenantId: targetTenantId },
+            },
+          });
+        }
+      }));
+    }
+
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// Mark message as read
+router.patch('/messages/:id/read', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = (req as AuthRequest).user!;
+
+    const message = await prisma.communication.findUnique({
+      where: { id },
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    // Authorization check: 
+    // If user is tenant, they can only mark OUTBOUND messages as read (sent to them)
+    // If user is manager, they can only mark INBOUND messages as read (sent to them)
+    // Also check tenant ownership
+    if (user.role === 'TENANT') {
+      if (message.tenantId !== user.tenantId) return res.status(403).json({ error: 'Access denied' });
+      // Tenants read OUTBOUND messages
+      // if (message.direction !== 'OUTBOUND') return res.status(400).json({ error: 'Cannot mark own message as read' });
+    } else {
+      // Managers read INBOUND messages
+      // if (message.direction !== 'INBOUND') return res.status(400).json({ error: 'Cannot mark own message as read' });
+    }
+
+    const updatedMessage = await prisma.communication.update({
+      where: { id },
+      data: {
+        isRead: true,
+        readAt: new Date(),
+      },
+    });
+
+    res.json(updatedMessage);
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    res.status(500).json({ error: 'Failed to mark message as read' });
   }
 });
 

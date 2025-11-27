@@ -51,10 +51,16 @@ export function CommunicationForm() {
 
   const isEdit = Boolean(communicationId);
 
+  const searchParams = new URLSearchParams(location.search);
+  const typeParam = searchParams.get('type');
+  const defaultType = (typeParam && ['email', 'call', 'meeting', 'note'].includes(typeParam))
+    ? typeParam as 'email' | 'call' | 'meeting' | 'note'
+    : 'email';
+
   const form = useForm<CommunicationFormValues>({
     resolver: zodResolver(communicationSchema) as any,
     defaultValues: {
-      type: 'email',
+      type: defaultType,
       channel: '',
       summary: '',
       content: '',

@@ -57,3 +57,31 @@ export const sendEmailToTenant = async (data: SendEmailInput, userId: string) =>
         sentTo: tenant.email,
     };
 };
+
+export const sendNewMessageNotification = async (
+    recipientEmail: string,
+    senderName: string,
+    messagePreview: string,
+    isToTenant: boolean
+) => {
+    const subject = isToTenant
+        ? `New message from ${senderName}`
+        : `New message from ${senderName} (Tenant)`;
+
+    const body = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>You have a new message</h2>
+            <p><strong>From:</strong> ${senderName}</p>
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #374151;">${messagePreview}</p>
+            </div>
+            <p>Log in to your dashboard to reply.</p>
+        </div>
+    `;
+
+    await sendEmail({
+        to: recipientEmail,
+        subject,
+        html: body,
+    });
+};

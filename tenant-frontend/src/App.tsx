@@ -8,6 +8,7 @@ import { CommunityPage } from './pages/CommunityPage';
 import { AmenitiesPage } from './pages/AmenitiesPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { MessagesPage } from './pages/MessagesPage';
 import { LoginPage } from './pages/LoginPage';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/app/community" element={<CommunityPage />} />
           <Route path="/app/amenities" element={<AmenitiesPage />} />
           <Route path="/app/documents" element={<DocumentsPage />} />
+          <Route path="/app/messages" element={<MessagesPage />} />
           <Route path="/app/profile" element={<ProfilePage />} />
         </Route>
       </Route>

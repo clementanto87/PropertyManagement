@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
-import { Calendar as CalendarIcon, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Filter, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { calendarService, CalendarEvent, EventType } from '@/api/calendarService';
 import { toast } from 'sonner';
+import { CreateMeetingDialog } from '@/components/calendar/CreateMeetingDialog';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const locales = {
@@ -46,6 +47,7 @@ export default function CalendarPage() {
         'PAYMENT_DUE',
         'FOLLOW_UP',
     ]);
+    const [createMeetingOpen, setCreateMeetingOpen] = useState(false);
 
     const loadEvents = useCallback(async () => {
         try {
@@ -105,6 +107,10 @@ export default function CalendarPage() {
                             <p className="text-sm text-gray-500">View and manage property events</p>
                         </div>
                         <div className="flex items-center gap-3">
+                            <Button onClick={() => setCreateMeetingOpen(true)}>
+                                <Video className="mr-2 h-4 w-4" />
+                                Schedule Meeting
+                            </Button>
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4 text-gray-500" />
                                 {eventTypeButtons.map(({ type, label, color }) => (
@@ -166,6 +172,11 @@ export default function CalendarPage() {
                     </div>
                 </div>
             </div>
+
+            <CreateMeetingDialog
+                open={createMeetingOpen}
+                onOpenChange={setCreateMeetingOpen}
+            />
         </div>
     );
 }

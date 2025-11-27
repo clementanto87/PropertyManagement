@@ -6,7 +6,7 @@ import { tenant } from '../services/api';
 import { motion } from 'framer-motion';
 import { PaymentModal } from '../components/PaymentModal';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
 export function PaymentsPage() {
   const { t } = useTranslation();
