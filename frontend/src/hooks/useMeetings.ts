@@ -8,6 +8,8 @@ type Provider = 'google' | 'teams';
 interface UseMeetingsReturn {
   isGoogleSignedIn: boolean;
   isTeamsSignedIn: boolean;
+  isGoogleConfigured: boolean;
+  isTeamsConfigured: boolean;
   signIn: (provider: Provider) => Promise<void>;
   signOut: (provider: Provider) => Promise<void>;
   createMeeting: (
@@ -32,19 +34,29 @@ interface UseMeetingsReturn {
 export function useMeetings(): UseMeetingsReturn {
   const [isGoogleSignedIn, setIsGoogleSignedIn] = useState(false);
   const [isTeamsSignedIn, setIsTeamsSignedIn] = useState(false);
+  const [isGoogleConfigured, setIsGoogleConfigured] = useState(false);
+  const [isTeamsConfigured, setIsTeamsConfigured] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize Google Meet service
   useEffect(() => {
     const initializeGoogle = async () => {
+      // Check if Google is configured
+      if (!googleMeetService.isConfigured()) {
+        setIsGoogleConfigured(false);
+        console.info('Google Meet not configured - skipping initialization');
+        return;
+      }
+
+      setIsGoogleConfigured(true);
       try {
         await googleMeetService.initialize((isSignedIn: boolean) => {
           setIsGoogleSignedIn(isSignedIn);
         });
       } catch (err) {
         console.error('Failed to initialize Google Meet', err);
-        setError('Failed to initialize Google Meet integration');
+        // Don't set error for missing config - it's expected in dev
       }
     };
 
@@ -55,6 +67,14 @@ export function useMeetings(): UseMeetingsReturn {
   useEffect(() => {
     const checkTeamsSignIn = async () => {
       try {
+        // Check if Teams is configured
+        if (!teamsService.isConfigured()) {
+          setIsTeamsConfigured(false);
+          console.info('Microsoft Teams not configured - skipping initialization');
+          return;
+        }
+
+        setIsTeamsConfigured(true);
         const accounts = await teamsService.getAccount();
         setIsTeamsSignedIn(!!accounts?.length);
       } catch (err) {
@@ -178,6 +198,8 @@ export function useMeetings(): UseMeetingsReturn {
   return {
     isGoogleSignedIn,
     isTeamsSignedIn,
+    isGoogleConfigured,
+    isTeamsConfigured,
     signIn,
     signOut,
     createMeeting,

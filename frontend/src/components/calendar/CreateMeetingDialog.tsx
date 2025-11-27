@@ -25,6 +25,8 @@ export function CreateMeetingDialog({ open, onOpenChange }: CreateMeetingDialogP
     const {
         isGoogleSignedIn,
         isTeamsSignedIn,
+        isGoogleConfigured,
+        isTeamsConfigured,
         signIn,
         createMeeting,
         loading,
@@ -101,6 +103,7 @@ export function CreateMeetingDialog({ open, onOpenChange }: CreateMeetingDialogP
     };
 
     const isSignedIn = provider === 'google' ? isGoogleSignedIn : isTeamsSignedIn;
+    const isConfigured = provider === 'google' ? isGoogleConfigured : isTeamsConfigured;
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -121,20 +124,39 @@ export function CreateMeetingDialog({ open, onOpenChange }: CreateMeetingDialogP
                             </TabsList>
                         </Tabs>
 
-                        {!isSignedIn ? (
+                        {!isConfigured ? (
                             <div className="py-8 text-center space-y-4">
-                                <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <Video className="h-6 w-6 text-gray-600" />
+                                <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <Calendar className="h-6 w-6 text-amber-600" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="font-medium">Connect your account</h3>
+                                    <h3 className="font-medium">Coming Soon</h3>
                                     <p className="text-sm text-gray-500">
-                                        Sign in to {provider === 'google' ? 'Google' : 'Microsoft'} to schedule meetings.
+                                        {provider === 'google' 
+                                            ? 'Google Meet integration is not yet configured for this application.' 
+                                            : 'Microsoft Teams integration is not yet configured for this application.'}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Contact your administrator to enable this feature.
                                     </p>
                                 </div>
-                                <Button onClick={handleSignIn} disabled={loading}>
-                                    {loading ? 'Connecting...' : `Sign in with ${provider === 'google' ? 'Google' : 'Microsoft'}`}
-                                </Button>
+                            </div>
+                        ) : !isSignedIn ? (
+                            <div className="py-8 text-center space-y-4">
+                                <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <Calendar className="h-6 w-6 text-amber-600" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="font-medium">Integration Setup Required</h3>
+                                    <p className="text-sm text-gray-500">
+                                        {provider === 'google' 
+                                            ? 'Google Meet requires migration to the new Google Identity Services.' 
+                                            : 'Microsoft Teams integration requires additional setup.'}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        This feature will be available in a future update.
+                                    </p>
+                                </div>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">

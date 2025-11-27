@@ -11,9 +11,50 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d property_mgmt"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d property_mgmt" ]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    build: .
+    container_name: property_mgmt_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/property_mgmt
+      - PORT=3000
+      # Add other backend env vars here or use env_file
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+        - VITE_GOOGLE_API_KEY=${VITE_GOOGLE_API_KEY}
+        - VITE_MICROSOFT_CLIENT_ID=${VITE_MICROSOFT_CLIENT_ID}
+    container_name: property_mgmt_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  tenant-frontend:
+    build:
+      context: ./tenant-frontend
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000
+    container_name: property_mgmt_tenant_frontend
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+
 volumes:
   db_data:

@@ -6,10 +6,21 @@ class TeamsService {
   private accessToken: string | null = null;
 
   constructor() {
-    this.initializeMsal();
+    if (microsoftConfig.isConfigured) {
+      this.initializeMsal();
+    }
+  }
+
+  isConfigured(): boolean {
+    return microsoftConfig.isConfigured;
   }
 
   private initializeMsal() {
+    if (!microsoftConfig.isConfigured) {
+      console.warn('Microsoft Teams not configured - set VITE_MICROSOFT_CLIENT_ID');
+      return;
+    }
+
     this.msalInstance = new PublicClientApplication({
       auth: {
         clientId: microsoftConfig.clientId,
@@ -24,6 +35,9 @@ class TeamsService {
   }
 
   async signIn() {
+    if (!microsoftConfig.isConfigured) {
+      throw new Error('Microsoft Teams not configured');
+    }
     if (!this.msalInstance) throw new Error('MSAL not initialized');
     
     try {

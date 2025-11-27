@@ -4,6 +4,9 @@ export const googleConfig = {
   apiKey: import.meta.env.VITE_GOOGLE_API_KEY || '',
   discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
   scope: 'https://www.googleapis.com/auth/calendar',
+  get isConfigured() {
+    return Boolean(this.clientId && this.apiKey);
+  }
 };
 
 // Microsoft Graph Configuration
@@ -11,7 +14,10 @@ export const microsoftConfig = {
   clientId: import.meta.env.VITE_MICROSOFT_CLIENT_ID || '',
   authority: 'https://login.microsoftonline.com/common',
   redirectUri: window.location.origin,
-  scopes: ['https://graph.microsoft.com/Calendars.ReadWrite', 'https://graph.microsoft.com/OnlineMeetings.ReadWrite']
+  scopes: ['https://graph.microsoft.com/Calendars.ReadWrite', 'https://graph.microsoft.com/OnlineMeetings.ReadWrite'],
+  get isConfigured() {
+    return Boolean(this.clientId);
+  }
 };
 
 // Common meeting interface
