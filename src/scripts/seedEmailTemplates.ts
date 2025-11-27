@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TemplateType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -79,13 +79,16 @@ async function seedEmailTemplates() {
 
     for (const template of defaultTemplates) {
         try {
-            const existing = await prisma.emailTemplate.findFirst({
+            const existing = await prisma.template.findFirst({
                 where: { name: template.name },
             });
 
             if (!existing) {
-                await prisma.emailTemplate.create({
-                    data: template,
+                await prisma.template.create({
+                    data: {
+                        ...template,
+                        type: TemplateType.EMAIL,
+                    },
                 });
                 console.log(`✓ Created template: ${template.name}`);
             } else {

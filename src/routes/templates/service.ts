@@ -46,3 +46,9 @@ export const deleteTemplate = async (id: string) => {
         where: { id },
     });
 };
+
+export const replaceTemplateVariables = (text: string, variables: Record<string, string>): string => {
+    return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        return variables[key] || match;
+    });
+};

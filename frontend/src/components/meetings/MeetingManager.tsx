@@ -5,7 +5,7 @@ import { Calendar, Video, LogOut, LogIn, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import Textarea from '../ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from '../ui/select-component';
 import { Label } from '../ui/label';
 import { useToast } from '../ui/use-toast';
 
@@ -135,10 +135,10 @@ export function MeetingManager() {
 
   const handleCreateMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const { title, description, startTime, endTime, attendees, provider } = formData;
-      
+
       const meeting = await createMeeting(provider, {
         title,
         description,
@@ -149,7 +149,7 @@ export function MeetingManager() {
 
       setMeetings(prev => [...prev, meeting]);
       setIsDialogOpen(false);
-      
+
       toast({
         title: 'Meeting Created',
         description: `${provider === 'google' ? 'Google Meet' : 'Teams'} meeting has been created successfully!`,

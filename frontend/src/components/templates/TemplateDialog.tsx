@@ -87,7 +87,7 @@ export function TemplateDialog({ open, onOpenChange, template, type, onSave }: T
     const isEdit = Boolean(template);
 
     const form = useForm<TemplateFormValues>({
-        resolver: zodResolver(templateSchema),
+        resolver: zodResolver(templateSchema) as any,
         defaultValues: {
             name: '',
             category: 'general',

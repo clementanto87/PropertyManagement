@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import Textarea from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Video, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -132,8 +132,8 @@ export function CreateMeetingDialog({ open, onOpenChange }: CreateMeetingDialogP
                                 <div className="space-y-2">
                                     <h3 className="font-medium">Coming Soon</h3>
                                     <p className="text-sm text-gray-500">
-                                        {provider === 'google' 
-                                            ? 'Google Meet integration is not yet configured for this application.' 
+                                        {provider === 'google'
+                                            ? 'Google Meet integration is not yet configured for this application.'
                                             : 'Microsoft Teams integration is not yet configured for this application.'}
                                     </p>
                                     <p className="text-xs text-gray-400 mt-2">
@@ -149,8 +149,8 @@ export function CreateMeetingDialog({ open, onOpenChange }: CreateMeetingDialogP
                                 <div className="space-y-2">
                                     <h3 className="font-medium">Integration Setup Required</h3>
                                     <p className="text-sm text-gray-500">
-                                        {provider === 'google' 
-                                            ? 'Google Meet requires migration to the new Google Identity Services.' 
+                                        {provider === 'google'
+                                            ? 'Google Meet requires migration to the new Google Identity Services.'
                                             : 'Microsoft Teams integration requires additional setup.'}
                                     </p>
                                     <p className="text-xs text-gray-400 mt-2">

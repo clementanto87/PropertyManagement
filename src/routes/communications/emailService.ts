@@ -1,5 +1,5 @@
 import { sendEmail } from '../../services/email/emailService';
-import { replaceTemplateVariables } from '../email-templates/service';
+import { replaceTemplateVariables } from '../templates/service';
 import { prisma } from '../../db/prisma';
 
 export type SendEmailInput = {
