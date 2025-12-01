@@ -2,9 +2,14 @@ import Stripe from 'stripe';
 
 // Initialize Stripe with secret key
 // Make sure to add STRIPE_SECRET_KEY to your .env file
-// Get your keys from: https://dashboard.stripe.com/test/apikeys
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2024-11-20.acacia' as any, // Type assertion for newer API version
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeKey) {
+    console.warn('STRIPE_SECRET_KEY is not set. Payment features will not work.');
+}
+
+const stripe = new Stripe(stripeKey || 'dummy_key_to_prevent_crash', {
+    apiVersion: '2024-11-20.acacia' as any,
 });
 
 export default stripe;
