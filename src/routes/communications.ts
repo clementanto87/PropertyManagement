@@ -5,21 +5,121 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Get all communications for the authenticated user (Property Manager)
+// Get all communications
 router.get('/', authenticate, async (req: Request, res: Response) => {
   try {
-    const userId = (req as AuthRequest).user!.id;
+    const user = (req as AuthRequest).user!;
     const { tenantId, limit, search, type, followUpOnly, startDate, endDate } = req.query;
 
-    const where: any = tenantId ? { tenantId: tenantId as string } : { userId };
+    let where: any = {};
+
+    if (tenantId) {
+      where.tenantId = tenantId as string;
+    }
+
+    // RBAC Logic
+    if (user.role === 'MANAGER') {
+      const managerFilter = {
+        leases: {
+          some: {
+            unit: {
+              OR: [
+                { managers: { some: { id: user.id } } },
+                { property: { managers: { some: { id: user.id } } } }
+              ]
+            }
+          }
+        }
+      };
+
+      if (tenantId) {
+        // Verify access to specific tenant
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId as string,
+            ...managerFilter
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      } else {
+        // Filter all communications
+        where.OR = [
+          { userId: user.id }, // Created by manager
+          { tenant: managerFilter } // Or belonging to managed tenant
+        ];
+      }
+    } else if (user.role === 'TENANT') {
+      if (user.tenantId !== tenantId && !tenantId) {
+        where.tenantId = user.tenantId;
+      } else if (user.tenantId !== tenantId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    } else if (user.role === 'CARETAKER') {
+      // Caretakers only see their own communications for now
+      where.userId = user.id;
+      if (tenantId) {
+        // Verify access to tenant (optional, but good practice)
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId as string,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { caretakers: { some: { id: user.caretakerId! } } },
+                    { property: { caretakers: { some: { id: user.caretakerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      }
+    } else if (user.role === 'HOUSEOWNER') {
+      // House Owners only see their own communications
+      where.userId = user.id;
+      if (tenantId) {
+        // Verify access to tenant
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId as string,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { houseOwners: { some: { id: user.houseOwnerId! } } },
+                    { property: { houseOwners: { some: { id: user.houseOwnerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      }
+    }
+    // Admin sees all (no extra filter)
 
     // Add search filter
     if (search) {
-      where.OR = [
-        { summary: { contains: search as string, mode: 'insensitive' } },
-        { content: { contains: search as string, mode: 'insensitive' } },
-        { channel: { contains: search as string, mode: 'insensitive' } },
-      ];
+      const searchFilter = {
+        OR: [
+          { summary: { contains: search as string, mode: 'insensitive' } },
+          { content: { contains: search as string, mode: 'insensitive' } },
+          { channel: { contains: search as string, mode: 'insensitive' } },
+        ]
+      };
+      // Merge with existing OR if present
+      if (where.OR) {
+        where.AND = [
+          { OR: where.OR },
+          searchFilter
+        ];
+        delete where.OR;
+      } else {
+        where = { ...where, ...searchFilter };
+      }
     }
 
     // Add type filter
@@ -39,9 +139,8 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
         where.createdAt.gte = new Date(startDate as string);
       }
       if (endDate) {
-        // Set end date to end of day if it's just a date string
         const end = new Date(endDate as string);
-        if (endDate.toString().length === 10) { // YYYY-MM-DD
+        if (endDate.toString().length === 10) {
           end.setHours(23, 59, 59, 999);
         }
         where.createdAt.lte = end;
@@ -430,6 +529,59 @@ router.get('/messages/list', authenticate, async (req: Request, res: Response) =
         return res.status(400).json({ error: 'Tenant ID is required for managers' });
       }
       targetTenantId = tenantId as string;
+
+      if (user.role === 'MANAGER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: targetTenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { managers: { some: { id: user.id } } },
+                    { property: { managers: { some: { id: user.id } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      } else if (user.role === 'CARETAKER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: targetTenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { caretakers: { some: { id: user.caretakerId! } } },
+                    { property: { caretakers: { some: { id: user.caretakerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      } else if (user.role === 'HOUSEOWNER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: targetTenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { houseOwners: { some: { id: user.houseOwnerId! } } },
+                    { property: { houseOwners: { some: { id: user.houseOwnerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      }
     }
 
     const messages = await prisma.communication.findMany({
@@ -540,14 +692,69 @@ router.post('/messages', authenticate, async (req: Request, res: Response) => {
       senderName = user.name || 'Tenant';
       // userId remains null for tenant-sent messages (or could be linked if we want)
     } else {
-      // Manager/Admin
+      // Manager/Admin/Caretaker
       if (!tenantId) {
-        return res.status(400).json({ error: 'Tenant ID is required for managers' });
+        return res.status(400).json({ error: 'Tenant ID is required for staff' });
       }
+
+      // RBAC Check
+      if (user.role === 'MANAGER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { managers: { some: { id: user.id } } },
+                    { property: { managers: { some: { id: user.id } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      } else if (user.role === 'CARETAKER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { caretakers: { some: { id: user.caretakerId! } } },
+                    { property: { caretakers: { some: { id: user.caretakerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      } else if (user.role === 'HOUSEOWNER') {
+        const hasAccess = await prisma.tenant.findFirst({
+          where: {
+            id: tenantId,
+            leases: {
+              some: {
+                unit: {
+                  OR: [
+                    { houseOwners: { some: { id: user.houseOwnerId! } } },
+                    { property: { houseOwners: { some: { id: user.houseOwnerId! } } } }
+                  ]
+                }
+              }
+            }
+          }
+        });
+        if (!hasAccess) return res.status(403).json({ error: 'Access denied to this tenant' });
+      }
+
       direction = 'OUTBOUND';
       targetTenantId = tenantId;
       userId = user.id;
-      senderName = user.name || 'Property Manager';
+      senderName = user.name || (user.role === 'CARETAKER' ? 'Caretaker' : (user.role === 'HOUSEOWNER' ? 'House Owner' : 'Property Manager'));
     }
 
     const message = await prisma.communication.create({

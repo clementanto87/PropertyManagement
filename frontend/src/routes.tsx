@@ -25,6 +25,7 @@ import ExpensesPage from './pages/ExpensesPage';
 import NewExpensePage from './pages/NewExpensePage';
 import ReportsPage from './pages/ReportsPage';
 import DashboardPage from './pages/DashboardPage';
+import DocumentsPage from './pages/DocumentsPage';
 import AddPropertyPage from './pages/AddPropertyPage';
 import PaymentsPage from './pages/PaymentsPage';
 import CalendarPage from './pages/CalendarPage';
@@ -38,6 +39,13 @@ import SignAgreementPage from './pages/SignAgreementPage';
 import TenantPortalSetupPage from './pages/TenantPortalSetupPage';
 import GDPRManagementPage from './pages/GDPRManagementPage';
 import TemplatesPage from './pages/TemplatesPage';
+import AdminPage from './pages/AdminPage';
+import CareTakersPage from './pages/CareTakersPage';
+import NewCareTakerPage from './pages/NewCareTakerPage';
+import HouseOwnersPage from './pages/HouseOwnersPage';
+import NewHouseOwnerPage from './pages/NewHouseOwnerPage';
+import NewManagerPage from './pages/NewManagerPage';
+import ManagersPage from './pages/ManagersPage';
 import { Outlet } from 'react-router-dom';
 
 import App from './App';
@@ -125,6 +133,24 @@ export const routes: RouteObject[] = [
             ]
           },
           {
+            path: 'caretakers',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Outlet /></ProtectedRoute>,
+            children: [
+              { index: true, element: <CareTakersPage /> },
+              { path: 'new', element: <NewCareTakerPage /> },
+              { path: ':id/edit', element: <NewCareTakerPage /> }
+            ]
+          },
+          {
+            path: 'houseowners',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Outlet /></ProtectedRoute>,
+            children: [
+              { index: true, element: <HouseOwnersPage /> },
+              { path: 'new', element: <NewHouseOwnerPage /> },
+              { path: ':id/edit', element: <NewHouseOwnerPage /> }
+            ]
+          },
+          {
             path: 'expenses',
             element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Outlet /></ProtectedRoute>,
             children: [
@@ -138,6 +164,10 @@ export const routes: RouteObject[] = [
           {
             path: 'reports',
             element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><ReportsPage /></ProtectedRoute>
+          },
+          {
+            path: 'documents',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'CARETAKER', 'HOUSEOWNER']}><DocumentsPage /></ProtectedRoute>
           },
           {
             path: 'gdpr',
@@ -155,6 +185,19 @@ export const routes: RouteObject[] = [
           {
             path: 'templates',
             element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><TemplatesPage /></ProtectedRoute>
+          },
+          {
+            path: 'managers',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Outlet /></ProtectedRoute>,
+            children: [
+              { index: true, element: <ManagersPage /> }, // Optional: if we want a standalone managers page
+              { path: 'new', element: <NewManagerPage /> },
+              { path: ':id/edit', element: <NewManagerPage /> }
+            ]
+          },
+          {
+            path: 'admin',
+            element: <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><AdminPage /></ProtectedRoute>
           },
         ]
       },

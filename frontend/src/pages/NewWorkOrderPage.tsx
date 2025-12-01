@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Wrench,
@@ -30,6 +31,7 @@ type Vendor = {
 };
 
 export default function NewWorkOrderPage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditMode = !!id;
@@ -80,7 +82,7 @@ export default function NewWorkOrderPage() {
             setVendors(vendorsData.items || []);
         } catch (error) {
             console.error('Failed to load form data:', error);
-            toast.error('Failed to load properties or vendors');
+            toast.error(t('newWorkOrder.validation.loadDataError'));
         } finally {
             setLoadingData(false);
         }
@@ -92,7 +94,7 @@ export default function NewWorkOrderPage() {
             setUnits(response.items || []);
         } catch (error) {
             console.error('Failed to load units:', error);
-            toast.error('Failed to load units');
+            toast.error(t('newWorkOrder.validation.loadUnitsError'));
         }
     };
 
@@ -100,23 +102,19 @@ export default function NewWorkOrderPage() {
         try {
             const workOrder = await workOrderService.getWorkOrder(workOrderId);
 
-            const propertyId = workOrder.unit?.property?.id || ''; // Assuming backend returns this structure
+            const propertyId = workOrder.unit?.property?.id || '';
 
             setFormData({
-                propertyId: propertyId, // We might not get this directly if not populated, but let's assume for now
+                propertyId: propertyId,
                 unitId: workOrder.unitId,
                 vendorId: workOrder.vendorId || '',
                 title: workOrder.title,
                 description: workOrder.description || '',
                 status: workOrder.status
             });
-
-            // If we have propertyId, units will be loaded by useEffect
-            // But if propertyId is missing from response (e.g. only unitId returned), we might have trouble pre-selecting property
-            // For now, let's assume unit includes property relation
         } catch (error) {
             console.error('Failed to load work order:', error);
-            toast.error('Failed to load work order details');
+            toast.error(t('newWorkOrder.validation.loadError'));
             navigate('/dashboard/work-orders');
         } finally {
             setIsLoading(false);
@@ -127,7 +125,7 @@ export default function NewWorkOrderPage() {
         e.preventDefault();
 
         if (!formData.unitId || !formData.title) {
-            toast.error('Please fill in all required fields');
+            toast.error(t('newWorkOrder.validation.requiredFields'));
             return;
         }
 
@@ -144,15 +142,15 @@ export default function NewWorkOrderPage() {
 
             if (isEditMode && id) {
                 await workOrderService.updateWorkOrder(id, payload);
-                toast.success('Work order updated successfully');
+                toast.success(t('newWorkOrder.validation.updateSuccess'));
             } else {
                 await workOrderService.createWorkOrder(payload);
-                toast.success('Work order created successfully');
+                toast.success(t('newWorkOrder.validation.createSuccess'));
             }
             navigate('/dashboard/work-orders');
         } catch (error: any) {
             console.error('Failed to save work order:', error);
-            toast.error(error?.message || 'Failed to save work order');
+            toast.error(error?.message || t('newWorkOrder.validation.error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -160,19 +158,19 @@ export default function NewWorkOrderPage() {
 
     if (isLoading || loadingData) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="text-center p-8">
                     <Loader2 className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-500">Loading...</p>
+                    <p className="text-muted-foreground">{t('newWorkOrder.loading')}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50 pb-32">
+        <div className="min-h-screen bg-background pb-32">
             {/* Professional Sticky Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div className="bg-card border-b border-border sticky top-0 z-40">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -180,17 +178,17 @@ export default function NewWorkOrderPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate(-1)}
-                                className="h-10 w-10 rounded-full hover:bg-gray-100 text-gray-500"
+                                className="h-10 w-10 rounded-full hover:bg-accent text-muted-foreground"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">{isEditMode ? 'Edit Work Order' : 'New Work Order'}</h1>
-                                <p className="text-sm text-gray-500">{isEditMode ? 'Update work order details' : 'Create a new maintenance request'}</p>
+                                <h1 className="text-xl font-bold text-foreground">{isEditMode ? t('newWorkOrder.editTitle') : t('newWorkOrder.title')}</h1>
+                                <p className="text-sm text-muted-foreground">{isEditMode ? t('newWorkOrder.editSubtitle') : t('newWorkOrder.subtitle')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
+                            <button className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors relative">
                                 <Bell className="w-5 h-5" />
                             </button>
                         </div>
@@ -201,25 +199,25 @@ export default function NewWorkOrderPage() {
             <div className="px-6 mt-8 max-w-4xl mx-auto">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Location Details */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                                     <Building2 className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Location Details</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newWorkOrder.locationDetails.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Property <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.locationDetails.property')} <span className="text-red-500">*</span></label>
                                 <select
                                     value={formData.propertyId}
                                     onChange={(e) => setFormData({ ...formData, propertyId: e.target.value, unitId: '' })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                     required
                                 >
-                                    <option value="">Select Property</option>
+                                    <option value="">{t('newWorkOrder.locationDetails.selectProperty')}</option>
                                     {properties.map(p => (
                                         <option key={p.id} value={p.id}>{p.title}</option>
                                     ))}
@@ -227,18 +225,18 @@ export default function NewWorkOrderPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Unit <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.locationDetails.unit')} <span className="text-red-500">*</span></label>
                                 <select
                                     value={formData.unitId}
                                     onChange={(e) => setFormData({ ...formData, unitId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                     required
                                     disabled={!formData.propertyId}
                                 >
-                                    <option value="">Select Unit</option>
+                                    <option value="">{t('newWorkOrder.locationDetails.selectUnit')}</option>
                                     {units.map(u => (
                                         <option key={u.id} value={u.id}>
-                                            Unit {u.unitNumber} ({u.status})
+                                            {t('newWorkOrder.locationDetails.unit')} {u.unitNumber} ({u.status})
                                         </option>
                                     ))}
                                 </select>
@@ -247,59 +245,59 @@ export default function NewWorkOrderPage() {
                     </div>
 
                     {/* Issue Details */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600 dark:text-amber-400">
                                     <AlertCircle className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Issue Details</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newWorkOrder.issueDetails.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Title <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.issueDetails.titleLabel')} <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                                    placeholder="e.g., Leaky Faucet in Kitchen"
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                                    placeholder={t('newWorkOrder.issueDetails.titlePlaceholder')}
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Description</label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.issueDetails.description')}</label>
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors min-h-[120px]"
-                                    placeholder="Describe the issue in detail..."
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors min-h-[120px] bg-background text-foreground placeholder:text-muted-foreground"
+                                    placeholder={t('newWorkOrder.issueDetails.descriptionPlaceholder')}
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* Assignment & Status */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
                                     <Wrench className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Assignment & Status</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newWorkOrder.assignmentStatus.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Assign Vendor</label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.assignmentStatus.assignVendor')}</label>
                                 <select
                                     value={formData.vendorId}
                                     onChange={(e) => setFormData({ ...formData, vendorId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                 >
-                                    <option value="">Unassigned</option>
+                                    <option value="">{t('newWorkOrder.assignmentStatus.unassigned')}</option>
                                     {vendors.map(v => (
                                         <option key={v.id} value={v.id}>{v.name} {v.companyName ? `(${v.companyName})` : ''}</option>
                                     ))}
@@ -307,17 +305,17 @@ export default function NewWorkOrderPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Status</label>
+                                <label className="text-sm font-medium text-foreground">{t('newWorkOrder.assignmentStatus.status')}</label>
                                 <select
                                     value={formData.status}
                                     onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkOrderStatus })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                 >
-                                    <option value="NEW">New</option>
-                                    <option value="ASSIGNED">Assigned</option>
-                                    <option value="IN_PROGRESS">In Progress</option>
-                                    <option value="ON_HOLD">On Hold</option>
-                                    <option value="COMPLETED">Completed</option>
+                                    <option value="NEW">{t('newWorkOrder.statusOptions.new')}</option>
+                                    <option value="ASSIGNED">{t('newWorkOrder.statusOptions.assigned')}</option>
+                                    <option value="IN_PROGRESS">{t('newWorkOrder.statusOptions.inProgress')}</option>
+                                    <option value="ON_HOLD">{t('newWorkOrder.statusOptions.onHold')}</option>
+                                    <option value="COMPLETED">{t('newWorkOrder.statusOptions.completed')}</option>
                                 </select>
                             </div>
                         </div>
@@ -332,20 +330,20 @@ export default function NewWorkOrderPage() {
                             className="px-6"
                             disabled={isSubmitting}
                         >
-                            Cancel
+                            {t('newWorkOrder.actions.cancel')}
                         </Button>
                         <Button
                             type="submit"
-                            className="px-8 bg-gray-900 hover:bg-gray-800 text-white"
+                            className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t('newWorkOrder.actions.saving')}
                                 </>
                             ) : (
-                                isEditMode ? 'Update Work Order' : 'Create Work Order'
+                                isEditMode ? t('newWorkOrder.actions.update') : t('newWorkOrder.actions.create')
                             )}
                         </Button>
                     </div>

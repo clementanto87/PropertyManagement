@@ -8,7 +8,10 @@ export const createUnitSchema = z.object({
   bedrooms: z.number().int().nonnegative(),
   bathrooms: z.number().nonnegative(),
   sizeSqft: z.number().int().positive().optional(),
-  status: unitStatusEnum.optional()
+  status: unitStatusEnum.optional(),
+  managerIds: z.array(z.string()).optional(),
+  careTakerIds: z.array(z.string()).optional(),
+  houseOwnerIds: z.array(z.string()).optional()
 });
 
 export const updateUnitSchema = createUnitSchema.partial();

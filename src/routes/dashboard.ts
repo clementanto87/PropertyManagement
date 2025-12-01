@@ -3,8 +3,17 @@ import { prisma } from '../db/prisma';
 
 const router = Router();
 
-router.get('/stats', async (_req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
     try {
+        const { propertyId } = req.query;
+        const propertyFilter = propertyId ? { id: String(propertyId) } : {};
+        const unitFilter = propertyId ? { propertyId: String(propertyId) } : {};
+        const leaseFilter = propertyId ? { unit: { propertyId: String(propertyId) } } : {};
+        const paymentFilter = propertyId ? { lease: { unit: { propertyId: String(propertyId) } } } : {};
+        const workOrderFilter = propertyId ? { unit: { propertyId: String(propertyId) } } : {};
+        // For tenants, we count tenants who have at least one lease in the filtered property
+        const tenantFilter = propertyId ? { leases: { some: { unit: { propertyId: String(propertyId) } } } } : {};
+
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -12,19 +21,19 @@ router.get('/stats', async (_req: Request, res: Response) => {
         const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
         // 1. Occupancy Rate & Trend
-        const totalUnits = await prisma.unit.count();
+        const totalUnits = await prisma.unit.count({ where: unitFilter });
         const occupiedUnits = await prisma.unit.count({
-            where: { status: 'OCCUPIED' }
+            where: { ...unitFilter, status: 'OCCUPIED' }
         });
         const occupancyRate = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
 
         // Calculate previous month occupancy (Approximation based on active leases last month)
-        // We count leases that were active at the end of last month
         const activeLeasesLastMonth = await prisma.lease.count({
             where: {
+                ...leaseFilter,
                 startDate: { lte: endOfLastMonth },
                 endDate: { gte: endOfLastMonth },
-                status: { not: 'TERMINATED' } // Assuming TERMINATED leases shouldn't count if they ended before
+                status: { not: 'TERMINATED' }
             }
         });
         const prevOccupancyRate = totalUnits > 0 ? Math.round((activeLeasesLastMonth / totalUnits) * 100) : 0;
@@ -33,6 +42,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
         // 2. Rent Collected (Current Month vs Last Month)
         const paymentsCurrentMonth = await prisma.payment.findMany({
             where: {
+                ...paymentFilter,
                 status: 'PAID',
                 paidAt: {
                     gte: startOfMonth,
@@ -44,6 +54,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
 
         const paymentsLastMonth = await prisma.payment.findMany({
             where: {
+                ...paymentFilter,
                 status: 'PAID',
                 paidAt: {
                     gte: startOfLastMonth,
@@ -56,25 +67,22 @@ router.get('/stats', async (_req: Request, res: Response) => {
             ? Math.round(((rentCollected - rentCollectedLastMonth) / rentCollectedLastMonth) * 100)
             : 0;
 
-        // 3. Rent Overdue (Total Outstanding vs Last Month's New Overdue? Or just total change)
-        // Let's track "New Overdue Payments" created this month vs last month
-        // A payment is overdue if dueDate < now and status != PAID
+        // 3. Rent Overdue
         const overduePayments = await prisma.payment.findMany({
-            where: { status: 'OVERDUE' }
+            where: { ...paymentFilter, status: 'OVERDUE' }
         });
         const rentOverdue = overduePayments.reduce((sum, p) => sum + p.amount, 0);
 
-        // For trend, let's compare the amount that became overdue this month vs last month
-        // This is a bit complex to query perfectly without history, so we'll approximate
-        // by checking overdue payments with dueDate in current month vs last month
         const overdueThisMonth = await prisma.payment.findMany({
             where: {
+                ...paymentFilter,
                 status: 'OVERDUE',
                 dueDate: { gte: startOfMonth, lte: endOfMonth }
             }
         });
         const overdueLastMonth = await prisma.payment.findMany({
             where: {
+                ...paymentFilter,
                 status: 'OVERDUE',
                 dueDate: { gte: startOfLastMonth, lte: endOfLastMonth }
             }
@@ -88,6 +96,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
         // 4. Open Requests & Resolved This Week
         const openRequests = await prisma.workOrder.count({
             where: {
+                ...workOrderFilter,
                 status: { not: 'COMPLETED' }
             }
         });
@@ -95,17 +104,19 @@ router.get('/stats', async (_req: Request, res: Response) => {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const resolvedThisWeek = await prisma.workOrder.count({
             where: {
+                ...workOrderFilter,
                 status: 'COMPLETED',
                 updatedAt: { gte: oneWeekAgo }
             }
         });
 
         // 5. Total Counts
-        const totalProperties = await prisma.property.count();
-        const totalTenants = await prisma.tenant.count();
+        const totalProperties = await prisma.property.count({ where: propertyFilter });
+        const totalTenants = await prisma.tenant.count({ where: tenantFilter });
 
         // 6. Recent Activity (Last 5 Work Orders)
         const recentWorkOrders = await prisma.workOrder.findMany({
+            where: workOrderFilter,
             take: 5,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -118,6 +129,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
         const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
         const expiringLeases = await prisma.lease.findMany({
             where: {
+                ...leaseFilter,
                 endDate: {
                     gte: now,
                     lte: thirtyDaysFromNow
@@ -138,10 +150,16 @@ router.get('/stats', async (_req: Request, res: Response) => {
 
         // 8. Properties for Map
         const properties = await prisma.property.findMany({
+            where: propertyFilter,
             include: {
                 units: {
                     select: {
-                        status: true
+                        status: true,
+                        workOrders: {
+                            where: {
+                                status: { not: 'COMPLETED' }
+                            }
+                        }
                     }
                 }
             }
@@ -158,6 +176,9 @@ router.get('/stats', async (_req: Request, res: Response) => {
             const lat = prop.latitude || (40.7128 + (Math.random() - 0.5) * 0.1);
             const lng = prop.longitude || (-74.0060 + (Math.random() - 0.5) * 0.1);
 
+            const vacantUnits = totalUnits - occupiedUnits;
+            const maintenanceCount = prop.units.reduce((sum, u) => sum + u.workOrders.length, 0);
+
             return {
                 id: prop.id,
                 name: prop.name,
@@ -166,7 +187,11 @@ router.get('/stats', async (_req: Request, res: Response) => {
                 longitude: lng,
                 status: occupancyStatus,
                 occupancyRate: totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0,
-                image: prop.image
+                image: prop.image,
+                totalUnits,
+                occupiedUnits,
+                vacantUnits,
+                maintenanceCount
             };
         });
 
@@ -180,6 +205,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
             openRequests,
             openRequestsChange: resolvedThisWeek,
             totalProperties,
+            totalUnits,
             totalTenants,
             recentWorkOrders: recentWorkOrders.map(wo => ({
                 ...wo,

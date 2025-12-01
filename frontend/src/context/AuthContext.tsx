@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { getAuthToken, setAuth, clearAuth } from '../lib/auth';
 
-export type Role = 'ADMIN' | 'MANAGER' | 'TENANT';
+export type Role = 'ADMIN' | 'MANAGER' | 'TENANT' | 'CARETAKER' | 'HOUSEOWNER';
 
 interface User {
     id: string;

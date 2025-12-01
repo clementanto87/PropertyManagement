@@ -13,7 +13,13 @@ router.get('/types', (req: Request, res: Response) => {
 
 router.get('/', async (req: Request, res: Response) => {
   const { skip, take } = parsePagination(req.query as any);
-  const items = await listProperties({ skip, take });
+  const user = (req as any).user;
+  const userId = user?.role === 'MANAGER' ? user.id : undefined;
+  const caretakerId = user?.role === 'CARETAKER' ? user.caretakerId : undefined;
+  const houseOwnerId = user?.role === 'HOUSEOWNER' ? user.houseOwnerId : undefined;
+
+  const includeUnits = req.query.include === 'units' || (req.query.include as string)?.includes('units');
+  const items = await listProperties({ skip, take, userId, caretakerId, houseOwnerId, includeUnits });
   res.json({ items, page: Number(req.query.page ?? 1), limit: take });
 });
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Calendar,
@@ -25,6 +26,7 @@ type Unit = {
 };
 
 export default function NewLeasePage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditMode = !!id;
@@ -77,7 +79,7 @@ export default function NewLeasePage() {
             setProperties(propertiesData);
         } catch (error) {
             console.error('Failed to load form data:', error);
-            toast.error('Failed to load tenants or properties');
+            toast.error(t('newLease.validation.loadDataError'));
         } finally {
             setLoadingData(false);
         }
@@ -89,7 +91,7 @@ export default function NewLeasePage() {
             setUnits(response.items || []);
         } catch (error) {
             console.error('Failed to load units:', error);
-            toast.error('Failed to load units');
+            toast.error(t('newLease.validation.loadUnitsError'));
         }
     };
 
@@ -97,28 +99,21 @@ export default function NewLeasePage() {
         try {
             const lease = await leaseService.getLease(leaseId);
 
-            // We need to find the propertyId from the unitId
-            // Since we don't have it directly, we might need to fetch the unit first or rely on the lease.unit relation if it exists
-            // The lease object from service should have unit.propertyId if we included it, let's check leaseService type
-            // The type has unit: { property: { id } }
-
             const propertyId = lease.unit?.property?.id || '';
 
             setFormData({
                 tenantId: lease.tenantId,
                 propertyId: propertyId,
                 unitId: lease.unitId,
-                startDate: lease.startDate.split('T')[0], // Format for date input
+                startDate: lease.startDate.split('T')[0],
                 endDate: lease.endDate.split('T')[0],
                 rentAmount: lease.rentAmount.toString(),
                 securityDeposit: lease.securityDeposit?.toString() || '',
                 status: lease.status
             });
-
-            // Units will be loaded by the useEffect when propertyId is set
         } catch (error) {
             console.error('Failed to load lease:', error);
-            toast.error('Failed to load lease details');
+            toast.error(t('newLease.validation.loadError'));
             navigate('/dashboard/leases');
         } finally {
             setIsLoading(false);
@@ -129,7 +124,7 @@ export default function NewLeasePage() {
         e.preventDefault();
 
         if (!formData.tenantId || !formData.unitId || !formData.startDate || !formData.endDate || !formData.rentAmount) {
-            toast.error('Please fill in all required fields');
+            toast.error(t('newLease.validation.requiredFields'));
             return;
         }
 
@@ -148,15 +143,15 @@ export default function NewLeasePage() {
 
             if (isEditMode && id) {
                 await leaseService.updateLease(id, payload);
-                toast.success('Lease updated successfully');
+                toast.success(t('newLease.validation.updateSuccess'));
             } else {
                 await leaseService.createLease(payload);
-                toast.success('Lease created successfully');
+                toast.success(t('newLease.validation.createSuccess'));
             }
             navigate('/dashboard/leases');
         } catch (error: any) {
             console.error('Failed to save lease:', error);
-            toast.error(error?.message || 'Failed to save lease');
+            toast.error(error?.message || t('newLease.validation.error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -164,19 +159,19 @@ export default function NewLeasePage() {
 
     if (isLoading || loadingData) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="text-center p-8">
                     <Loader2 className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-500">Loading...</p>
+                    <p className="text-muted-foreground">{t('newLease.loading')}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50 pb-32">
+        <div className="min-h-screen bg-background pb-32">
             {/* Professional Sticky Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div className="bg-card border-b border-border sticky top-0 z-40">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -184,17 +179,17 @@ export default function NewLeasePage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate(-1)}
-                                className="h-10 w-10 rounded-full hover:bg-gray-100 text-gray-500"
+                                className="h-10 w-10 rounded-full hover:bg-accent text-muted-foreground"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">{isEditMode ? 'Edit Lease' : 'New Lease'}</h1>
-                                <p className="text-sm text-gray-500">{isEditMode ? 'Update lease details' : 'Create a new lease agreement'}</p>
+                                <h1 className="text-xl font-bold text-foreground">{isEditMode ? t('newLease.editTitle') : t('newLease.title')}</h1>
+                                <p className="text-sm text-muted-foreground">{isEditMode ? t('newLease.editSubtitle') : t('newLease.subtitle')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
+                            <button className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors relative">
                                 <Bell className="w-5 h-5" />
                             </button>
                         </div>
@@ -205,25 +200,25 @@ export default function NewLeasePage() {
             <div className="px-6 mt-8 max-w-4xl mx-auto">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Property & Unit Selection */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                                     <Building2 className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Property Details</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newLease.propertyDetails.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Property <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.propertyDetails.property')} <span className="text-red-500">*</span></label>
                                 <select
                                     value={formData.propertyId}
                                     onChange={(e) => setFormData({ ...formData, propertyId: e.target.value, unitId: '' })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     required
                                 >
-                                    <option value="">Select Property</option>
+                                    <option value="">{t('newLease.propertyDetails.selectProperty')}</option>
                                     {properties.map(p => (
                                         <option key={p.id} value={p.id}>{p.title}</option>
                                     ))}
@@ -231,18 +226,18 @@ export default function NewLeasePage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Unit <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.propertyDetails.unit')} <span className="text-red-500">*</span></label>
                                 <select
                                     value={formData.unitId}
                                     onChange={(e) => setFormData({ ...formData, unitId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     required
                                     disabled={!formData.propertyId}
                                 >
-                                    <option value="">Select Unit</option>
+                                    <option value="">{t('newLease.propertyDetails.selectUnit')}</option>
                                     {units.map(u => (
                                         <option key={u.id} value={u.id}>
-                                            Unit {u.unitNumber} ({u.status})
+                                            {t('newLease.propertyDetails.unit')} {u.unitNumber} ({u.status})
                                         </option>
                                     ))}
                                 </select>
@@ -251,113 +246,113 @@ export default function NewLeasePage() {
                     </div>
 
                     {/* Tenant Selection */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                                <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
                                     <User className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Tenant</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newLease.tenant.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Select Tenant <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.tenant.selectTenant')} <span className="text-red-500">*</span></label>
                                 <select
                                     value={formData.tenantId}
                                     onChange={(e) => setFormData({ ...formData, tenantId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     required
                                 >
-                                    <option value="">Select Tenant</option>
+                                    <option value="">{t('newLease.tenant.selectTenant')}</option>
                                     {tenants.map(t => (
                                         <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Can't find the tenant? <a href="/dashboard/tenants/new" className="text-blue-600 hover:underline">Add new tenant</a>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {t('newLease.tenant.cantFind')} <a href="/dashboard/tenants/new" className="text-blue-600 dark:text-blue-400 hover:underline">{t('newLease.tenant.addNew')}</a>
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     {/* Lease Terms & Financials */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600 dark:text-amber-400">
                                     <Calendar className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Terms & Financials</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newLease.termsFinancials.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Start Date <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.termsFinancials.startDate')} <span className="text-red-500">*</span></label>
                                 <input
                                     type="date"
                                     value={formData.startDate}
                                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">End Date <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.termsFinancials.endDate')} <span className="text-red-500">*</span></label>
                                 <input
                                     type="date"
                                     value={formData.endDate}
                                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Monthly Rent <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.termsFinancials.monthlyRent')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.01"
                                         value={formData.rentAmount}
                                         onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                                        placeholder="0.00"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                        placeholder={t('newLease.termsFinancials.placeholder')}
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Security Deposit</label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.termsFinancials.securityDeposit')}</label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.01"
                                         value={formData.securityDeposit}
                                         onChange={(e) => setFormData({ ...formData, securityDeposit: e.target.value })}
-                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                                        placeholder="0.00"
+                                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                        placeholder={t('newLease.termsFinancials.placeholder')}
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Status</label>
+                                <label className="text-sm font-medium text-foreground">{t('newLease.termsFinancials.status')}</label>
                                 <select
                                     value={formData.status}
                                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                 >
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="PENDING">Pending</option>
-                                    <option value="EXPIRED">Expired</option>
-                                    <option value="TERMINATED">Terminated</option>
+                                    <option value="ACTIVE">{t('newLease.statusOptions.active')}</option>
+                                    <option value="PENDING">{t('newLease.statusOptions.pending')}</option>
+                                    <option value="EXPIRED">{t('newLease.statusOptions.expired')}</option>
+                                    <option value="TERMINATED">{t('newLease.statusOptions.terminated')}</option>
                                 </select>
                             </div>
                         </div>
@@ -372,20 +367,20 @@ export default function NewLeasePage() {
                             className="px-6"
                             disabled={isSubmitting}
                         >
-                            Cancel
+                            {t('newLease.actions.cancel')}
                         </Button>
                         <Button
                             type="submit"
-                            className="px-8 bg-gray-900 hover:bg-gray-800 text-white"
+                            className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t('newLease.actions.saving')}
                                 </>
                             ) : (
-                                isEditMode ? 'Update Lease' : 'Create Lease'
+                                isEditMode ? t('newLease.actions.update') : t('newLease.actions.create')
                             )}
                         </Button>
                     </div>

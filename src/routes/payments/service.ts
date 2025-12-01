@@ -50,6 +50,7 @@ export const getPayments = async (filters: {
     status?: string;
     startDate?: string;
     endDate?: string;
+    userId?: string;
 }) => {
     const where: any = {};
 
@@ -75,6 +76,18 @@ export const getPayments = async (filters: {
         if (filters.endDate) {
             where.dueDate.lte = new Date(filters.endDate);
         }
+    }
+
+    if (filters.userId) {
+        where.lease = {
+            ...where.lease,
+            unit: {
+                OR: [
+                    { managers: { some: { id: filters.userId } } },
+                    { property: { managers: { some: { id: filters.userId } } } }
+                ]
+            }
+        };
     }
 
     return prisma.payment.findMany({

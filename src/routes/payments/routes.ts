@@ -27,7 +27,10 @@ router.get('/', async (req: Request, res: Response) => {
         endDate: req.query.endDate as string | undefined,
     };
 
-    const items = await getPayments(filters);
+    const user = (req as any).user;
+    const userId = user?.role === 'MANAGER' ? user.id : undefined;
+
+    const items = await getPayments({ ...filters, userId });
     res.json({ items });
 });
 

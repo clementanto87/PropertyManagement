@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Wallet,
@@ -18,6 +19,7 @@ import { Property } from '@/types/property';
 import { toast } from 'sonner';
 
 export default function NewExpensePage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditMode = !!id;
@@ -48,7 +50,7 @@ export default function NewExpensePage() {
             setProperties(data);
         } catch (error) {
             console.error('Failed to load properties:', error);
-            toast.error('Failed to load properties');
+            toast.error(t('newExpense.validation.loadPropertiesError'));
         }
     };
 
@@ -65,7 +67,7 @@ export default function NewExpensePage() {
             });
         } catch (error) {
             console.error('Failed to load expense:', error);
-            toast.error('Failed to load expense details');
+            toast.error(t('newExpense.validation.loadError'));
             navigate('/dashboard/expenses');
         } finally {
             setIsLoading(false);
@@ -76,7 +78,7 @@ export default function NewExpensePage() {
         e.preventDefault();
 
         if (!formData.propertyId || !formData.amount || !formData.category || !formData.incurredAt) {
-            toast.error('Please fill in all required fields');
+            toast.error(t('newExpense.validation.requiredFields'));
             return;
         }
 
@@ -94,15 +96,15 @@ export default function NewExpensePage() {
 
             if (isEditMode && id) {
                 await expenseService.updateExpense(id, payload);
-                toast.success('Expense updated successfully');
+                toast.success(t('newExpense.validation.updateSuccess'));
             } else {
                 await expenseService.createExpense(payload);
-                toast.success('Expense logged successfully');
+                toast.success(t('newExpense.validation.logSuccess'));
             }
             navigate('/dashboard/expenses');
         } catch (error: any) {
             console.error('Failed to save expense:', error);
-            toast.error(error?.message || 'Failed to save expense');
+            toast.error(error?.message || t('newExpense.validation.error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -110,19 +112,19 @@ export default function NewExpensePage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="text-center p-8">
                     <Loader2 className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-500">Loading...</p>
+                    <p className="text-muted-foreground">{t('newExpense.loading')}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50 pb-32">
+        <div className="min-h-screen bg-background pb-32">
             {/* Professional Sticky Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div className="bg-card border-b border-border sticky top-0 z-40">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -130,17 +132,17 @@ export default function NewExpensePage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate(-1)}
-                                className="h-10 w-10 rounded-full hover:bg-gray-100 text-gray-500"
+                                className="h-10 w-10 rounded-full hover:bg-accent text-muted-foreground"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">{isEditMode ? 'Edit Expense' : 'Log Expense'}</h1>
-                                <p className="text-sm text-gray-500">{isEditMode ? 'Update expense details' : 'Record a new property expense'}</p>
+                                <h1 className="text-xl font-bold text-foreground">{isEditMode ? t('newExpense.editTitle') : t('newExpense.title')}</h1>
+                                <p className="text-sm text-muted-foreground">{isEditMode ? t('newExpense.editSubtitle') : t('newExpense.subtitle')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
+                            <button className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors relative">
                                 <Bell className="w-5 h-5" />
                             </button>
                         </div>
@@ -151,27 +153,27 @@ export default function NewExpensePage() {
             <div className="px-6 mt-8 max-w-4xl mx-auto">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Expense Details */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border bg-accent/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                                     <Wallet className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-base font-bold text-gray-900">Expense Details</h2>
+                                <h2 className="text-base font-bold text-foreground">{t('newExpense.expenseDetails.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Property <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newExpense.expenseDetails.property')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                    <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                     <select
                                         value={formData.propertyId}
                                         onChange={(e) => setFormData({ ...formData, propertyId: e.target.value })}
-                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                         required
                                     >
-                                        <option value="">Select Property</option>
+                                        <option value="">{t('newExpense.expenseDetails.selectProperty')}</option>
                                         {properties.map(p => (
                                             <option key={p.id} value={p.id}>{p.title}</option>
                                         ))}
@@ -180,68 +182,68 @@ export default function NewExpensePage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Amount <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newExpense.expenseDetails.amount')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                    <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                     <input
                                         type="number"
                                         step="0.01"
                                         min="0"
                                         value={formData.amount}
                                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                                        placeholder="0.00"
+                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                                        placeholder={t('newExpense.expenseDetails.amountPlaceholder')}
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Category <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newExpense.expenseDetails.category')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <Receipt className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                    <Receipt className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                     <select
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                         required
                                     >
-                                        <option value="">Select Category</option>
-                                        <option value="Maintenance">Maintenance</option>
-                                        <option value="Repairs">Repairs</option>
-                                        <option value="Utilities">Utilities</option>
-                                        <option value="Insurance">Insurance</option>
-                                        <option value="Taxes">Taxes</option>
-                                        <option value="Management Fees">Management Fees</option>
-                                        <option value="Supplies">Supplies</option>
-                                        <option value="Other">Other</option>
+                                        <option value="">{t('newExpense.expenseDetails.selectCategory')}</option>
+                                        <option value="Maintenance">{t('newExpense.categories.maintenance')}</option>
+                                        <option value="Repairs">{t('newExpense.categories.repairs')}</option>
+                                        <option value="Utilities">{t('newExpense.categories.utilities')}</option>
+                                        <option value="Insurance">{t('newExpense.categories.insurance')}</option>
+                                        <option value="Taxes">{t('newExpense.categories.taxes')}</option>
+                                        <option value="Management Fees">{t('newExpense.categories.managementFees')}</option>
+                                        <option value="Supplies">{t('newExpense.categories.supplies')}</option>
+                                        <option value="Other">{t('newExpense.categories.other')}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Date Incurred <span className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t('newExpense.expenseDetails.dateIncurred')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                                    <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                     <input
                                         type="date"
                                         value={formData.incurredAt}
                                         onChange={(e) => setFormData({ ...formData, incurredAt: e.target.value })}
-                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-background text-foreground"
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm font-medium text-gray-700">Description / Note</label>
+                                <label className="text-sm font-medium text-foreground">{t('newExpense.expenseDetails.descriptionNote')}</label>
                                 <div className="relative">
-                                    <FileText className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                    <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                                     <textarea
                                         value={formData.note}
                                         onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors min-h-[100px]"
-                                        placeholder="Add details about this expense..."
+                                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-input focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors min-h-[100px] bg-background text-foreground placeholder:text-muted-foreground"
+                                        placeholder={t('newExpense.expenseDetails.descriptionPlaceholder')}
                                     />
                                 </div>
                             </div>
@@ -257,20 +259,20 @@ export default function NewExpensePage() {
                             className="px-6"
                             disabled={isSubmitting}
                         >
-                            Cancel
+                            {t('newExpense.actions.cancel')}
                         </Button>
                         <Button
                             type="submit"
-                            className="px-8 bg-gray-900 hover:bg-gray-800 text-white"
+                            className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t('newExpense.actions.saving')}
                                 </>
                             ) : (
-                                isEditMode ? 'Update Expense' : 'Log Expense'
+                                isEditMode ? t('newExpense.actions.update') : t('newExpense.actions.log')
                             )}
                         </Button>
                     </div>

@@ -4,8 +4,26 @@ import type { CreateTenantInput, UpdateTenantInput } from './validation';
 import { hashPassword } from '../../lib/auth';
 import crypto from 'crypto';
 
-export async function listTenants(opts?: { skip?: number; take?: number }) {
-  return prisma.tenant.findMany({ orderBy: { createdAt: 'desc' }, skip: opts?.skip, take: opts?.take });
+export async function listTenants(opts?: { skip?: number; take?: number; userId?: string }) {
+  const where: any = opts?.userId ? {
+    leases: {
+      some: {
+        unit: {
+          OR: [
+            { managers: { some: { id: opts.userId } } },
+            { property: { managers: { some: { id: opts.userId } } } }
+          ]
+        }
+      }
+    }
+  } : {};
+
+  return prisma.tenant.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    skip: opts?.skip,
+    take: opts?.take
+  });
 }
 
 export async function createTenant(data: CreateTenantInput) {

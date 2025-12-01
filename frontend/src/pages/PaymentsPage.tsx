@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DollarSign, Calendar, Filter, Receipt, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,6 +24,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export default function PaymentsPage() {
+    const { t } = useTranslation();
     const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -40,7 +42,7 @@ export default function PaymentsPage() {
             setPayments(data);
         } catch (error) {
             console.error('Failed to load payments:', error);
-            toast.error('Failed to load payments');
+            toast.error(t('payments.errors.loadFailed'));
         } finally {
             setLoading(false);
         }
@@ -62,54 +64,63 @@ export default function PaymentsPage() {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            toast.success('Receipt downloaded successfully');
+            toast.success(t('payments.success.receiptDownloaded'));
         } catch (error) {
             console.error('Failed to download receipt:', error);
-            toast.error('Failed to download receipt');
+            toast.error(t('payments.errors.downloadReceiptFailed'));
         }
     };
 
     const getStatusBadge = (status: string) => {
         const styles = {
-            PAID: 'bg-green-100 text-green-700',
-            PENDING: 'bg-yellow-100 text-yellow-700',
-            OVERDUE: 'bg-red-100 text-red-700',
+            PAID: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
+            PENDING: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400',
+            OVERDUE: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
         };
-        return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-700';
+        return styles[status as keyof typeof styles] || 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400';
+    };
+
+    const getStatusLabel = (status: string) => {
+        const labels: Record<string, string> = {
+            PAID: t('payments.status.paid'),
+            PENDING: t('payments.status.pending'),
+            OVERDUE: t('payments.status.overdue'),
+        };
+        return labels[status] || status;
     };
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading payments...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">{t('payments.loading')}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div className="bg-card border-b border-border sticky top-0 z-10">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900">Payments</h1>
-                            <p className="text-sm text-gray-500">Manage rent payments and receipts</p>
+                            <h1 className="text-xl font-bold text-foreground">{t('payments.title')}</h1>
+                            <p className="text-sm text-muted-foreground">{t('payments.subtitle')}</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
                                 <SelectTrigger className="w-[180px]">
                                     <Filter className="h-4 w-4 mr-2" />
-                                    <SelectValue placeholder="All Statuses" />
+                                    <SelectValue placeholder={t('payments.allStatuses')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value="PENDING">Pending</SelectItem>
-                                    <SelectItem value="PAID">Paid</SelectItem>
-                                    <SelectItem value="OVERDUE">Overdue</SelectItem>
+                                    <SelectItem value="all">{t('payments.allStatuses')}</SelectItem>
+                                    <SelectItem value="PENDING">{t('payments.status.pending')}</SelectItem>
+                                    <SelectItem value="PAID">{t('payments.status.paid')}</SelectItem>
+                                    <SelectItem value="OVERDUE">{t('payments.status.overdue')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -123,21 +134,21 @@ export default function PaymentsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Tenant</TableHead>
-                                <TableHead>Property</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Receipt #</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>{t('payments.table.tenant')}</TableHead>
+                                <TableHead>{t('payments.table.property')}</TableHead>
+                                <TableHead>{t('payments.table.amount')}</TableHead>
+                                <TableHead>{t('payments.table.dueDate')}</TableHead>
+                                <TableHead>{t('payments.table.status')}</TableHead>
+                                <TableHead>{t('payments.table.receiptNumber')}</TableHead>
+                                <TableHead className="text-right">{t('payments.table.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {payments.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center py-12">
-                                        <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                                        <p className="text-gray-500">No payments found</p>
+                                        <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground">{t('payments.noPayments')}</p>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -154,16 +165,16 @@ export default function PaymentsPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Calendar className="h-4 w-4 text-gray-400" />
+                                                <Calendar className="h-4 w-4 text-muted-foreground" />
                                                 {format(new Date(payment.dueDate), 'MMM dd, yyyy')}
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(payment.status)}`}>
-                                                {payment.status}
+                                                {getStatusLabel(payment.status)}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="text-gray-500">
+                                        <TableCell className="text-muted-foreground">
                                             {payment.receiptNumber || '-'}
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -174,24 +185,24 @@ export default function PaymentsPage() {
                                                     className="gap-2"
                                                 >
                                                     <DollarSign className="h-4 w-4" />
-                                                    Record Payment
+                                                    {t('payments.actions.recordPayment')}
                                                 </Button>
                                             )}
                                             {payment.status === 'PAID' && (
                                                 <div className="flex flex-col items-end gap-1">
                                                     {payment.paidAt && (
-                                                        <span className="text-sm text-gray-500">
-                                                            Paid {format(new Date(payment.paidAt), 'MMM dd')}
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {t('payments.actions.paid')} {format(new Date(payment.paidAt), 'MMM dd')}
                                                         </span>
                                                     )}
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
                                                         onClick={() => handleDownloadReceipt(payment.id)}
-                                                        className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        className="h-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                                     >
                                                         <Download className="h-4 w-4 mr-1" />
-                                                        Receipt
+                                                        {t('payments.actions.receipt')}
                                                     </Button>
                                                 </div>
                                             )}

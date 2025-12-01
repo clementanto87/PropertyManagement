@@ -58,13 +58,13 @@ export function CommunicationDetail() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'email':
-        return <Mail className="h-5 w-5 text-blue-500" />;
+        return <Mail className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
       case 'call':
-        return <Phone className="h-5 w-5 text-green-500" />;
+        return <Phone className="h-5 w-5 text-green-500 dark:text-green-400" />;
       case 'meeting':
-        return <CalendarIcon className="h-5 w-5 text-purple-500" />;
+        return <CalendarIcon className="h-5 w-5 text-purple-500 dark:text-purple-400" />;
       default:
-        return <MessageSquare className="h-5 w-5 text-gray-500" />;
+        return <MessageSquare className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -83,7 +83,7 @@ export function CommunicationDetail() {
   if (error || !communication) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500">{error || 'Communication not found'}</p>
+        <p className="text-destructive">{error || 'Communication not found'}</p>
         <Button
           variant="outline"
           className="mt-4"
@@ -97,7 +97,7 @@ export function CommunicationDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       <div className="px-6 py-8 max-w-6xl mx-auto">
         <div className="space-y-6">
           <div className="flex flex-col space-y-2">
@@ -113,7 +113,7 @@ export function CommunicationDetail() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 {getTypeIcon(communication.type)}
-                <h1 className="text-2xl font-bold tracking-tight">{communication.summary}</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">{communication.summary}</h1>
               </div>
               <div className="flex items-center space-x-2">
                 <Button asChild variant="outline" size="sm">
@@ -147,22 +147,22 @@ export function CommunicationDetail() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Type</p>
-                      <p className="capitalize">{communication.type}</p>
+                      <p className="capitalize text-foreground">{communication.type}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Channel</p>
-                      <p>{communication.channel}</p>
+                      <p className="text-foreground">{communication.channel}</p>
                     </div>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Summary</p>
-                    <p>{communication.summary}</p>
+                    <p className="text-foreground">{communication.summary}</p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Notes</p>
-                    <p className="whitespace-pre-line">{communication.content}</p>
+                    <p className="whitespace-pre-line text-foreground">{communication.content}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -177,9 +177,9 @@ export function CommunicationDetail() {
                   <div className="flex items-center space-x-2">
                     {communication.followUpRequired ? (
                       <>
-                        <Clock className="h-5 w-5 text-amber-500" />
+                        <Clock className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                         <div>
-                          <p className="font-medium">Follow-up Required</p>
+                          <p className="font-medium text-foreground">Follow-up Required</p>
                           <p className="text-sm text-muted-foreground">
                             By {format(new Date(communication.followUpDate!), 'MMMM d, yyyy')}
                           </p>
@@ -187,23 +187,23 @@ export function CommunicationDetail() {
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400" />
                         <div>
-                          <p className="font-medium">Completed</p>
+                          <p className="font-medium text-foreground">Completed</p>
                           <p className="text-sm text-muted-foreground">No follow-up needed</p>
                         </div>
                       </>
                     )}
                   </div>
 
-                  <div className="pt-4 border-t">
+                  <div className="pt-4 border-t border-border">
                     <p className="text-sm font-medium text-muted-foreground">Tenant</p>
-                    <p>{communication.tenant.name}</p>
+                    <p className="text-foreground">{communication.tenant.name}</p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Created By</p>
-                    <p>{communication.user.name}</p>
+                    <p className="text-foreground">{communication.user.name}</p>
                     <p className="text-sm text-muted-foreground">{communication.user.email}</p>
                   </div>
                 </CardContent>

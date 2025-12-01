@@ -101,21 +101,21 @@ export function RecordPaymentDialog({
                 </DialogHeader>
 
                 {/* Payment Info */}
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Tenant:</span>
-                        <span className="font-medium">{payment.lease?.tenant.name}</span>
+                        <span className="text-sm text-muted-foreground">Tenant:</span>
+                        <span className="font-medium text-foreground">{payment.lease?.tenant.name}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Amount:</span>
-                        <span className="font-semibold text-lg flex items-center">
+                        <span className="text-sm text-muted-foreground">Amount:</span>
+                        <span className="font-semibold text-lg flex items-center text-foreground">
                             <DollarSign className="h-4 w-4" />
                             {(payment.amount / 100).toFixed(2)}
                         </span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Due Date:</span>
-                        <span className="font-medium">{format(new Date(payment.dueDate), 'MMM dd, yyyy')}</span>
+                        <span className="text-sm text-muted-foreground">Due Date:</span>
+                        <span className="font-medium text-foreground">{format(new Date(payment.dueDate), 'MMM dd, yyyy')}</span>
                     </div>
                 </div>
 

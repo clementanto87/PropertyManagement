@@ -1,0 +1,1261 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "filter": "Filter",
+        "actions": "Actions",
+        "view": "View",
+        "create": "Create",
+        "update": "Update",
+        "success": "Success",
+        "error": "Error"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "properties": "Properties",
+        "tenants": "Tenants",
+        "leases": "Leases",
+        "workOrders": "Work Orders",
+        "vendors": "Vendors",
+        "finance": "Finance",
+        "expenses": "Expenses",
+        "payments": "Payments",
+        "reports": "Reports",
+        "communications": "Communications",
+        "calendar": "Calendar",
+        "settings": "Settings",
+        "gdpr": "GDPR",
+        "templates": "Templates"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome back",
+        "overview": "Overview",
+        "occupancy": "Occupancy",
+        "revenue": "Revenue",
+        "maintenance": "Maintenance",
+        "recentActivity": "Recent Activity",
+        "morningBriefing": "Morning Briefing",
+        "leasesExpiringSoon": "leases expiring soon",
+        "urgentMaintenance": "urgent maintenance requests",
+        "needAttention": "that need attention",
+        "youHave": "You have",
+        "and": "and",
+        "quickActions": "Quick Actions",
+        "newRequest": "New Request",
+        "logPayment": "Log Payment",
+        "addTenant": "Add Tenant",
+        "addProperty": "Add Property",
+        "vsLastMonth": "vs last month",
+        "resolvedThisWeek": "resolved this week",
+        "portfolioMap": "Portfolio Map",
+        "portfolioMapDesc": "Geographic distribution of your properties",
+        "recentMaintenance": "Recent Maintenance",
+        "viewAll": "View All",
+        "noActiveRequests": "No active maintenance requests",
+        "unit": "Unit",
+        "generalProperty": "General Property",
+        "daysAgo": "days ago",
+        "expiringLeases": "ExpiringLeases",
+        "noExpiringLeases": "No leases expiring in the next 30 days",
+        "daysLeft": "days left",
+        "ends": "Ends",
+        "portfolio": "Portfolio",
+        "units": "Units",
+        "tenants": "Tenants"
+    },
+    "properties": {
+        "title": "Properties",
+        "subtitle": "Manage your property portfolio",
+        "addProperty": "Add Property",
+        "searchPlaceholder": "Search properties by name, address, or unit...",
+        "filters": "Filters",
+        "resetFilters": "Reset Filters",
+        "applyFilters": "Apply Filters",
+        "showing": "Showing",
+        "propertiesCount": "properties",
+        "noProperties": "No properties found",
+        "noPropertiesDesc": "We couldn't find any properties matching your current filters. Try adjusting your search or clearing filters.",
+        "clearFilters": "Clear all filters",
+        "loading": "Loading Properties",
+        "featured": "Featured",
+        "available": "Available",
+        "occupied": "Occupied",
+        "maintenance": "Maintenance",
+        "beds": "Beds",
+        "baths": "Baths",
+        "area": "Area",
+        "rent": "Rent",
+        "details": "Details",
+        "viewDetails": "View Details",
+        "sqft": "sqft",
+        "types": {
+            "all": "All Properties",
+            "apartment": "Apartments",
+            "house": "Houses",
+            "villa": "Villas",
+            "condo": "Condos"
+        },
+        "status": {
+            "all": "All Status",
+            "vacant": "Vacant",
+            "occupied": "Occupied",
+            "maintenance": "Under Maintenance"
+        },
+        "price": {
+            "all": "Any Price",
+            "under1000": "Under $1,000",
+            "1000to2000": "$1,000 - $2,000",
+            "2000to3000": "$2,000 - $3,000",
+            "over3000": "Over $3,000"
+        },
+        "sort": {
+            "newest": "Newest First",
+            "priceLowHigh": "Price: Low to High",
+            "priceHighLow": "Price: High to Low",
+            "rating": "Top Rated"
+        },
+        "labels": {
+            "propertyType": "Property Type",
+            "status": "Status",
+            "priceRange": "Price Range"
+        }
+    },
+    "propertyDetails": {
+        "title": "Property Details",
+        "subtitle": "View and manage property information",
+        "editProperty": "Edit Property",
+        "deleteProperty": "Delete Property",
+        "totalUnits": "Total Units",
+        "occupancyRate": "Occupancy Rate",
+        "totalMonthlyRent": "Total Monthly Rent",
+        "units": "Units",
+        "addUnit": "Add Unit",
+        "noUnits": "No units added yet",
+        "noUnitsDesc": "Add units to start managing tenants and leases",
+        "unit": "Unit",
+        "sqft": "sq ft",
+        "editUnit": "Edit unit",
+        "deleteUnit": "Delete unit",
+        "bedsBaths": "Beds/Baths",
+        "bd": "bd",
+        "ba": "ba",
+        "tenant": "Tenant",
+        "documents": "Documents",
+        "uploadDocument": "Upload Document",
+        "deleteDialogTitle": "Delete Property",
+        "deleteDialogDesc": "This action cannot be undone",
+        "deleteConfirmation": "Are you sure you want to delete",
+        "deleteConfirmationSuffix": "? This will also delete all associated units and data.",
+        "deleteUnitDialogTitle": "Delete Unit",
+        "deleteUnitConfirmation": "Are you sure you want to delete this unit? This will also remove any associated lease data.",
+        "loading": "Loading Property Details",
+        "messages": {
+            "loadError": "Failed to load property details",
+            "deleteSuccess": "Property deleted successfully",
+            "deleteError": "Failed to delete property",
+            "unitDeleteSuccess": "Unit deleted successfully",
+            "unitDeleteError": "Failed to delete unit"
+        }
+    },
+    "unitDetails": {
+        "back": "Back",
+        "title": "Unit",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "size": "Size",
+        "sqft": "sqft",
+        "documents": "Documents",
+        "unitDocuments": "Unit Documents",
+        "documentsDesc": "Manage documents specific to this unit (manuals, warranties, etc.)",
+        "uploadDocument": "Upload Document",
+        "status": {
+            "occupied": "Occupied",
+            "vacant": "Vacant",
+            "maintenance": "Maintenance"
+        },
+        "notFound": "Unit not found"
+    },
+    "documents": {
+        "title": "Documents",
+        "upload": "Upload Document",
+        "uploadDesc": "Upload a document (PDF, image, etc.) to attach to this record.",
+        "noDocuments": "No documents yet",
+        "noDocumentsDesc": "Upload documents to keep them organized here.",
+        "download": "Download",
+        "delete": "Delete",
+        "deleteConfirmation": "Are you sure you want to delete this document?",
+        "form": {
+            "title": "Title",
+            "titlePlaceholder": "e.g., Lease Agreement",
+            "type": "Type",
+            "typePlaceholder": "Select document type",
+            "file": "File",
+            "cancel": "Cancel",
+            "upload": "Upload",
+            "types": {
+                "lease": "Lease Agreement",
+                "receipt": "Receipt",
+                "invoice": "Invoice",
+                "inspection": "Inspection Report",
+                "other": "Other"
+            },
+            "validation": {
+                "titleRequired": "Title is required",
+                "typeRequired": "Type is required",
+                "fileRequired": "File is required"
+            }
+        },
+        "messages": {
+            "loadError": "Failed to load documents",
+            "deleteSuccess": "Document deleted successfully",
+            "deleteError": "Failed to delete document",
+            "uploadSuccess": "Document uploaded successfully",
+            "uploadError": "Failed to upload document"
+        }
+    },
+    "editProperty": {
+        "title": "Edit Property",
+        "addTitle": "Add New Property",
+        "subtitle": "Update property information",
+        "addSubtitle": "Create a new property listing",
+        "detailsTitle": "Property Details",
+        "detailsDesc": "Update the information below to modify this property.",
+        "addDetailsDesc": "Please provide the information below to list a new property.",
+        "loading": "Loading Property Data",
+        "success": "Property updated successfully",
+        "addSuccess": "Property added successfully",
+        "error": "Failed to update property",
+        "addError": "Failed to add property",
+        "loadError": "Failed to load property data",
+        "form": {
+            "basicInfo": "Basic Information",
+            "propertyTitle": "Property Title",
+            "titlePlaceholder": "e.g., Modern Downtown Apartment",
+            "propertyType": "Property Type",
+            "selectType": "Select property type",
+            "status": "Status",
+            "price": "Price ($)",
+            "pricePlaceholder": "e.g., 250000",
+            "propertyDetails": "Property Details",
+            "bedrooms": "Bedrooms",
+            "bathrooms": "Bathrooms",
+            "area": "Area (sq ft)",
+            "yearBuilt": "Year Built",
+            "parkingSpaces": "Parking Spaces",
+            "address": "Address",
+            "fullAddress": "Full Address",
+            "addressPlaceholder": "e.g., 123 Main St, Anytown, CA 12345",
+            "propertyImage": "Property Image",
+            "uploadImage": "Upload an image",
+            "imageSizeError": "Image size should be less than 5MB",
+            "description": "Description",
+            "descriptionPlaceholder": "Enter property description",
+            "features": "Features",
+            "featureList": {
+                "pool": "Swimming Pool",
+                "gym": "Gym",
+                "parking": "Parking",
+                "laundry": "In-Unit Laundry"
+            },
+            "cancel": "Cancel",
+            "update": "Update Property",
+            "add": "Add Property",
+            "validation": {
+                "titleRequired": "Title is required",
+                "typeRequired": "Type is required",
+                "statusRequired": "Status is required",
+                "priceRequired": "Price is required",
+                "bedroomsRequired": "Bedrooms is required",
+                "bathroomsRequired": "Bathrooms is required",
+                "areaRequired": "Area is required",
+                "addressRequired": "Address is required",
+                "descriptionRequired": "Description is required"
+            }
+        }
+    },
+    "unitDialog": {
+        "addTitle": "Add New Unit",
+        "editTitle": "Edit Unit",
+        "addSubtitle": "Add a new unit to this property",
+        "editSubtitle": "Update unit information",
+        "unitNumber": "Unit Number",
+        "unitNumberPlaceholder": "e.g., 101, A1, etc.",
+        "status": "Status",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "size": "Square Feet",
+        "sizePlaceholder": "e.g., 850",
+        "cancel": "Cancel",
+        "add": "Add Unit",
+        "update": "Update Unit",
+        "adding": "Adding...",
+        "updating": "Updating...",
+        "addSuccess": "Unit added successfully",
+        "updateSuccess": "Unit updated successfully",
+        "addError": "Failed to add unit",
+        "updateError": "Failed to update unit",
+        "statusOptions": {
+            "vacant": "Vacant",
+            "occupied": "Occupied",
+            "maintenance": "Maintenance"
+        }
+    },
+    "tenants": {
+        "title": "Tenants",
+        "subtitle": "Manage your tenants and leases",
+        "addTenant": "Add Tenant",
+        "loading": "Loading Tenants",
+        "searchPlaceholder": "Search tenants by name, email, or phone...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "count_one": "tenant",
+        "count_other": "tenants",
+        "noTenants": "No tenants found",
+        "noTenantsDescSearch": "Try a different search term.",
+        "noTenantsDescEmpty": "Get started by adding your first tenant.",
+        "addFirstTenant": "Add First Tenant",
+        "activeLease": "Active Lease",
+        "lastPayment": "Last payment:",
+        "viewProfile": "View Profile",
+        "mockPaymentTime": "2 days ago"
+    },
+    "newTenant": {
+        "title": "New Tenant",
+        "subtitle": "Add a new tenant to your property",
+        "uploadPhoto": "Upload Photo",
+        "tabs": {
+            "primary": "Primary Tenant",
+            "occupants": "Occupants"
+        },
+        "personalInfo": {
+            "title": "Personal Information",
+            "fullName": "Full Name",
+            "fullNamePlaceholder": "Enter full name",
+            "email": "Email",
+            "emailPlaceholder": "Enter email address",
+            "phone": "Phone Number",
+            "phonePlaceholder": "(555) 000-0000"
+        },
+        "emergencyContacts": {
+            "title": "Emergency Contacts",
+            "name": "Contact Name",
+            "namePlaceholder": "Enter contact name",
+            "phone": "Contact Phone",
+            "phonePlaceholder": "(555) 000-0000",
+            "relation": "Relationship",
+            "relationPlaceholder": "Select relationship",
+            "relations": {
+                "spouse": "Spouse",
+                "parent": "Parent",
+                "sibling": "Sibling",
+                "friend": "Friend",
+                "other": "Other"
+            }
+        },
+        "occupants": {
+            "title": "Add Occupants",
+            "placeholder": "Enter occupant name"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "save": "Save Tenant",
+            "creating": "Creating..."
+        },
+        "validation": {
+            "nameRequired": "Please enter tenant name",
+            "success": "Tenant created successfully!",
+            "error": "Failed to create tenant"
+        }
+    },
+    "editTenant": {
+        "title": "Edit Tenant",
+        "subtitle": "Update tenant information",
+        "loading": "Loading Tenant Data",
+        "actions": {
+            "update": "Update Tenant",
+            "updating": "Updating..."
+        },
+        "validation": {
+            "success": "Tenant updated successfully!",
+            "error": "Failed to update tenant",
+            "idMissing": "Tenant ID is missing"
+        }
+    },
+    "tenantProfile": {
+        "title": "Tenant Profile",
+        "subtitle": "View and manage tenant details",
+        "loading": "Loading Tenant Profile",
+        "actions": {
+            "back": "Back",
+            "message": "Message",
+            "edit": "Edit Tenant",
+            "sendEmail": "Send Email",
+            "viewAll": "View All",
+            "uploadDocument": "Upload Document",
+            "recordPayment": "Record Payment"
+        },
+        "header": {
+            "activeLease": "Active Lease",
+            "memberSince": "Member since"
+        },
+        "contactInfo": {
+            "title": "Contact Information",
+            "email": "Email Address",
+            "phone": "Phone Number",
+            "emergencyContact": "Emergency Contact",
+            "notProvided": "Not provided"
+        },
+        "leaseDetails": {
+            "title": "Lease Details",
+            "activeLease_one": "Active Lease",
+            "activeLease_other": "Active Leases",
+            "noLease": "No lease information available",
+            "createLease": "Create a lease to get started",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "monthlyRent": "Monthly Rent",
+            "securityDeposit": "Security Deposit",
+            "unit": "Unit",
+            "property": "Property",
+            "addressNotAvailable": "Address not available"
+        },
+        "paymentHistory": {
+            "title": "Payment History",
+            "noHistory": "No payment history",
+            "noHistoryDesc": "Payments will appear here once recorded",
+            "paid": "Paid",
+            "due": "Due"
+        },
+        "communications": {
+            "title": "Recent Communications",
+            "messages": "Messages"
+        },
+        "documents": {
+            "title": "Documents"
+        }
+    },
+    "leases": {
+        "title": "Leases",
+        "subtitle": "Manage lease agreements and terms",
+        "loading": "Loading Leases",
+        "createLease": "Create Lease",
+        "searchPlaceholder": "Search leases by tenant, property, or unit...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "leasesCount": "leases",
+        "noLeases": "No leases found",
+        "noLeasesDescSearch": "Try a different search term.",
+        "noLeasesDescEmpty": "Get started by creating your first lease.",
+        "createFirstLease": "Create First Lease",
+        "table": {
+            "tenantProperty": "Tenant & Property",
+            "term": "Term",
+            "rentDeposit": "Rent & Deposit",
+            "status": "Status",
+            "actions": "Actions",
+            "unknownTenant": "Unknown Tenant",
+            "unit": "Unit",
+            "monthlyRent": "/mo",
+            "deposit": "Deposit:",
+            "duration": "12 months duration",
+            "viewAgreement": "View Agreement"
+        }
+    },
+    "newLease": {
+        "title": "New Lease",
+        "editTitle": "Edit Lease",
+        "subtitle": "Create a new lease agreement",
+        "editSubtitle": "Update lease details",
+        "loading": "Loading...",
+        "propertyDetails": {
+            "title": "Property Details",
+            "property": "Property",
+            "selectProperty": "Select Property",
+            "unit": "Unit",
+            "selectUnit": "Select Unit",
+            "unitStatus": "Unit {{number}} ({{status}})"
+        },
+        "tenant": {
+            "title": "Tenant",
+            "selectTenant": "Select Tenant",
+            "cantFind": "Can't find the tenant?",
+            "addNew": "Add new tenant"
+        },
+        "termsFinancials": {
+            "title": "Terms & Financials",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "monthlyRent": "Monthly Rent",
+            "securityDeposit": "Security Deposit",
+            "status": "Status",
+            "placeholder": "0.00"
+        },
+        "statusOptions": {
+            "active": "Active",
+            "pending": "Pending",
+            "expired": "Expired",
+            "terminated": "Terminated"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "create": "Create Lease",
+            "update": "Update Lease",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "createSuccess": "Lease created successfully",
+            "updateSuccess": "Lease updated successfully",
+            "error": "Failed to save lease",
+            "loadError": "Failed to load lease details",
+            "loadDataError": "Failed to load tenants or properties",
+            "loadUnitsError": "Failed to load units"
+        }
+    },
+    "leaseAgreement": {
+        "title": "Lease Agreement",
+        "subtitle": "Manage digital lease agreement for {{tenant}}",
+        "backToLeases": "Back to Leases",
+        "loading": "Loading...",
+        "leaseNotFound": "Lease not found",
+        "leaseInfo": {
+            "title": "Lease Information",
+            "tenant": "Tenant",
+            "property": "Property",
+            "unit": "Unit",
+            "rentAmount": "Rent Amount",
+            "monthlyRent": "/month",
+            "leaseTerm": "Lease Term",
+            "status": "Status"
+        },
+        "noAgreement": {
+            "title": "No Agreement Created",
+            "description": "Create a digital lease agreement to send to the tenant for signature",
+            "previewPDF": "Preview PDF",
+            "createAgreement": "Create Agreement",
+            "creating": "Creating..."
+        },
+        "agreementStatus": {
+            "title": "Agreement Status",
+            "createdOn": "Created on",
+            "signatures": "Signatures",
+            "expiresOn": "Expires on"
+        },
+        "actions": {
+            "downloadPDF": "Download PDF",
+            "sendToTenant": "Send to Tenant",
+            "sending": "Sending...",
+            "void": "Void",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "createSuccess": "Lease agreement created successfully",
+            "createError": "Failed to create agreement",
+            "sendSuccess": "Agreement sent to tenant for signature",
+            "sendError": "Failed to send agreement",
+            "voidSuccess": "Agreement voided successfully",
+            "voidError": "Failed to void agreement",
+            "downloadSuccess": "PDF downloaded successfully",
+            "downloadError": "Failed to download PDF",
+            "previewSuccess": "Opening PDF preview",
+            "previewError": "Failed to preview PDF"
+        }
+    },
+    "workOrders": {
+        "title": "Work Orders",
+        "subtitle": "Manage maintenance requests and repairs",
+        "loading": "Loading Work Orders",
+        "newWorkOrder": "New Work Order",
+        "searchPlaceholder": "Search by title, unit, or property...",
+        "showing": "Showing",
+        "requests": "requests",
+        "noWorkOrders": "No work orders found",
+        "noWorkOrdersDescSearch": "Try a different search term.",
+        "noWorkOrdersDescFilter": "No work orders match your current filter.",
+        "createFirstWorkOrder": "Create First Work Order",
+        "unit": "Unit",
+        "status": {
+            "new": "New",
+            "assigned": "Assigned",
+            "inProgress": "In Progress",
+            "onHold": "On Hold",
+            "completed": "Completed"
+        },
+        "errors": {
+            "loadFailed": "Failed to load work orders"
+        }
+    },
+    "newWorkOrder": {
+        "title": "New Work Order",
+        "editTitle": "Edit Work Order",
+        "subtitle": "Create a new maintenance request",
+        "editSubtitle": "Update work order details",
+        "loading": "Loading...",
+        "locationDetails": {
+            "title": "Location Details",
+            "property": "Property",
+            "selectProperty": "Select Property",
+            "unit": "Unit",
+            "selectUnit": "Select Unit",
+            "unitStatus": "Unit {{number}} ({{status}})"
+        },
+        "issueDetails": {
+            "title": "Issue Details",
+            "titleLabel": "Title",
+            "titlePlaceholder": "e.g., Leaky Faucet in Kitchen",
+            "description": "Description",
+            "descriptionPlaceholder": "Describe the issue in detail..."
+        },
+        "assignmentStatus": {
+            "title": "Assignment & Status",
+            "assignVendor": "Assign Vendor",
+            "unassigned": "Unassigned",
+            "status": "Status"
+        },
+        "statusOptions": {
+            "new": "New",
+            "assigned": "Assigned",
+            "inProgress": "In Progress",
+            "onHold": "On Hold",
+            "completed": "Completed"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "create": "Create Work Order",
+            "update": "Update Work Order",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "createSuccess": "Work order created successfully",
+            "updateSuccess": "Work order updated successfully",
+            "error": "Failed to save work order",
+            "loadError": "Failed to load work order details",
+            "loadDataError": "Failed to load properties or vendors",
+            "loadUnitsError": "Failed to load units"
+        }
+    },
+    "vendors": {
+        "title": "Vendors",
+        "subtitle": "Manage service providers and contractors",
+        "loading": "Loading Vendors",
+        "newVendor": "New Vendor",
+        "searchPlaceholder": "Search by name, company, or category...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "vendorsCount": "vendors",
+        "noVendors": "No vendors found",
+        "noVendorsDescSearch": "Try a different search term.",
+        "noVendorsDescEmpty": "Get started by adding your first vendor.",
+        "addVendor": "Add Vendor",
+        "insured": "Insured",
+        "uninsured": "Uninsured",
+        "added": "Added",
+        "errors": {
+            "loadFailed": "Failed to load vendors"
+        }
+    },
+    "newVendor": {
+        "title": "New Vendor",
+        "editTitle": "Edit Vendor",
+        "subtitle": "Add a new service provider",
+        "editSubtitle": "Update vendor details",
+        "loading": "Loading...",
+        "basicInfo": {
+            "title": "Basic Information",
+            "contactName": "Contact Name",
+            "contactNamePlaceholder": "e.g., John Smith",
+            "companyName": "Company Name",
+            "companyNamePlaceholder": "e.g., Smith Plumbing Co.",
+            "category": "Category",
+            "selectCategory": "Select Category"
+        },
+        "categories": {
+            "plumbing": "Plumbing",
+            "electrical": "Electrical",
+            "hvac": "HVAC",
+            "generalContractor": "General Contractor",
+            "cleaning": "Cleaning",
+            "landscaping": "Landscaping",
+            "pestControl": "Pest Control",
+            "other": "Other"
+        },
+        "contactDetails": {
+            "title": "Contact Details",
+            "phoneNumber": "Phone Number",
+            "phonePlaceholder": "(555) 123-4567",
+            "emailAddress": "Email Address",
+            "emailPlaceholder": "vendor@example.com",
+            "address": "Address",
+            "addressPlaceholder": "123 Business Rd, City, State"
+        },
+        "additionalInfo": {
+            "title": "Additional Information",
+            "vendorInsured": "Vendor is Insured",
+            "rateInfo": "Rate Information / Notes",
+            "rateInfoPlaceholder": "e.g., $85/hr standard rate, $120/hr emergency"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "create": "Create Vendor",
+            "update": "Update Vendor",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "createSuccess": "Vendor created successfully",
+            "updateSuccess": "Vendor updated successfully",
+            "error": "Failed to save vendor",
+            "loadError": "Failed to load vendor details"
+        }
+    },
+    "caretakers": {
+        "title": "Care Takers",
+        "subtitle": "Manage care takers and staff",
+        "loading": "Loading Care Takers",
+        "newCareTaker": "New Care Taker",
+        "searchPlaceholder": "Search by name...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "careTakersCount": "care takers",
+        "noCareTakers": "No care takers found",
+        "noCareTakersDescSearch": "Try a different search term.",
+        "noCareTakersDescEmpty": "Get started by adding your first care taker.",
+        "addCareTaker": "Add Care Taker",
+        "insured": "Insured",
+        "uninsured": "Uninsured",
+        "added": "Added",
+        "errors": {
+            "loadFailed": "Failed to load care takers"
+        }
+    },
+    "newCareTaker": {
+        "title": "New Care Taker",
+        "editTitle": "Edit Care Taker",
+        "subtitle": "Add a new care taker",
+        "editSubtitle": "Update care taker details",
+        "loading": "Loading...",
+        "basicInfo": {
+            "title": "Basic Information",
+            "contactName": "Name",
+            "contactNamePlaceholder": "e.g., John Doe",
+            "companyName": "Company Name",
+            "companyNamePlaceholder": "e.g., Care Services Inc.",
+            "category": "Role",
+            "selectCategory": "Select Role"
+        },
+        "contactDetails": {
+            "title": "Contact Details",
+            "phoneNumber": "Phone Number",
+            "phonePlaceholder": "(555) 123-4567",
+            "emailAddress": "Email Address",
+            "emailPlaceholder": "caretaker@example.com",
+            "address": "Address",
+            "addressPlaceholder": "123 Main St"
+        },
+        "additionalInfo": {
+            "title": "Additional Information",
+            "careTakerInsured": "Care Taker is Insured",
+            "rateInfo": "Rate Information / Notes",
+            "rateInfoPlaceholder": "e.g., $20/hr"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "create": "Create Care Taker",
+            "update": "Update Care Taker",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "createSuccess": "Care taker created successfully",
+            "updateSuccess": "Care taker updated successfully",
+            "error": "Failed to save care taker",
+            "loadError": "Failed to load care taker details"
+        }
+    },
+    "houseowners": {
+        "title": "House Owners",
+        "subtitle": "Manage house owners",
+        "loading": "Loading House Owners",
+        "newHouseOwner": "New House Owner",
+        "searchPlaceholder": "Search by name...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "houseOwnersCount": "house owners",
+        "noHouseOwners": "No house owners found",
+        "noHouseOwnersDescSearch": "Try a different search term.",
+        "noHouseOwnersDescEmpty": "Get started by adding your first house owner.",
+        "addHouseOwner": "Add House Owner",
+        "insured": "Insured",
+        "uninsured": "Uninsured",
+        "added": "Added",
+        "errors": {
+            "loadFailed": "Failed to load house owners"
+        }
+    },
+    "newHouseOwner": {
+        "title": "New House Owner",
+        "editTitle": "Edit House Owner",
+        "subtitle": "Add a new house owner",
+        "editSubtitle": "Update house owner details",
+        "loading": "Loading...",
+        "basicInfo": {
+            "title": "Basic Information",
+            "contactName": "Name",
+            "contactNamePlaceholder": "e.g., Jane Doe",
+            "companyName": "Company Name",
+            "companyNamePlaceholder": "e.g., Real Estate LLC",
+            "category": "Type",
+            "selectCategory": "Select Type"
+        },
+        "contactDetails": {
+            "title": "Contact Details",
+            "phoneNumber": "Phone Number",
+            "phonePlaceholder": "(555) 987-6543",
+            "emailAddress": "Email Address",
+            "emailPlaceholder": "owner@example.com",
+            "address": "Address",
+            "addressPlaceholder": "456 Owner Ln"
+        },
+        "additionalInfo": {
+            "title": "Additional Information",
+            "houseOwnerInsured": "House Owner is Insured",
+            "rateInfo": "Notes",
+            "rateInfoPlaceholder": "Additional notes..."
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "create": "Create House Owner",
+            "update": "Update House Owner",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "createSuccess": "House owner created successfully",
+            "updateSuccess": "House owner updated successfully",
+            "error": "Failed to save house owner",
+            "loadError": "Failed to load house owner details"
+        }
+    },
+    "expenses": {
+        "title": "Expenses",
+        "subtitle": "Track property costs and maintenance fees",
+        "loading": "Loading Expenses",
+        "logExpense": "Log Expense",
+        "searchPlaceholder": "Search by category, property, or note...",
+        "totalExpenses": "Total Expenses",
+        "showing": "Showing",
+        "records": "records",
+        "noExpenses": "No expenses found",
+        "noExpensesDescSearch": "Try a different search term.",
+        "noExpensesDescEmpty": "Start tracking your property expenses.",
+        "logFirstExpense": "Log First Expense",
+        "table": {
+            "date": "Date",
+            "category": "Category",
+            "property": "Property",
+            "description": "Description",
+            "amount": "Amount",
+            "actions": "Actions",
+            "unknownProperty": "Unknown Property"
+        },
+        "errors": {
+            "loadFailed": "Failed to load expenses"
+        }
+    },
+    "newExpense": {
+        "title": "Log Expense",
+        "editTitle": "Edit Expense",
+        "subtitle": "Record a new property expense",
+        "editSubtitle": "Update expense details",
+        "loading": "Loading...",
+        "expenseDetails": {
+            "title": "Expense Details",
+            "property": "Property",
+            "selectProperty": "Select Property",
+            "amount": "Amount",
+            "amountPlaceholder": "0.00",
+            "category": "Category",
+            "selectCategory": "Select Category",
+            "dateIncurred": "Date Incurred",
+            "descriptionNote": "Description / Note",
+            "descriptionPlaceholder": "Add details about this expense..."
+        },
+        "categories": {
+            "maintenance": "Maintenance",
+            "repairs": "Repairs",
+            "utilities": "Utilities",
+            "insurance": "Insurance",
+            "taxes": "Taxes",
+            "managementFees": "Management Fees",
+            "supplies": "Supplies",
+            "other": "Other"
+        },
+        "actions": {
+            "cancel": "Cancel",
+            "log": "Log Expense",
+            "update": "Update Expense",
+            "saving": "Saving..."
+        },
+        "validation": {
+            "requiredFields": "Please fill in all required fields",
+            "logSuccess": "Expense logged successfully",
+            "updateSuccess": "Expense updated successfully",
+            "error": "Failed to save expense",
+            "loadError": "Failed to load expense details",
+            "loadPropertiesError": "Failed to load properties"
+        }
+    },
+    "payments": {
+        "title": "Payments",
+        "subtitle": "Manage rent payments and receipts",
+        "loading": "Loading payments...",
+        "allStatuses": "All Statuses",
+        "noPayments": "No payments found",
+        "table": {
+            "tenant": "Tenant",
+            "property": "Property",
+            "amount": "Amount",
+            "dueDate": "Due Date",
+            "status": "Status",
+            "receiptNumber": "Receipt #",
+            "actions": "Actions"
+        },
+        "status": {
+            "pending": "Pending",
+            "paid": "Paid",
+            "overdue": "Overdue"
+        },
+        "actions": {
+            "recordPayment": "Record Payment",
+            "receipt": "Receipt",
+            "paid": "Paid"
+        },
+        "errors": {
+            "loadFailed": "Failed to load payments",
+            "downloadReceiptFailed": "Failed to download receipt"
+        },
+        "success": {
+            "receiptDownloaded": "Receipt downloaded successfully"
+        }
+    },
+    "calendar": {
+        "title": "Calendar",
+        "subtitle": "View and manage property events",
+        "loading": "Loading calendar...",
+        "scheduleMeeting": "Schedule Meeting",
+        "joinMeeting": "Join Meeting",
+        "navigation": {
+            "today": "Today",
+            "previous": "Back",
+            "next": "Next",
+            "month": "Month",
+            "week": "Week",
+            "day": "Day",
+            "agenda": "Agenda"
+        },
+        "eventTypes": {
+            "leaseStart": "Lease Start",
+            "leaseEnd": "Lease End",
+            "paymentDue": "Payment Due",
+            "followUps": "Follow-ups",
+            "meetings": "Meetings"
+        },
+        "errors": {
+            "loadFailed": "Failed to load calendar events"
+        },
+        "meetingDialog": {
+            "title": "Schedule Meeting",
+            "description": "Create a video meeting using your preferred provider.",
+            "googleMeet": "Google Meet",
+            "microsoftTeams": "Microsoft Teams",
+            "notConfigured": "Not Configured",
+            "googleNotConfigured": "Google Meet integration requires a valid Client ID to be configured.",
+            "teamsNotConfigured": "Microsoft Teams integration requires a valid Client ID to be configured.",
+            "envHint": "Set",
+            "envVariable": "in your .env file.",
+            "connectAccount": "Connect your account",
+            "signInPrompt": "Sign in to {{provider}} to schedule meetings.",
+            "signInButton": "Sign in with {{provider}}",
+            "connecting": "Connecting...",
+            "meetingTitle": "Meeting Title",
+            "titlePlaceholder": "e.g., Lease Review",
+            "date": "Date",
+            "time": "Time",
+            "duration": "Duration (minutes)",
+            "attendees": "Attendees (comma separated emails)",
+            "attendeesPlaceholder": "tenant@example.com, owner@example.com",
+            "description": "Description",
+            "descriptionPlaceholder": "Meeting agenda...",
+            "cancel": "Cancel",
+            "createMeeting": "Create Meeting",
+            "creating": "Creating...",
+            "meetingCreated": "Meeting Created!",
+            "meetingScheduled": "Your meeting has been scheduled successfully.",
+            "meetingLink": "Meeting Link",
+            "close": "Close",
+            "validation": {
+                "signInFailed": "Failed to sign in to {{provider}}",
+                "requiredFields": "Please fill in all required fields",
+                "createFailed": "Failed to create meeting"
+            },
+            "messages": {
+                "created": "Meeting created successfully!",
+                "linkCopied": "Meeting link copied!"
+            }
+        }
+    },
+    "reports": {
+        "title": "Reports & Analytics",
+        "subtitle": "Track performance and insights",
+        "loading": "Loading Reports",
+        "exportReport": "Export Report",
+        "allProperties": "All Properties",
+        "pickDate": "Pick a date",
+        "tabs": {
+            "financial": "Financial",
+            "occupancy": "Occupancy",
+            "maintenance": "Maintenance"
+        },
+        "financial": {
+            "projectedIncome": "Projected Income",
+            "monthlyProjection": "Monthly Projection",
+            "totalExpenses": "Total Expenses",
+            "allTime": "All Time",
+            "netProfit": "Net Profit",
+            "estimate": "Estimate",
+            "incomeVsExpenses": "Income vs Expenses",
+            "chartComingSoon": "Chart visualization coming soon (requires historical data)"
+        },
+        "occupancy": {
+            "totalProperties": "Total Properties",
+            "occupiedUnits": "Occupied Units",
+            "occupancyRate": "occupancy rate",
+            "vacantUnits": "Vacant Units",
+            "vacancyRate": "vacancy rate",
+            "occupancyStatus": "Occupancy Status",
+            "occupied": "Occupied",
+            "vacant": "Vacant"
+        },
+        "maintenance": {
+            "pendingRequests": "Pending Requests",
+            "inProgress": "In Progress",
+            "completed": "Completed",
+            "recentRequests": "Recent Maintenance Requests",
+            "statusDistribution": "Status Distribution",
+            "unknownProperty": "Unknown Property",
+            "noWorkOrders": "No work orders found.",
+            "workOrders": "Work Orders",
+            "pending": "Pending"
+        },
+        "errors": {
+            "loadFailed": "Failed to load report data"
+        }
+    },
+    "communications": {
+        "title": "Communications",
+        "tenantTitle": "Tenant Communications",
+        "subtitle": "View and manage communications",
+        "tenantSubtitle": "Manage communications with this tenant",
+        "selectTenant": "Select a Tenant...",
+        "selectTenantTitle": "Select a Tenant",
+        "selectTenantMessage": "Please select a tenant to view their messages.",
+        "searchPlaceholder": "Search communications...",
+        "clear": "Clear",
+        "tabs": {
+            "messages": "Messages",
+            "emails": "Emails",
+            "calls": "Calls",
+            "meetings": "Meetings",
+            "notes": "Notes",
+            "followUps": "Follow-ups"
+        },
+        "headers": {
+            "allCommunications": "All Communications",
+            "emailHistory": "Email History",
+            "callLogs": "Call Logs",
+            "meetingNotes": "Meeting Notes",
+            "internalNotes": "Internal Notes",
+            "pendingFollowUps": "Pending Follow-ups"
+        },
+        "actions": {
+            "logEmail": "Log Email",
+            "logCall": "Log Call",
+            "logMeeting": "Log Meeting",
+            "addNote": "Add Note"
+        },
+        "filters": {
+            "title": "Filters:",
+            "from": "From:",
+            "to": "to"
+        },
+        "errors": {
+            "tenantNotFound": "Tenant not found",
+            "loadTenantsFailed": "Failed to load tenants"
+        }
+    },
+    "templates": {
+        "title": "Templates",
+        "subtitle": "Manage your communication and document templates",
+        "newTemplate": "New Template",
+        "searchPlaceholder": "Search templates...",
+        "tabs": {
+            "emails": "Emails",
+            "agreements": "Agreements",
+            "invoices": "Invoices"
+        },
+        "labels": {
+            "subject": "Subject",
+            "preview": "Preview",
+            "inactive": "Inactive"
+        },
+        "actions": {
+            "preview": "Preview",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "empty": {
+            "message": "No {{type}} templates found. Create one to get started!"
+        },
+        "delete": {
+            "title": "Delete Template",
+            "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+        },
+        "messages": {
+            "deleteSuccess": "Template deleted successfully",
+            "deleteFailed": "Failed to delete template",
+            "loadFailed": "Failed to load templates"
+        },
+        "preview": {
+            "title": "Preview: {{name}}",
+            "subtitle": "Previewing with sample data",
+            "subject": "Subject:",
+            "closePreview": "Close Preview",
+            "description": "Description",
+            "amount": "Amount",
+            "monthlyRent": "Monthly Rent"
+        },
+        "dialog": {
+            "createTitle": "Create {{type}} Template",
+            "editTitle": "Edit Template",
+            "createSubtitle": "Create a new {{type}} template",
+            "editSubtitle": "Update the template details",
+            "name": "Template Name",
+            "namePlaceholder": "e.g., Standard Lease Agreement",
+            "category": "Category",
+            "selectCategory": "Select category",
+            "subject": "Subject Line",
+            "subjectPlaceholder": "Email Subject",
+            "content": "Template Content",
+            "contentPlaceholder": "Template content...",
+            "variables": "Variables",
+            "clickToCopy": "Click to copy",
+            "active": "Active Template",
+            "available": "Available for use",
+            "cancel": "Cancel",
+            "create": "Create Template",
+            "update": "Update Template",
+            "copied": "Copied {{text}}",
+            "successCreate": "Template created successfully",
+            "successUpdate": "Template updated successfully",
+            "error": "Failed to save template",
+            "variableDesc": {
+                "fullName": "Full Name",
+                "email": "Email Address",
+                "propertyName": "Property Name",
+                "unitNumber": "Unit Number",
+                "dueDate": "Due Date",
+                "amount": "Amount",
+                "tenantName": "Tenant Name",
+                "landlordName": "Landlord Name",
+                "propertyAddress": "Property Address",
+                "startDate": "Start Date",
+                "endDate": "End Date",
+                "rentAmount": "Rent Amount",
+                "securityDeposit": "Security Deposit",
+                "invoiceNumber": "Invoice #",
+                "issueDate": "Issue Date",
+                "totalAmount": "Total Amount",
+                "lineItems": "Line Items Table"
+            },
+            "categories": {
+                "general": "General",
+                "rentReminder": "Rent Reminder",
+                "welcome": "Welcome",
+                "maintenance": "Maintenance",
+                "lease": "Lease",
+                "addendum": "Addendum",
+                "rent": "Rent",
+                "utility": "Utility",
+                "fee": "Fee"
+            }
+        }
+    },
+    "gdpr": {
+        "title": "GDPR Data Management",
+        "subtitle": "View and manage user data locations",
+        "loading": "Loading Users",
+        "allUsers": "All Users",
+        "searchPlaceholder": "Search users...",
+        "noUsers": "No users found",
+        "roles": {
+            "ADMIN": "ADMIN",
+            "MANAGER": "MANAGER",
+            "TENANT": "TENANT",
+            "CARE_TAKER": "CARE TAKER",
+            "HOUSE_OWNER": "HOUSE OWNER"
+        },
+        "tenant": "Tenant: {{name}}",
+        "noName": "No name",
+        "dataLocations": {
+            "title": "Data Locations",
+            "found": "{{count}} data locations found",
+            "noData": "No data locations found for this user",
+            "loading": "Loading data locations...",
+            "selectUser": "Select a user",
+            "selectUserDesc": "Choose a user from the list to view their data locations"
+        },
+        "anonymize": {
+            "button": "Anonymize User Data",
+            "processing": "Anonymizing...",
+            "confirmTitle": "Confirm Anonymization",
+            "confirmSubtitle": "This action cannot be undone",
+            "confirmText": "Are you sure you want to anonymize all data for",
+            "consequences": {
+                "personalInfo": "Replace email, name, and phone with anonymized values",
+                "content": "Remove or anonymize content in communications and posts",
+                "signatures": "Anonymize lease signatures",
+                "irreversible": "This action is permanent and cannot be reversed"
+            },
+            "cancel": "Cancel",
+            "confirm": "Confirm Anonymization",
+            "success": "User data has been anonymized successfully",
+            "error": "Failed to anonymize user data",
+            "loadError": "Failed to load user data locations"
+        },
+        "models": {
+            "User": "User",
+            "Tenant": "Tenant",
+            "Communication": "Communication",
+            "Post": "Post",
+            "LeaseSignature": "Lease Signature",
+            "AmenityBooking": "Amenity Booking",
+            "AuditLog": "Audit Log"
+        },
+        "fields": {
+            "email": "Email",
+            "phone": "Phone",
+            "name": "Name",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "content": "Content",
+            "subject": "Subject",
+            "body": "Body"
+        }
+    }
+}

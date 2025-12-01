@@ -19,6 +19,9 @@ import pdfRouter from './pdf/routes';
 import templatesRouter from './templates/routes';
 import gdprRouter from './gdpr/routes';
 import notificationsRouter from './notifications';
+import usersRouter from './users/routes';
+import caretakersRouter from './caretakers/routes';
+import houseownersRouter from './houseowners/routes';
 
 const router = Router();
 
@@ -54,5 +57,8 @@ router.use('/pdf', pdfRouter);
 router.use('/templates', templatesRouter);
 router.use('/gdpr', gdprRouter);
 router.use('/notifications', notificationsRouter);
+router.use('/users', usersRouter);
+router.use('/caretakers', caretakersRouter);
+router.use('/houseowners', houseownersRouter);
 
 export default router;

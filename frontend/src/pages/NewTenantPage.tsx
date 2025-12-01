@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Camera,
@@ -23,6 +24,7 @@ import { toast } from 'sonner';
 type TabType = 'PRIMARY' | 'OCCUPANTS';
 
 export default function NewTenantPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('PRIMARY');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +67,7 @@ export default function NewTenantPage() {
     e.preventDefault();
 
     if (!formData.fullName.trim()) {
-      toast.error('Please enter tenant name');
+      toast.error(t('newTenant.validation.nameRequired'));
       return;
     }
 
@@ -85,20 +87,20 @@ export default function NewTenantPage() {
         emergencyContact
       });
 
-      toast.success('Tenant created successfully!');
+      toast.success(t('newTenant.validation.success'));
       navigate('/dashboard/tenants');
     } catch (error: any) {
       console.error('Failed to create tenant:', error);
-      toast.error(error?.message || 'Failed to create tenant. Please try again.');
+      toast.error(error?.message || t('newTenant.validation.error'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-32">
+    <div className="min-h-screen bg-background pb-32">
       {/* Professional Sticky Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -106,26 +108,26 @@ export default function NewTenantPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate(-1)}
-                className="h-10 w-10 rounded-full hover:bg-gray-100 text-gray-500"
+                className="h-10 w-10 rounded-full hover:bg-accent text-muted-foreground"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">New Tenant</h1>
-                <p className="text-sm text-gray-500">Add a new tenant to your property</p>
+                <h1 className="text-xl font-bold text-foreground">{t('newTenant.title')}</h1>
+                <p className="text-sm text-muted-foreground">{t('newTenant.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors relative">
+              <button className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-card"></span>
               </button>
-              <div className="h-8 w-px bg-gray-200 mx-1"></div>
+              <div className="h-8 w-px bg-border mx-1"></div>
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                  <User className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center border border-border">
+                  <User className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-card"></div>
               </div>
             </div>
           </div>
@@ -136,57 +138,57 @@ export default function NewTenantPage() {
         {/* Profile Picture Section */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300 group-hover:border-blue-500 transition-colors">
-              <User className="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition-colors" />
+            <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center border-2 border-dashed border-border group-hover:border-blue-500 transition-colors">
+              <User className="w-10 h-10 text-muted-foreground group-hover:text-blue-500 transition-colors" />
             </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-blue-600 border-2 border-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
               <Camera className="w-4 h-4 text-white" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-gray-600">Upload Photo</p>
+          <p className="mt-3 text-sm font-medium text-muted-foreground">{t('newTenant.uploadPhoto')}</p>
         </div>
 
         {/* Tabs */}
-        <div className="bg-gray-100/50 p-1 rounded-xl inline-flex border border-gray-200">
+        <div className="bg-accent/50 p-1 rounded-xl inline-flex border border-border">
           <button
             onClick={() => setActiveTab('PRIMARY')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'PRIMARY'
-              ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               }`}
           >
-            Primary Tenant
+            {t('newTenant.tabs.primary')}
           </button>
           <button
             onClick={() => setActiveTab('OCCUPANTS')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'OCCUPANTS'
-              ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               }`}
           >
-            Occupants
+            {t('newTenant.tabs.occupants')}
           </button>
         </div>
 
         {/* Form Sections */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information Section */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('personalInfo')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors border-b border-gray-100"
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors border-b border-border"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400">
                   <User className="w-5 h-5" />
                 </div>
-                <h2 className="text-base font-bold text-gray-900">Personal Information</h2>
+                <h2 className="text-base font-bold text-foreground">{t('newTenant.personalInfo.title')}</h2>
               </div>
               {expandedSections.personalInfo ? (
-                <ChevronUp className="w-5 h-5 text-gray-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
@@ -194,49 +196,47 @@ export default function NewTenantPage() {
               <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-200">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Full Name <span className="text-red-500">*</span>
+                    <label className="text-sm font-medium text-foreground">
+                      {t('newTenant.personalInfo.fullName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                      placeholder="Enter full name"
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                      placeholder={t('newTenant.personalInfo.fullNamePlaceholder')}
                       required
                     />
                   </div>
 
-
-
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Email
+                    <label className="text-sm font-medium text-foreground">
+                      {t('newTenant.personalInfo.email')}
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                        placeholder="Enter email address"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                        placeholder={t('newTenant.personalInfo.emailPlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Phone Number
+                    <label className="text-sm font-medium text-foreground">
+                      {t('newTenant.personalInfo.phone')}
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="tel"
                         value={formData.phoneNumber}
                         onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                        placeholder="(555) 000-0000"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                        placeholder={t('newTenant.personalInfo.phonePlaceholder')}
                       />
                     </div>
                   </div>
@@ -245,25 +245,23 @@ export default function NewTenantPage() {
             )}
           </div>
 
-
-
           {/* Emergency Contacts Section */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             <button
               type="button"
               onClick={() => toggleSection('emergencyContacts')}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors border-b border-gray-100"
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-accent/50 transition-colors border-b border-border"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
-                <h2 className="text-base font-bold text-gray-900">Emergency Contacts</h2>
+                <h2 className="text-base font-bold text-foreground">{t('newTenant.emergencyContacts.title')}</h2>
               </div>
               {expandedSections.emergencyContacts ? (
-                <ChevronUp className="w-5 h-5 text-gray-400" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
@@ -271,43 +269,43 @@ export default function NewTenantPage() {
               <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-200">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Contact Name</label>
+                    <label className="text-sm font-medium text-foreground">{t('newTenant.emergencyContacts.name')}</label>
                     <input
                       type="text"
                       value={formData.emergencyContactName}
                       onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                      placeholder="Enter contact name"
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                      placeholder={t('newTenant.emergencyContacts.namePlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Contact Phone</label>
+                    <label className="text-sm font-medium text-foreground">{t('newTenant.emergencyContacts.phone')}</label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="tel"
                         value={formData.emergencyContactPhone}
                         onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                        placeholder="(555) 000-0000"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                        placeholder={t('newTenant.emergencyContacts.phonePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Relationship</label>
+                    <label className="text-sm font-medium text-foreground">{t('newTenant.emergencyContacts.relation')}</label>
                     <select
                       value={formData.emergencyContactRelation}
                       onChange={(e) => setFormData({ ...formData, emergencyContactRelation: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                     >
-                      <option value="">Select relationship</option>
-                      <option value="spouse">Spouse</option>
-                      <option value="parent">Parent</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="friend">Friend</option>
-                      <option value="other">Other</option>
+                      <option value="">{t('newTenant.emergencyContacts.relationPlaceholder')}</option>
+                      <option value="spouse">{t('newTenant.emergencyContacts.relations.spouse')}</option>
+                      <option value="parent">{t('newTenant.emergencyContacts.relations.parent')}</option>
+                      <option value="sibling">{t('newTenant.emergencyContacts.relations.sibling')}</option>
+                      <option value="friend">{t('newTenant.emergencyContacts.relations.friend')}</option>
+                      <option value="other">{t('newTenant.emergencyContacts.relations.other')}</option>
                     </select>
                   </div>
                 </div>
@@ -317,12 +315,12 @@ export default function NewTenantPage() {
 
           {/* Occupants Section (when tab is active) */}
           {activeTab === 'OCCUPANTS' && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4 animate-in fade-in duration-200">
+            <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-4 animate-in fade-in duration-200">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400">
                   <Users className="w-5 h-5" />
                 </div>
-                <h2 className="text-base font-bold text-gray-900">Add Occupants</h2>
+                <h2 className="text-base font-bold text-foreground">{t('newTenant.occupants.title')}</h2>
               </div>
 
               <div className="flex gap-2">
@@ -331,13 +329,13 @@ export default function NewTenantPage() {
                   value={newOccupant}
                   onChange={(e) => setNewOccupant(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOccupant())}
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                  placeholder="Enter occupant name"
+                  className="flex-1 px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  placeholder={t('newTenant.occupants.placeholder')}
                 />
                 <Button
                   type="button"
                   onClick={addOccupant}
-                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <UserPlus className="w-4 h-4" />
                 </Button>
@@ -348,20 +346,20 @@ export default function NewTenantPage() {
                   {occupants.map((occupant, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-200"
+                      className="flex items-center justify-between px-4 py-3 bg-accent/50 rounded-lg border border-border"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Users className="w-4 h-4 text-blue-600" />
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <span className="font-medium text-gray-900">{occupant}</span>
+                        <span className="font-medium text-foreground">{occupant}</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeOccupant(index)}
-                        className="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors group"
+                        className="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center transition-colors group"
                       >
-                        <X className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                        <X className="w-4 h-4 text-muted-foreground group-hover:text-red-600 dark:group-hover:text-red-400" />
                       </button>
                     </div>
                   ))}
@@ -379,20 +377,20 @@ export default function NewTenantPage() {
               className="px-6"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('newTenant.actions.cancel')}
             </Button>
             <Button
               type="submit"
-              className="px-8 bg-gray-900 hover:bg-gray-800 text-white"
+              className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
+                  {t('newTenant.actions.creating')}
                 </>
               ) : (
-                'Save Tenant'
+                t('newTenant.actions.save')
               )}
             </Button>
           </div>

@@ -13,19 +13,26 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  phone     String?
   role      Role     @default(MANAGER)
-  tenantId  String?  @unique
-  otpCode   String?
-  otpExpiresAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  tenantId      String?  @unique
+  caretakerId   String?  @unique
+  houseOwnerId  String?  @unique
+  otpCode       String?
+  otpExpiresAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   tenant         Tenant?         @relation(fields: [tenantId], references: [id])
+  caretaker      CareTaker?      @relation(fields: [caretakerId], references: [id])
+  houseOwner     HouseOwner?     @relation(fields: [houseOwnerId], references: [id])
   auditLogs      AuditLog[]
   communications Communication[]
   posts          Post[]
   amenityBookings AmenityBooking[]
   notifications   Notification[]
+  managedProperties Property[] @relation("PropertyManagers")
+  managedUnits      Unit[]     @relation("UnitManagers")
 }
 
 model AuditLog {
@@ -43,6 +50,8 @@ enum Role {
   ADMIN
   MANAGER
   TENANT
+  CARETAKER
+  HOUSEOWNER
 }
 
 model Property {
@@ -69,6 +78,10 @@ model Property {
   amenities     Amenity[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  managers      User[]     @relation("PropertyManagers")
+  vendors       Vendor[]   @relation("PropertyVendors")
+  caretakers    CareTaker[] @relation("PropertyCareTakers")
+  houseOwners   HouseOwner[] @relation("PropertyHouseOwners")
 }
 
 model Unit {
@@ -88,6 +101,10 @@ model Unit {
   updatedAt   DateTime             @updatedAt
 
   property Property @relation(fields: [propertyId], references: [id])
+  managers      User[]        @relation("UnitManagers")
+  vendors       Vendor[]      @relation("UnitVendors")
+  caretakers    CareTaker[]   @relation("UnitCareTakers")
+  houseOwners   HouseOwner[]  @relation("UnitHouseOwners")
 
   @@unique([propertyId, unitNumber])
 }
@@ -215,6 +232,34 @@ model Vendor {
   workOrders WorkOrder[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  properties Property[]  @relation("PropertyVendors")
+  units      Unit[]      @relation("UnitVendors")
+}
+
+model CareTaker {
+  id         String      @id @default(cuid())
+  name       String
+  contact    String?
+  rateInfo   String?
+  insured    Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  properties Property[]  @relation("PropertyCareTakers")
+  units      Unit[]      @relation("UnitCareTakers")
+  user       User?
+}
+
+model HouseOwner {
+  id         String      @id @default(cuid())
+  name       String
+  contact    String?
+  rateInfo   String?
+  insured    Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  properties Property[]  @relation("PropertyHouseOwners")
+  units      Unit[]      @relation("UnitHouseOwners")
+  user       User?
 }
 
 model Document {

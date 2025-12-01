@@ -1,76 +1,159 @@
 import { googleConfig } from './config';
 
-declare global {
-  interface Window {
-    gapi: any;
-  }
+
+
+interface TokenClientConfig {
+  client_id: string;
+  scope: string;
+  callback: (response: TokenResponse) => void;
+  error_callback?: (error: any) => void;
+}
+
+interface TokenClient {
+  requestAccessToken: (options?: { prompt?: string }) => void;
+}
+
+interface TokenResponse {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: string;
+  error?: string;
 }
 
 /**
- * Google Meet Service
+ * Google Meet Service using Google Identity Services (GIS)
  * 
- * NOTE: Google's gapi.auth2 library is deprecated.
- * For production, migrate to Google Identity Services (GIS).
- * See: https://developers.google.com/identity/gsi/web/guides/migration
- * 
- * This service is disabled by default until properly configured with valid credentials.
+ * This uses the new OAuth 2.0 authorization flow.
+ * See: https://developers.google.com/identity/oauth2/web/guides/overview
  */
 class GoogleMeetService {
-  private isInitialized = false;
-  private initializationError: string | null = null;
-  private initializationAttempted = false;
+  private tokenClient: TokenClient | null = null;
+  private accessToken: string | null = null;
+  private isGapiLoaded = false;
+  private isGisLoaded = false;
+  private authChangeCallback: ((isSignedIn: boolean) => void) | null = null;
 
   isConfigured(): boolean {
-    // Only consider configured if we have real-looking credentials (not empty or placeholder)
-    const hasValidClientId = googleConfig.clientId && 
-      googleConfig.clientId.length > 20 && 
-      !googleConfig.clientId.includes('your-');
-    const hasValidApiKey = googleConfig.apiKey && 
-      googleConfig.apiKey.length > 20 && 
-      !googleConfig.apiKey.includes('your-');
-    
-    return Boolean(hasValidClientId && hasValidApiKey);
+    const hasValidClientId = googleConfig.clientId &&
+      googleConfig.clientId.length > 20 &&
+      googleConfig.clientId.includes('.apps.googleusercontent.com');
+
+    return Boolean(hasValidClientId);
   }
 
-  getInitializationError(): string | null {
-    return this.initializationError;
+  private loadScript(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if script already exists
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+      document.head.appendChild(script);
+    });
   }
 
-  async initialize(handleAuthChange: (isSignedIn: boolean) => void) {
-    // Only attempt initialization once
-    if (this.initializationAttempted) return;
-    this.initializationAttempted = true;
-
-    if (this.isInitialized) return;
-
-    // Check if Google API credentials are configured
+  async initialize(handleAuthChange: (isSignedIn: boolean) => void): Promise<void> {
     if (!this.isConfigured()) {
-      this.initializationError = 'Google Meet integration not configured.';
-      // Silent - don't log warnings for unconfigured integration
       return;
     }
 
-    // Note: The gapi.auth2 library is deprecated. 
-    // For production use, migrate to Google Identity Services.
-    // Skipping initialization to avoid deprecation errors.
-    this.initializationError = 'Google Meet integration requires migration to new Google Identity Services. Contact your administrator.';
-    console.info('Google Meet: Skipping deprecated gapi.auth2 initialization. Migration to GIS required.');
-    return;
+    this.authChangeCallback = handleAuthChange;
+
+    try {
+      // Load Google Identity Services
+      await this.loadScript('https://accounts.google.com/gsi/client');
+      this.isGisLoaded = true;
+
+      // Load GAPI for Calendar API
+      await this.loadScript('https://apis.google.com/js/api.js');
+
+      // Load the GAPI client
+      await new Promise<void>((resolve) => {
+        window.gapi.load('client', resolve);
+      });
+
+      // Initialize GAPI client with Calendar API
+      await window.gapi.client.init({
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+      });
+
+      this.isGapiLoaded = true;
+
+      // Initialize the token client
+      this.tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: googleConfig.clientId,
+        scope: 'https://www.googleapis.com/auth/calendar',
+        callback: (response: TokenResponse) => {
+          if (response.error) {
+            console.error('Token error:', response.error);
+            this.accessToken = null;
+            handleAuthChange(false);
+            return;
+          }
+          this.accessToken = response.access_token;
+          handleAuthChange(true);
+        },
+        error_callback: (error: any) => {
+          console.error('OAuth error:', error);
+          this.accessToken = null;
+          handleAuthChange(false);
+        },
+      });
+
+      // Check if we have a cached token (session)
+      const cachedToken = sessionStorage.getItem('google_access_token');
+      if (cachedToken) {
+        this.accessToken = cachedToken;
+        window.gapi.client.setToken({ access_token: cachedToken });
+        handleAuthChange(true);
+      }
+
+    } catch (error) {
+      console.error('Failed to initialize Google Meet service:', error);
+      throw error;
+    }
   }
 
-  async signIn() {
+  isSignedIn(): boolean {
+    return !!this.accessToken;
+  }
+
+  async signIn(): Promise<void> {
     if (!this.isConfigured()) {
       throw new Error('Google Meet integration not configured');
     }
-    if (!this.isInitialized) {
-      throw new Error('Google API not initialized. Migration to Google Identity Services required.');
+
+    if (!this.tokenClient) {
+      throw new Error('Google API not initialized');
     }
-    return window.gapi.auth2.getAuthInstance().signIn();
+
+    // Request access token - this opens the Google sign-in popup
+    this.tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
-  async signOut() {
-    if (!this.isInitialized) return;
-    return window.gapi.auth2.getAuthInstance().signOut();
+  async signOut(): Promise<void> {
+    if (this.accessToken) {
+      // Revoke the token
+      await fetch(`https://oauth2.googleapis.com/revoke?token=${this.accessToken}`, {
+        method: 'POST',
+      });
+    }
+
+    this.accessToken = null;
+    sessionStorage.removeItem('google_access_token');
+    window.gapi.client.setToken(null);
+
+    if (this.authChangeCallback) {
+      this.authChangeCallback(false);
+    }
   }
 
   async createMeeting(meetingDetails: {
@@ -80,9 +163,12 @@ class GoogleMeetService {
     description?: string;
     attendees?: string[];
   }) {
-    if (!this.isInitialized) {
-      throw new Error('Google API not initialized');
+    if (!this.accessToken) {
+      throw new Error('Not signed in to Google');
     }
+
+    // Set the access token for the API call
+    window.gapi.client.setToken({ access_token: this.accessToken });
 
     const event = {
       summary: meetingDetails.title,
@@ -109,7 +195,11 @@ class GoogleMeetService {
         calendarId: 'primary',
         resource: event,
         conferenceDataVersion: 1,
+        sendUpdates: 'all',
       });
+
+      // Cache the token for future requests
+      sessionStorage.setItem('google_access_token', this.accessToken);
 
       return {
         id: response.result.id,
@@ -120,16 +210,26 @@ class GoogleMeetService {
         organizer: response.result.organizer?.email || '',
         type: 'google' as const,
       };
-    } catch (error) {
-      console.error('Error creating Google Meet', error);
+    } catch (error: any) {
+      // Token might be expired, clear it
+      if (error?.status === 401) {
+        this.accessToken = null;
+        sessionStorage.removeItem('google_access_token');
+        if (this.authChangeCallback) {
+          this.authChangeCallback(false);
+        }
+      }
+      console.error('Error creating Google Meet:', error);
       throw error;
     }
   }
 
   async listMeetings(timeMin: string, timeMax: string) {
-    if (!this.isInitialized) {
-      throw new Error('Google API not initialized');
+    if (!this.accessToken) {
+      throw new Error('Not signed in to Google');
     }
+
+    window.gapi.client.setToken({ access_token: this.accessToken });
 
     try {
       const response = await window.gapi.client.calendar.events.list({
@@ -141,19 +241,26 @@ class GoogleMeetService {
         orderBy: 'startTime',
       });
 
-      return response.result.items
+      return (response.result.items || [])
         .filter((event: any) => event.hangoutLink)
         .map((event: any) => ({
           id: event.id,
           title: event.summary,
-          startTime: event.start.dateTime,
-          endTime: event.end.dateTime,
+          startTime: event.start.dateTime || event.start.date,
+          endTime: event.end.dateTime || event.end.date,
           joinUrl: event.hangoutLink,
           organizer: event.organizer?.email || '',
           type: 'google' as const,
         }));
-    } catch (error) {
-      console.error('Error listing Google Meets', error);
+    } catch (error: any) {
+      if (error?.status === 401) {
+        this.accessToken = null;
+        sessionStorage.removeItem('google_access_token');
+        if (this.authChangeCallback) {
+          this.authChangeCallback(false);
+        }
+      }
+      console.error('Error listing Google Meets:', error);
       throw error;
     }
   }

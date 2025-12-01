@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     MapPin,
@@ -45,6 +46,7 @@ type Unit = {
 };
 
 export default function PropertyDetailPage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [property, setProperty] = useState<Property | null>(null);
@@ -86,7 +88,7 @@ export default function PropertyDetailPage() {
             }
         } catch (error) {
             console.error('Failed to load property:', error);
-            toast.error('Failed to load property details');
+            toast.error(t('propertyDetails.messages.loadError'));
             navigate('/dashboard/properties');
         } finally {
             setLoading(false);
@@ -98,11 +100,11 @@ export default function PropertyDetailPage() {
 
         try {
             await propertyService.deleteProperty(id);
-            toast.success('Property deleted successfully');
+            toast.success(t('propertyDetails.messages.deleteSuccess'));
             navigate('/dashboard/properties');
         } catch (error) {
             console.error('Failed to delete property:', error);
-            toast.error('Failed to delete property');
+            toast.error(t('propertyDetails.messages.deleteError'));
         }
     };
 
@@ -119,14 +121,14 @@ export default function PropertyDetailPage() {
     const handleDeleteUnit = async (unitId: string) => {
         try {
             await api.delete(`/units/${unitId}`);
-            toast.success('Unit deleted successfully');
+            toast.success(t('propertyDetails.messages.unitDeleteSuccess'));
             if (id) {
                 loadPropertyData(id);
             }
             setUnitToDelete(null);
         } catch (error) {
             console.error('Failed to delete unit:', error);
-            toast.error('Failed to delete unit');
+            toast.error(t('propertyDetails.messages.unitDeleteError'));
         }
     };
 
@@ -138,12 +140,12 @@ export default function PropertyDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <div className="text-center p-8">
                     <div className="relative w-16 h-16 mx-auto mb-4">
-                        <div className="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-500 animate-spin"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-500 animate-spin"></div>
                     </div>
-                    <h2 className="text-xl font-bold text-gray-800">Loading Property Details</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('propertyDetails.loading')}</h2>
                 </div>
             </div>
         );
@@ -159,9 +161,9 @@ export default function PropertyDetailPage() {
     const totalRent = 0;
 
     return (
-        <div className="min-h-screen bg-gray-50/50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Professional Sticky Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div className="bg-card border-b border-border sticky top-0 z-40">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -169,32 +171,32 @@ export default function PropertyDetailPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => navigate('/dashboard/properties')}
-                                className="h-10 w-10 rounded-full hover:bg-gray-100 text-gray-500"
+                                className="h-10 w-10 rounded-full hover:bg-accent text-muted-foreground"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Property Details</h1>
-                                <p className="text-sm text-gray-500">View and manage property information</p>
+                                <h1 className="text-xl font-bold text-foreground">{t('propertyDetails.title')}</h1>
+                                <p className="text-sm text-muted-foreground">{t('propertyDetails.subtitle')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <NotificationBell />
-                            <div className="h-8 w-px bg-gray-200 mx-1"></div>
+                            <div className="h-8 w-px bg-border mx-1"></div>
                             <Button
                                 variant="outline"
                                 onClick={() => setShowDeleteDialog(true)}
-                                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Delete
+                                {t('common.delete')}
                             </Button>
                             <Button
                                 onClick={() => navigate(`/dashboard/properties/${id}/edit`)}
-                                className="bg-gray-900 hover:bg-gray-800 text-white gap-2"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                             >
                                 <Edit className="w-4 h-4" />
-                                Edit Property
+                                {t('propertyDetails.editProperty')}
                             </Button>
                         </div>
                     </div>
@@ -203,7 +205,7 @@ export default function PropertyDetailPage() {
 
             <div className="px-6 mt-8 max-w-7xl mx-auto space-y-6">
                 {/* Property Header Card */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Property Image */}
                         <div className="h-80 lg:h-full relative">
@@ -216,64 +218,64 @@ export default function PropertyDetailPage() {
                                 property.status === 'occupied' ? 'bg-blue-500 text-white' :
                                     'bg-amber-500 text-white'
                                 }`}>
-                                {property.status === 'vacant' ? 'Available' : property.status === 'occupied' ? 'Occupied' : 'Maintenance'}
+                                {property.status === 'vacant' ? t('properties.available') : property.status === 'occupied' ? t('properties.occupied') : t('properties.maintenance')}
                             </div>
                         </div>
 
                         {/* Property Info */}
                         <div className="p-8">
                             <div className="mb-6">
-                                <h1 className="text-2xl font-bold text-gray-900">{property.title}</h1>
-                                <p className="text-gray-600 flex items-center gap-2">
+                                <h1 className="text-2xl font-bold text-foreground">{property.title}</h1>
+                                <p className="text-muted-foreground flex items-center gap-2">
                                     <MapPin className="w-5 h-5" />
                                     {property.address}
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                        <Bed className="w-5 h-5 text-blue-600" />
+                                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <Bed className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Bedrooms</p>
-                                        <p className="text-lg font-semibold text-gray-900">{property.bedrooms}</p>
+                                        <p className="text-sm text-muted-foreground">{t('properties.beds')}</p>
+                                        <p className="text-lg font-semibold text-foreground">{property.bedrooms}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                        <Bath className="w-5 h-5 text-emerald-600" />
+                                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+                                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                        <Bath className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Bathrooms</p>
-                                        <p className="text-lg font-semibold text-gray-900">{property.bathrooms}</p>
+                                        <p className="text-sm text-muted-foreground">{t('properties.baths')}</p>
+                                        <p className="text-lg font-semibold text-foreground">{property.bathrooms}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                        <Ruler className="w-5 h-5 text-purple-600" />
+                                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+                                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                        <Ruler className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Area</p>
-                                        <p className="text-lg font-semibold text-gray-900">{property.area}</p>
+                                        <p className="text-sm text-muted-foreground">{t('properties.area')}</p>
+                                        <p className="text-lg font-semibold text-foreground">{property.area}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                                        <DollarSign className="w-5 h-5 text-amber-600" />
+                                <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
+                                    <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                        <DollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Rent</p>
-                                        <p className="text-lg font-semibold text-gray-900">${property.price.toLocaleString()}/mo</p>
+                                        <p className="text-sm text-muted-foreground">{t('properties.rent')}</p>
+                                        <p className="text-lg font-semibold text-foreground">${property.price.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-gray-100">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                            <div className="pt-4 border-t border-border">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
                                     {property.type}
                                 </span>
                             </div>
@@ -283,94 +285,94 @@ export default function PropertyDetailPage() {
 
                 {/* Financial Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
-                                <Building2 className="w-6 h-6 text-blue-600" />
+                            <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500 mb-1">Total Units</p>
-                        <p className="text-3xl font-bold text-gray-900">{units.length}</p>
+                        <p className="text-sm text-muted-foreground mb-1">{t('propertyDetails.totalUnits')}</p>
+                        <p className="text-3xl font-bold text-foreground">{units.length}</p>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                <Users className="w-6 h-6 text-emerald-600" />
+                            <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                                <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500 mb-1">Occupancy Rate</p>
-                        <p className="text-3xl font-bold text-gray-900">{occupancyRate}%</p>
+                        <p className="text-sm text-muted-foreground mb-1">{t('propertyDetails.occupancyRate')}</p>
+                        <p className="text-3xl font-bold text-foreground">{occupancyRate}%</p>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-amber-600" />
+                            <div className="w-12 h-12 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                                <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500 mb-1">Total Monthly Rent</p>
-                        <p className="text-3xl font-bold text-gray-900">${totalRent.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground mb-1">{t('propertyDetails.totalMonthlyRent')}</p>
+                        <p className="text-3xl font-bold text-foreground">${totalRent.toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* Units Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">Units</h3>
+                <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-foreground">{t('propertyDetails.units')}</h3>
                         <Button size="sm" className="gap-2" onClick={handleAddUnit}>
                             <Plus className="w-4 h-4" />
-                            Add Unit
+                            {t('propertyDetails.addUnit')}
                         </Button>
                     </div>
                     <div className="p-6">
                         {units.length === 0 ? (
                             <div className="text-center py-12">
-                                <Home className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500">No units added yet</p>
-                                <p className="text-sm text-gray-400 mt-1">Add units to start managing tenants and leases</p>
+                                <Home className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                                <p className="text-muted-foreground">{t('propertyDetails.noUnits')}</p>
+                                <p className="text-sm text-muted-foreground mt-1">{t('propertyDetails.noUnitsDesc')}</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {units.map((unit) => (
-                                    <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors group relative">
+                                    <div key={unit.id} className="border border-border rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-700 transition-colors group relative">
                                         <Link to={`/dashboard/units/${unit.id}`} className="absolute inset-0 z-0" />
                                         <div className="flex items-start justify-between mb-3 relative z-10 pointer-events-none">
                                             <div>
-                                                <h4 className="font-semibold text-gray-900">Unit {unit.unitNumber}</h4>
-                                                <p className="text-sm text-gray-500">{unit.sizeSqft ? `${unit.sizeSqft} sq ft` : 'N/A'}</p>
+                                                <h4 className="font-semibold text-foreground">{t('propertyDetails.unit')} {unit.unitNumber}</h4>
+                                                <p className="text-sm text-muted-foreground">{unit.sizeSqft ? `${unit.sizeSqft} ${t('propertyDetails.sqft')}` : 'N/A'}</p>
                                             </div>
                                             <div className="flex items-center gap-2 pointer-events-auto">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${unit.status === 'OCCUPIED' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${unit.status === 'OCCUPIED' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
                                                     }`}>
                                                     {unit.status}
                                                 </span>
                                                 <button
                                                     onClick={() => handleEditUnit(unit)}
-                                                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-blue-50 rounded transition-all"
-                                                    title="Edit unit"
+                                                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-accent rounded transition-all"
+                                                    title={t('propertyDetails.editUnit')}
                                                 >
-                                                    <Edit className="w-4 h-4 text-blue-600" />
+                                                    <Edit className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                                 </button>
                                                 <button
                                                     onClick={() => setUnitToDelete(unit.id)}
-                                                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 rounded transition-all"
-                                                    title="Delete unit"
+                                                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
+                                                    title={t('propertyDetails.deleteUnit')}
                                                 >
-                                                    <Trash2 className="w-4 h-4 text-red-600" />
+                                                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="space-y-2 text-sm">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-gray-500">Beds/Baths:</span>
-                                                <span className="font-medium text-gray-900">{unit.bedrooms}bd / {unit.bathrooms}ba</span>
+                                                <span className="text-muted-foreground">{t('propertyDetails.bedsBaths')}:</span>
+                                                <span className="font-medium text-foreground">{unit.bedrooms}{t('propertyDetails.bd')} / {unit.bathrooms}{t('propertyDetails.ba')}</span>
                                             </div>
                                             {/* Rent amount removed as it's not in the model */}
                                             {unit.lease?.tenant && (
-                                                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                                    <span className="text-gray-500">Tenant:</span>
-                                                    <span className="font-medium text-gray-900">{unit.lease.tenant.name}</span>
+                                                <div className="flex items-center justify-between pt-2 border-t border-border">
+                                                    <span className="text-muted-foreground">{t('propertyDetails.tenant')}:</span>
+                                                    <span className="font-medium text-foreground">{unit.lease.tenant.name}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -382,12 +384,12 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Documents Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">Documents</h3>
+                <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-foreground">{t('propertyDetails.documents')}</h3>
                         <Button size="sm" className="gap-2" onClick={() => setShowUploadDialog(true)}>
                             <Plus className="w-4 h-4" />
-                            Upload Document
+                            {t('propertyDetails.uploadDocument')}
                         </Button>
                     </div>
                     <div className="p-6">
@@ -402,18 +404,18 @@ export default function PropertyDetailPage() {
             {/* Delete Confirmation Dialog */}
             {showDeleteDialog && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+                    <div className="bg-card rounded-xl max-w-md w-full p-6 shadow-xl border border-border">
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 className="w-6 h-6 text-red-600" />
+                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Delete Property</h3>
-                                <p className="text-sm text-gray-500">This action cannot be undone</p>
+                                <h3 className="text-lg font-bold text-foreground">{t('propertyDetails.deleteDialogTitle')}</h3>
+                                <p className="text-sm text-muted-foreground">{t('propertyDetails.deleteDialogDesc')}</p>
                             </div>
                         </div>
-                        <p className="text-gray-600 mb-6">
-                            Are you sure you want to delete <strong>{property.title}</strong>? This will also delete all associated units and data.
+                        <p className="text-muted-foreground mb-6">
+                            {t('propertyDetails.deleteConfirmation')} <strong>{property.title}</strong>{t('propertyDetails.deleteConfirmationSuffix')}
                         </p>
                         <div className="flex gap-3">
                             <Button
@@ -421,13 +423,13 @@ export default function PropertyDetailPage() {
                                 onClick={() => setShowDeleteDialog(false)}
                                 className="flex-1"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </Button>
                             <Button
                                 onClick={handleDelete}
                                 className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                             >
-                                Delete Property
+                                {t('propertyDetails.deleteProperty')}
                             </Button>
                         </div>
                     </div>
@@ -448,18 +450,18 @@ export default function PropertyDetailPage() {
             {/* Delete Unit Confirmation */}
             {unitToDelete && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+                    <div className="bg-card rounded-xl max-w-md w-full p-6 shadow-xl border border-border">
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 className="w-6 h-6 text-red-600" />
+                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Delete Unit</h3>
-                                <p className="text-sm text-gray-500">This action cannot be undone</p>
+                                <h3 className="text-lg font-bold text-foreground">{t('propertyDetails.deleteUnitDialogTitle')}</h3>
+                                <p className="text-sm text-muted-foreground">{t('propertyDetails.deleteDialogDesc')}</p>
                             </div>
                         </div>
-                        <p className="text-gray-600 mb-6">
-                            Are you sure you want to delete this unit? This will also remove any associated lease data.
+                        <p className="text-muted-foreground mb-6">
+                            {t('propertyDetails.deleteUnitConfirmation')}
                         </p>
                         <div className="flex gap-3">
                             <Button
@@ -467,13 +469,13 @@ export default function PropertyDetailPage() {
                                 onClick={() => setUnitToDelete(null)}
                                 className="flex-1"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </Button>
                             <Button
                                 onClick={() => handleDeleteUnit(unitToDelete)}
                                 className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                             >
-                                Delete Unit
+                                {t('propertyDetails.deleteUnit')}
                             </Button>
                         </div>
                     </div>

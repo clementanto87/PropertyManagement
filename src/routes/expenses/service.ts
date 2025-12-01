@@ -1,9 +1,18 @@
 import { prisma } from '../../db/prisma';
 import type { CreateExpenseInput, UpdateExpenseInput } from './validation';
 
-export async function listExpenses(propertyId?: string, opts?: { skip?: number; take?: number }) {
+export async function listExpenses(propertyId?: string, opts?: { skip?: number; take?: number; userId?: string }) {
+  const where: any = {
+    ...(propertyId ? { propertyId } : {}),
+    ...(opts?.userId ? {
+      property: {
+        managers: { some: { id: opts.userId } }
+      }
+    } : {})
+  };
+
   return prisma.expense.findMany({
-    where: propertyId ? { propertyId } : undefined,
+    where,
     orderBy: { incurredAt: 'desc' },
     skip: opts?.skip,
     take: opts?.take

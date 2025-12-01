@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api';
 import {
   Droplet,
@@ -23,6 +24,13 @@ import {
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend } from 'chart.js';
 import PropertyMap from '../components/dashboard/PropertyMap';
 import { NotificationBell } from '../components/layout/NotificationBell';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select-component";
 
 // Register ChartJS components
 ChartJS.register(
@@ -45,6 +53,7 @@ type Metrics = {
   openRequests: number;
   openRequestsChange: number;
   totalProperties: number;
+  totalUnits: number;
   totalTenants: number;
   recentWorkOrders: MaintenanceRequest[];
   expiringLeases: ExpiringLease[];
@@ -64,6 +73,11 @@ type Property = {
   vacantUnits?: number;
   occupiedUnits?: number;
   maintenanceCount?: number;
+};
+
+type PropertySummary = {
+  id: string;
+  name: string;
 };
 
 type MaintenanceRequest = {
@@ -94,20 +108,34 @@ type ExpiringLease = {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('all');
+  const [properties, setProperties] = useState<PropertySummary[]>([]);
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
+  }, [selectedPropertyId]);
+
+  const fetchProperties = async () => {
+    try {
+      const data = await api.get<{ items: PropertySummary[] }>('/properties');
+      setProperties(data.items);
+    } catch (error) {
+      console.error('Failed to fetch properties:', error);
     }
-  }, []);
+  };
 
   const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      const statsRes = await api.get<Metrics>('/dashboard/stats');
+      const query = selectedPropertyId !== 'all' ? `?propertyId=${selectedPropertyId}` : '';
+      const statsRes = await api.get<Metrics>(`/dashboard/stats${query}`);
       setMetrics(statsRes);
     } catch (err) {
       console.error('Failed to fetch dashboard stats:', err);
@@ -140,10 +168,10 @@ export default function DashboardPage() {
     );
   };
 
-  if (loading) {
+  if (loading && !metrics) {
     return (
-      <div className={`flex items-center justify-center min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -152,43 +180,54 @@ export default function DashboardPage() {
   const expiringCount = metrics?.expiringLeases.length || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-28">
+    <div className="min-h-screen bg-background pb-28">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center border border-indigo-100">
-                  <User className="w-6 h-6 text-indigo-600" />
+                <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
+                  <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-sm text-gray-500">Overview of your property portfolio</p>
+                <h1 className="text-xl font-bold text-foreground">{t('dashboard.title')}</h1>
+                <p className="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All Properties" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Properties</SelectItem>
+                  {properties.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <NotificationBell />
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+              <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent text-sm font-medium text-foreground transition-colors">
                 <Settings className="w-4 h-4" />
-                Settings
+                {t('common.settings')}
               </button>
             </div>
           </div>
 
           {/* Morning Briefing */}
           {(urgentCount > 0 || expiringCount > 0) && (
-            <div className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-4 flex items-start gap-4">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Briefcase className="w-5 h-5 text-indigo-600" />
+            <div className="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 border border-indigo-100 dark:border-indigo-900 rounded-xl p-4 flex items-start gap-4">
+              <div className="p-2 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+                <Briefcase className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-indigo-900">Morning Briefing</h3>
-                <p className="text-sm text-indigo-700 mt-1">
-                  You have <span className="font-bold">{expiringCount} leases expiring</span> soon
-                  {urgentCount > 0 && <span> and <span className="font-bold">{urgentCount} urgent maintenance requests</span></span>} that need attention.
+                <h3 className="font-semibold text-indigo-900 dark:text-indigo-100">{t('dashboard.morningBriefing')}</h3>
+                <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
+                  {t('dashboard.youHave')} <span className="font-bold">{expiringCount} {t('dashboard.leasesExpiringSoon')}</span>
+                  {urgentCount > 0 && <span> {t('dashboard.and')} <span className="font-bold">{urgentCount} {t('dashboard.urgentMaintenance')}</span></span>} {t('dashboard.needAttention')}.
                 </p>
               </div>
             </div>
@@ -196,21 +235,21 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="flex gap-3 overflow-x-auto pb-2">
-            <button onClick={() => navigate('/dashboard/work-orders/new')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-              <Wrench className="w-4 h-4 text-gray-500" />
-              New Request
+            <button onClick={() => navigate('/dashboard/work-orders/new')} className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-all shadow-sm">
+              <Wrench className="w-4 h-4 text-muted-foreground" />
+              {t('dashboard.newRequest')}
             </button>
-            <button onClick={() => navigate('/dashboard/payments')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-              <CreditCard className="w-4 h-4 text-gray-500" />
-              Log Payment
+            <button onClick={() => navigate('/dashboard/payments')} className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-all shadow-sm">
+              <CreditCard className="w-4 h-4 text-muted-foreground" />
+              {t('dashboard.logPayment')}
             </button>
-            <button onClick={() => navigate('/dashboard/tenants/new')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-              <User className="w-4 h-4 text-gray-500" />
-              Add Tenant
+            <button onClick={() => navigate('/dashboard/tenants/new')} className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-all shadow-sm">
+              <User className="w-4 h-4 text-muted-foreground" />
+              {t('dashboard.addTenant')}
             </button>
-            <button onClick={() => navigate('/dashboard/properties/add')} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-              <Building2 className="w-4 h-4 text-gray-500" />
-              Add Property
+            <button onClick={() => navigate('/dashboard/properties/add')} className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-all shadow-sm">
+              <Building2 className="w-4 h-4 text-muted-foreground" />
+              {t('dashboard.addProperty')}
             </button>
           </div>
         </div>
@@ -218,74 +257,92 @@ export default function DashboardPage() {
 
       <div className="px-6 space-y-6 mt-8">
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Occupancy Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Portfolio Card */}
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-500">Occupancy Rate</p>
-                <h3 className="text-3xl font-bold text-gray-900 mt-1">{metrics?.occupancyRate}%</h3>
+                <p className="text-sm font-medium text-muted-foreground">{t('dashboard.portfolio')}</p>
+                <h3 className="text-3xl font-bold text-foreground mt-1">{metrics?.totalProperties || 0}</h3>
               </div>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
             <div className="flex items-center text-sm">
-              <span className={`flex items-center font-medium px-2 py-0.5 rounded ${metrics?.occupancyChange! >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
+              <span className="text-muted-foreground">
+                {metrics?.totalUnits || 0} {t('dashboard.units')} • {metrics?.totalTenants || 0} {t('dashboard.tenants')}
+              </span>
+            </div>
+          </div>
+
+          {/* Occupancy Card */}
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{t('dashboard.occupancy')}</p>
+                <h3 className="text-3xl font-bold text-foreground mt-1">{metrics?.occupancyRate}%</h3>
+              </div>
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <span className={`flex items-center font-medium px-2 py-0.5 rounded ${metrics?.occupancyChange! >= 0 ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'}`}>
                 {metrics?.occupancyChange! >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                 {Math.abs(metrics?.occupancyChange || 0)}%
               </span>
-              <span className="text-gray-400 ml-2">vs last month</span>
+              <span className="text-muted-foreground ml-2">{t('dashboard.vsLastMonth')}</span>
             </div>
           </div>
 
           {/* Rent Overdue Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-500">Rent Overdue</p>
-                <h3 className="text-3xl font-bold text-gray-900 mt-1">${(metrics?.rentOverdue || 0).toLocaleString()}</h3>
+                <p className="text-sm font-medium text-muted-foreground">{t('dashboard.revenue')}</p>
+                <h3 className="text-3xl font-bold text-foreground mt-1">${(metrics?.rentOverdue || 0).toLocaleString()}</h3>
               </div>
-              <div className="p-2 bg-red-50 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-red-600" />
+              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
               </div>
             </div>
             <div className="flex items-center text-sm">
-              <span className={`flex items-center font-medium px-2 py-0.5 rounded ${metrics?.rentOverdueChange! <= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
+              <span className={`flex items-center font-medium px-2 py-0.5 rounded ${metrics?.rentOverdueChange! <= 0 ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'}`}>
                 {metrics?.rentOverdueChange! <= 0 ? <TrendingDown className="w-3 h-3 mr-1" /> : <TrendingUp className="w-3 h-3 mr-1" />}
                 {Math.abs(metrics?.rentOverdueChange || 0)}%
               </span>
-              <span className="text-gray-400 ml-2">vs last month</span>
+              <span className="text-muted-foreground ml-2">{t('dashboard.vsLastMonth')}</span>
             </div>
           </div>
 
           {/* Open Requests Card */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-500">Open Requests</p>
-                <h3 className="text-3xl font-bold text-gray-900 mt-1">{metrics?.openRequests}</h3>
+                <p className="text-sm font-medium text-muted-foreground">{t('dashboard.maintenance')}</p>
+                <h3 className="text-3xl font-bold text-foreground mt-1">{metrics?.openRequests}</h3>
               </div>
-              <div className="p-2 bg-amber-50 rounded-lg">
-                <Wrench className="w-5 h-5 text-amber-600" />
+              <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
             </div>
             <div className="flex items-center text-sm">
-              <span className="text-emerald-600 flex items-center font-medium bg-emerald-50 px-2 py-0.5 rounded">
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
                 {metrics?.openRequestsChange}
               </span>
-              <span className="text-gray-400 ml-2">resolved this week</span>
+              <span className="text-muted-foreground ml-2">{t('dashboard.resolvedThisWeek')}</span>
             </div>
           </div>
         </div>
 
         {/* Property Portfolio Map */}
         {metrics?.properties && metrics.properties.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="font-bold text-gray-900">Portfolio Map</h3>
-              <p className="text-sm text-gray-500">Geographic distribution of your properties</p>
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="font-bold text-foreground">{t('dashboard.portfolioMap')}</h3>
+              <p className="text-sm text-muted-foreground">{t('dashboard.portfolioMapDesc')}</p>
             </div>
             <div className="p-0">
               <PropertyMap properties={metrics.properties} />
@@ -297,27 +354,27 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Recent Maintenance */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">Recent Maintenance</h3>
-              <button onClick={() => navigate('/dashboard/work-orders')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+              <h3 className="font-bold text-foreground">{t('dashboard.recentMaintenance')}</h3>
+              <button onClick={() => navigate('/dashboard/work-orders')} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">{t('dashboard.viewAll')}</button>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {metrics?.recentWorkOrders.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">No active maintenance requests</div>
+                <div className="p-8 text-center text-muted-foreground">{t('dashboard.noActiveRequests')}</div>
               ) : (
                 metrics?.recentWorkOrders.map((wo) => (
-                  <div key={wo.id} className="p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => navigate(`/dashboard/work-orders/${wo.id}`)}>
+                  <div key={wo.id} className="p-4 hover:bg-accent transition-colors cursor-pointer" onClick={() => navigate(`/dashboard/work-orders/${wo.id}`)}>
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-gray-100 rounded-lg">
+                      <div className="p-2 bg-accent rounded-lg">
                         {getMaintenanceIcon(wo.title)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-medium text-gray-900 truncate">{wo.title}</h4>
+                          <h4 className="font-medium text-foreground truncate">{wo.title}</h4>
                           {getPriorityBadge(wo.priority)}
                         </div>
-                        <p className="text-sm text-gray-500 mt-0.5">{wo.unitNumber ? `Unit ${wo.unitNumber}` : 'General Property'} • {wo.reportedDaysAgo} days ago</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{wo.unitNumber ? `${t('dashboard.unit')} ${wo.unitNumber}` : t('dashboard.generalProperty')} • {wo.reportedDaysAgo} {t('dashboard.daysAgo')}</p>
                       </div>
                     </div>
                   </div>
@@ -327,31 +384,31 @@ export default function DashboardPage() {
           </div>
 
           {/* Expiring Leases */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">Expiring Leases</h3>
-              <button onClick={() => navigate('/dashboard/leases')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+              <h3 className="font-bold text-foreground">{t('dashboard.expiringLeases')}</h3>
+              <button onClick={() => navigate('/dashboard/leases')} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">{t('dashboard.viewAll')}</button>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {metrics?.expiringLeases.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">No leases expiring in the next 30 days</div>
+                <div className="p-8 text-center text-muted-foreground">{t('dashboard.noExpiringLeases')}</div>
               ) : (
                 metrics?.expiringLeases.map((lease) => (
-                  <div key={lease.id} className="p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => navigate(`/dashboard/leases`)}>
+                  <div key={lease.id} className="p-4 hover:bg-accent transition-colors cursor-pointer" onClick={() => navigate(`/dashboard/leases`)}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-sm">
                           {lease.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900">{lease.tenantName}</h4>
-                          <p className="text-sm text-gray-500">{lease.unitNumber} • Ends {new Date(lease.leaseEnd).toLocaleDateString()}</p>
+                          <h4 className="font-medium text-foreground">{lease.tenantName}</h4>
+                          <p className="text-sm text-muted-foreground">{lease.unitNumber} • {t('dashboard.ends')} {new Date(lease.leaseEnd).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-gray-900">${lease.rentAmount.toLocaleString()}</div>
-                        <div className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full inline-block mt-1">
-                          {lease.daysUntilExpiry} days left
+                        <div className="text-sm font-bold text-foreground">${lease.rentAmount.toLocaleString()}</div>
+                        <div className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full inline-block mt-1">
+                          {lease.daysUntilExpiry} {t('dashboard.daysLeft')}
                         </div>
                       </div>
                     </div>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Loader2, X, Upload } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 // Import components with relative paths
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -62,15 +63,24 @@ export function PropertyForm({
   isSubmitting: externalIsSubmitting = false,
   onSuccess
 }: PropertyFormProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(externalIsSubmitting);
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  const uploadSchema = z.object({
+    title: z.string().min(1, t('editProperty.form.validation.titleRequired')),
+    type: z.string().min(1, t('editProperty.form.validation.typeRequired')),
+    status: z.string().min(1, t('editProperty.form.validation.statusRequired')),
+    price: z.string().min(1, t('editProperty.form.validation.priceRequired')),
+    address: z.string().min(1, t('editProperty.form.validation.addressRequired')),
+    description: z.string().min(1, t('editProperty.form.validation.descriptionRequired')),
+  });
+
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     reset,
     formState: { errors },
@@ -139,7 +149,7 @@ export function PropertyForm({
 
     // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
+      toast.error(t('editProperty.form.imageSizeError'));
       return;
     }
 
@@ -170,17 +180,17 @@ export function PropertyForm({
         await handleFormSubmit(data);
       } else if (property) {
         await propertyService.updateProperty(property.id, data);
-        toast.success('Property updated successfully');
+        toast.success(t('editProperty.success'));
         onSuccess?.();
       } else {
         await propertyService.createProperty(data);
-        toast.success('Property created successfully');
+        toast.success(t('editProperty.addSuccess'));
         onSuccess?.();
       }
     } catch (error) {
       console.error('Error saving property:', error);
       if (!handleFormSubmit) {
-        toast.error('Failed to save property. Please try again.');
+        toast.error(t('editProperty.error'));
       }
     } finally {
       setIsSubmitting(false);
@@ -191,16 +201,16 @@ export function PropertyForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
         {/* Basic Information */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Basic Information</h3>
+        <div className="bg-white dark:bg-card p-6 rounded-lg shadow border border-gray-200 dark:border-border">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-foreground">{t('editProperty.form.basicInfo')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Title <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-muted-foreground mb-1">
+                {t('editProperty.form.propertyTitle')} <span className="text-red-500">*</span>
               </label>
               <Input
-                {...register('title')}
-                placeholder="e.g., Modern Downtown Apartment"
+                {...register('title', { required: t('editProperty.form.validation.titleRequired') })}
+                placeholder={t('editProperty.form.titlePlaceholder')}
                 className={errors.title ? 'border-red-500' : ''}
               />
               {errors.title && (
@@ -214,17 +224,17 @@ export function PropertyForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Type <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-muted-foreground mb-1">
+                {t('editProperty.form.propertyType')} <span className="text-red-500">*</span>
               </label>
               <select
-                {...register('type')}
-                className={`block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm ${errors.type ? 'border-red-500' : ''}`}
+                {...register('type', { required: t('editProperty.form.validation.typeRequired') })}
+                className={`block w-full rounded-md border border-input bg-background py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm text-foreground ${errors.type ? 'border-red-500' : ''}`}
               >
-                <option value="">Select property type</option>
+                <option value="">{t('editProperty.form.selectType')}</option>
                 {propertyTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {t(`properties.types.${type}`) || type}
                   </option>
                 ))}
               </select>
@@ -234,17 +244,17 @@ export function PropertyForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-muted-foreground mb-1">
+                {t('editProperty.form.status')} <span className="text-red-500">*</span>
               </label>
               <select
-                {...register('status')}
-                className={`block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm ${errors.status ? 'border-red-500' : ''}`}
+                {...register('status', { required: t('editProperty.form.validation.statusRequired') })}
+                className={`block w-full rounded-md border border-input bg-background py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm text-foreground ${errors.status ? 'border-red-500' : ''}`}
                 defaultValue="vacant"
               >
-                <option value="vacant">Vacant</option>
-                <option value="occupied">Occupied</option>
-                <option value="maintenance">Maintenance</option>
+                <option value="vacant">{t('properties.status.vacant')}</option>
+                <option value="occupied">{t('properties.status.occupied')}</option>
+                <option value="maintenance">{t('properties.status.maintenance')}</option>
               </select>
               {errors.status && (
                 <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
@@ -252,13 +262,13 @@ export function PropertyForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price ($) <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-muted-foreground mb-1">
+                {t('editProperty.form.price')} <span className="text-red-500">*</span>
               </label>
               <Input
                 type="number"
-                {...register('price')}
-                placeholder="e.g., 250000"
+                {...register('price', { required: t('editProperty.form.validation.priceRequired') })}
+                placeholder={t('editProperty.form.pricePlaceholder')}
                 className={errors.price ? 'border-red-500' : ''}
               />
               {errors.price && (
@@ -268,99 +278,19 @@ export function PropertyForm({
           </div>
         </div>
 
-        {/* Property Details */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Property Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bedrooms <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                {...register('bedrooms')}
-                placeholder="e.g., 3"
-                className={errors.bedrooms ? 'border-red-500' : ''}
-              />
-              {errors.bedrooms && (
-                <p className="mt-1 text-sm text-red-600">{errors.bedrooms.message}</p>
-              )}
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bathrooms <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                step="0.5"
-                {...register('bathrooms')}
-                placeholder="e.g., 2.5"
-                className={errors.bathrooms ? 'border-red-500' : ''}
-              />
-              {errors.bathrooms && (
-                <p className="mt-1 text-sm text-red-600">{errors.bathrooms.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Area (sq ft) <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                {...register('area')}
-                placeholder="e.g., 1500"
-                className={errors.area ? 'border-red-500' : ''}
-              />
-              {errors.area && (
-                <p className="mt-1 text-sm text-red-600">{errors.area.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Year Built
-              </label>
-              <Input
-                type="number"
-                {...register('yearBuilt')}
-                placeholder="e.g., 2020"
-                className={errors.yearBuilt ? 'border-red-500' : ''}
-              />
-              {errors.yearBuilt && (
-                <p className="mt-1 text-sm text-red-600">{errors.yearBuilt.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Parking Spaces
-              </label>
-              <Input
-                type="number"
-                {...register('parkingSpaces')}
-                placeholder="e.g., 2"
-                className={errors.parkingSpaces ? 'border-red-500' : ''}
-              />
-              {errors.parkingSpaces && (
-                <p className="mt-1 text-sm text-red-600">{errors.parkingSpaces.message}</p>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Address */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Address</h3>
+        <div className="bg-white dark:bg-card p-6 rounded-lg shadow border border-gray-200 dark:border-border">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-foreground">{t('editProperty.form.address')}</h3>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Address <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 dark:text-muted-foreground mb-1">
+              {t('editProperty.form.fullAddress')} <span className="text-red-500">*</span>
             </label>
             <textarea
-              {...register('address')}
-              placeholder="e.g., 123 Main St, Anytown, CA 12345"
-              className={`w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm ${errors.address ? 'border-red-500' : ''}`}
+              {...register('address', { required: t('editProperty.form.validation.addressRequired') })}
+              placeholder={t('editProperty.form.addressPlaceholder')}
+              className={`w-full rounded-md border border-input bg-background py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm text-foreground ${errors.address ? 'border-red-500' : ''}`}
               rows={2}
             />
             {errors.address && (
@@ -370,14 +300,14 @@ export function PropertyForm({
         </div>
 
         {/* Image Upload */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Property Image</h3>
+        <div className="bg-white dark:bg-card p-6 rounded-lg shadow border border-gray-200 dark:border-border">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-foreground">{t('editProperty.form.propertyImage')}</h3>
           <div className="mt-1 flex items-center">
             <label
               htmlFor="property-image"
-              className="relative cursor-pointer rounded-md bg-white font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+              className="relative cursor-pointer rounded-md bg-white dark:bg-secondary font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
             >
-              <span>Upload an image</span>
+              <span className="px-3 py-2">{t('editProperty.form.uploadImage')}</span>
               <input
                 id="property-image"
                 name="property-image"
@@ -393,7 +323,7 @@ export function PropertyForm({
 
           {previewImage && (
             <div className="mt-4 relative">
-              <div className="h-48 w-full rounded-md overflow-hidden bg-gray-100">
+              <div className="h-48 w-full rounded-md overflow-hidden bg-gray-100 dark:bg-secondary">
                 <img
                   src={previewImage}
                   alt="Property preview"
@@ -419,13 +349,13 @@ export function PropertyForm({
         </div>
 
         {/* Description */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Description</h3>
+        <div className="bg-white dark:bg-card p-6 rounded-lg shadow border border-gray-200 dark:border-border">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-foreground">{t('editProperty.form.description')}</h3>
           <div>
             <textarea
-              {...register('description')}
-              placeholder="Enter property description"
-              className={`min-h-[100px] w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm ${errors.description ? 'border-red-500' : ''}`}
+              {...register('description', { required: t('editProperty.form.validation.descriptionRequired') })}
+              placeholder={t('editProperty.form.descriptionPlaceholder')}
+              className={`min-h-[100px] w-full rounded-md border border-input bg-background py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm text-foreground ${errors.description ? 'border-red-500' : ''}`}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
@@ -434,8 +364,8 @@ export function PropertyForm({
         </div>
 
         {/* Features */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Features</h3>
+        <div className="bg-white dark:bg-card p-6 rounded-lg shadow border border-gray-200 dark:border-border">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-foreground">{t('editProperty.form.features')}</h3>
           <div className="space-y-2">
             <div className="flex items-center">
               <input
@@ -445,8 +375,8 @@ export function PropertyForm({
                 {...register('features')}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-              <label htmlFor="feature-pool" className="ml-2 block text-sm text-gray-700">
-                Swimming Pool
+              <label htmlFor="feature-pool" className="ml-2 block text-sm text-gray-700 dark:text-muted-foreground">
+                {t('editProperty.form.featureList.pool')}
               </label>
             </div>
             <div className="flex items-center">
@@ -457,8 +387,8 @@ export function PropertyForm({
                 {...register('features')}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-              <label htmlFor="feature-gym" className="ml-2 block text-sm text-gray-700">
-                Gym
+              <label htmlFor="feature-gym" className="ml-2 block text-sm text-gray-700 dark:text-muted-foreground">
+                {t('editProperty.form.featureList.gym')}
               </label>
             </div>
             <div className="flex items-center">
@@ -469,8 +399,8 @@ export function PropertyForm({
                 {...register('features')}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-              <label htmlFor="feature-parking" className="ml-2 block text-sm text-gray-700">
-                Parking
+              <label htmlFor="feature-parking" className="ml-2 block text-sm text-gray-700 dark:text-muted-foreground">
+                {t('editProperty.form.featureList.parking')}
               </label>
             </div>
             <div className="flex items-center">
@@ -481,8 +411,8 @@ export function PropertyForm({
                 {...register('features')}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-              <label htmlFor="feature-laundry" className="ml-2 block text-sm text-gray-700">
-                In-Unit Laundry
+              <label htmlFor="feature-laundry" className="ml-2 block text-sm text-gray-700 dark:text-muted-foreground">
+                {t('editProperty.form.featureList.laundry')}
               </label>
             </div>
           </div>
@@ -496,13 +426,13 @@ export function PropertyForm({
           onClick={() => navigate(-1)}
           disabled={isSubmitting}
         >
-          Cancel
+          {t('editProperty.form.cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {property || initialData ? 'Update Property' : 'Add Property'}
+          {property || initialData ? t('editProperty.form.update') : t('editProperty.form.add')}
         </Button>
       </div>
-    </form>
+    </form >
   );
 }

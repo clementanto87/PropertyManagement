@@ -1,0 +1,1130 @@
+{
+    "common": {
+        "loading": "Lädt...",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "search": "Suchen",
+        "filter": "Filtern",
+        "actions": "Aktionen",
+        "view": "Ansehen",
+        "create": "Erstellen",
+        "update": "Aktualisieren",
+        "success": "Erfolg",
+        "error": "Fehler"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "properties": "Immobilien",
+        "tenants": "Mieter",
+        "leases": "Mietverträge",
+        "workOrders": "Arbeitsaufträge",
+        "vendors": "Dienstleister",
+        "finance": "Finanzen",
+        "expenses": "Ausgaben",
+        "payments": "Zahlungen",
+        "reports": "Berichte",
+        "communications": "Kommunikation",
+        "calendar": "Kalender",
+        "settings": "Einstellungen",
+        "gdpr": "DSGVO",
+        "templates": "Vorlagen"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Willkommen zurück",
+        "overview": "Übersicht",
+        "occupancy": "Belegung",
+        "revenue": "Einnahmen",
+        "maintenance": "Wartung",
+        "recentActivity": "Letzte Aktivitäten",
+        "morningBriefing": "Morgenbesprechung",
+        "leasesExpiringSoon": "Mietverträge laufen bald ab",
+        "urgentMaintenance": "dringende Wartungsanfragen",
+        "needAttention": "die Aufmerksamkeit erfordern",
+        "youHave": "Sie haben",
+        "and": "und",
+        "quickActions": "Schnellaktionen",
+        "newRequest": "Neue Anfrage",
+        "logPayment": "Zahlung erfassen",
+        "addTenant": "Mieter hinzufügen",
+        "addProperty": "Immobilie hinzufügen",
+        "vsLastMonth": "ggü. Vormonat",
+        "resolvedThisWeek": "diese Woche gelöst",
+        "portfolioMap": "Portfolio-Karte",
+        "portfolioMapDesc": "Geografische Verteilung Ihrer Immobilien",
+        "recentMaintenance": "Letzte Wartungen",
+        "viewAll": "Alle ansehen",
+        "noActiveRequests": "Keine aktiven Wartungsanfragen",
+        "unit": "Einheit",
+        "generalProperty": "Allgemeines Eigentum",
+        "daysAgo": "vor Tagen",
+        "expiringLeases": "Auslaufende Mietverträge",
+        "noExpiringLeases": "Keine Mietverträge laufen in den nächsten 30 Tagen ab",
+        "daysLeft": "Tage übrig",
+        "ends": "Endet"
+    },
+    "properties": {
+        "title": "Immobilien",
+        "subtitle": "Verwalten Sie Ihr Immobilienportfolio",
+        "addProperty": "Immobilie hinzufügen",
+        "searchPlaceholder": "Suchen Sie nach Name, Adresse oder Einheit...",
+        "filters": "Filter",
+        "resetFilters": "Filter zurücksetzen",
+        "applyFilters": "Filter anwenden",
+        "showing": "Zeige",
+        "propertiesCount": "Immobilien",
+        "noProperties": "Keine Immobilien gefunden",
+        "noPropertiesDesc": "Wir konnten keine Immobilien finden, die Ihren aktuellen Filtern entsprechen. Versuchen Sie, Ihre Suche anzupassen oder Filter zu löschen.",
+        "clearFilters": "Alle Filter löschen",
+        "loading": "Lade Immobilien",
+        "featured": "Hervorgehoben",
+        "available": "Verfügbar",
+        "occupied": "Belegt",
+        "maintenance": "Wartung",
+        "beds": "Betten",
+        "baths": "Bäder",
+        "area": "Fläche",
+        "rent": "Miete",
+        "details": "Details",
+        "viewDetails": "Details ansehen",
+        "sqft": "m²",
+        "types": {
+            "all": "Alle Immobilien",
+            "apartment": "Wohnungen",
+            "house": "Häuser",
+            "villa": "Villen",
+            "condo": "Eigentumswohnungen"
+        },
+        "status": {
+            "all": "Alle Status",
+            "vacant": "Leerstehend",
+            "occupied": "Belegt",
+            "maintenance": "In Wartung"
+        },
+        "price": {
+            "all": "Jeder Preis",
+            "under1000": "Unter 1.000 €",
+            "1000to2000": "1.000 € - 2.000 €",
+            "2000to3000": "2.000 € - 3.000 €",
+            "over3000": "Über 3.000 €"
+        },
+        "sort": {
+            "newest": "Neueste zuerst",
+            "priceLowHigh": "Preis: Niedrig bis Hoch",
+            "priceHighLow": "Preis: Hoch bis Niedrig",
+            "rating": "Bestbewertet"
+        },
+        "labels": {
+            "propertyType": "Immobilientyp",
+            "status": "Status",
+            "priceRange": "Preisspanne"
+        }
+    },
+    "propertyDetails": {
+        "title": "Immobiliendetails",
+        "subtitle": "Immobilieninformationen anzeigen und verwalten",
+        "editProperty": "Immobilie bearbeiten",
+        "deleteProperty": "Immobilie löschen",
+        "totalUnits": "Gesamteinheiten",
+        "occupancyRate": "Belegungsrate",
+        "totalMonthlyRent": "Gesamtmonatsmiete",
+        "units": "Einheiten",
+        "addUnit": "Einheit hinzufügen",
+        "noUnits": "Noch keine Einheiten hinzugefügt",
+        "noUnitsDesc": "Fügen Sie Einheiten hinzu, um Mieter und Mietverträge zu verwalten",
+        "unit": "Einheit",
+        "sqft": "m²",
+        "editUnit": "Einheit bearbeiten",
+        "deleteUnit": "Einheit löschen",
+        "bedsBaths": "Betten/Bäder",
+        "bd": "Zi",
+        "ba": "Bä",
+        "tenant": "Mieter",
+        "documents": "Dokumente",
+        "uploadDocument": "Dokument hochladen",
+        "deleteDialogTitle": "Immobilie löschen",
+        "deleteDialogDesc": "Diese Aktion kann nicht rückgängig gemacht werden",
+        "deleteConfirmation": "Sind Sie sicher, dass Sie löschen möchten",
+        "deleteConfirmationSuffix": "? Dies löscht auch alle zugehörigen Einheiten und Daten.",
+        "deleteUnitDialogTitle": "Einheit löschen",
+        "deleteUnitConfirmation": "Sind Sie sicher, dass Sie diese Einheit löschen möchten? Dies entfernt auch alle zugehörigen Mietvertragsdaten.",
+        "loading": "Lade Immobiliendetails",
+        "messages": {
+            "loadError": "Fehler beim Laden der Immobiliendetails",
+            "deleteSuccess": "Immobilie erfolgreich gelöscht",
+            "deleteError": "Fehler beim Löschen der Immobilie",
+            "unitDeleteSuccess": "Einheit erfolgreich gelöscht",
+            "unitDeleteError": "Fehler beim Löschen der Einheit"
+        }
+    },
+    "unitDetails": {
+        "back": "Zurück",
+        "title": "Einheit",
+        "bedrooms": "Schlafzimmer",
+        "bathrooms": "Badezimmer",
+        "size": "Größe",
+        "sqft": "m²",
+        "documents": "Dokumente",
+        "unitDocuments": "Einheitsdokumente",
+        "documentsDesc": "Verwalten Sie Dokumente speziell für diese Einheit (Handbücher, Garantien usw.)",
+        "uploadDocument": "Dokument hochladen",
+        "status": {
+            "occupied": "Belegt",
+            "vacant": "Leerstehend",
+            "maintenance": "Wartung"
+        },
+        "notFound": "Einheit nicht gefunden"
+    },
+    "documents": {
+        "title": "Dokumente",
+        "upload": "Dokument hochladen",
+        "uploadDesc": "Laden Sie ein Dokument (PDF, Bild usw.) hoch, um es diesem Datensatz beizufügen.",
+        "noDocuments": "Noch keine Dokumente",
+        "noDocumentsDesc": "Laden Sie Dokumente hoch, um sie hier organisiert zu halten.",
+        "download": "Herunterladen",
+        "delete": "Löschen",
+        "deleteConfirmation": "Sind Sie sicher, dass Sie dieses Dokument löschen möchten?",
+        "form": {
+            "title": "Titel",
+            "titlePlaceholder": "z.B. Mietvertrag",
+            "type": "Typ",
+            "typePlaceholder": "Dokumenttyp auswählen",
+            "file": "Datei",
+            "cancel": "Abbrechen",
+            "upload": "Hochladen",
+            "types": {
+                "lease": "Mietvertrag",
+                "receipt": "Quittung",
+                "invoice": "Rechnung",
+                "inspection": "Inspektionsbericht",
+                "other": "Sonstiges"
+            },
+            "validation": {
+                "titleRequired": "Titel ist erforderlich",
+                "typeRequired": "Typ ist erforderlich",
+                "fileRequired": "Datei ist erforderlich"
+            }
+        },
+        "messages": {
+            "loadError": "Fehler beim Laden der Dokumente",
+            "deleteSuccess": "Dokument erfolgreich gelöscht",
+            "deleteError": "Fehler beim Löschen des Dokuments",
+            "uploadSuccess": "Dokument erfolgreich hochgeladen",
+            "uploadError": "Fehler beim Hochladen des Dokuments"
+        }
+    },
+    "editProperty": {
+        "title": "Immobilie bearbeiten",
+        "addTitle": "Neue Immobilie hinzufügen",
+        "subtitle": "Immobilieninformationen aktualisieren",
+        "addSubtitle": "Erstellen Sie ein neues Immobilienangebot",
+        "detailsTitle": "Immobiliendetails",
+        "detailsDesc": "Aktualisieren Sie die untenstehenden Informationen, um diese Immobilie zu ändern.",
+        "addDetailsDesc": "Bitte geben Sie die untenstehenden Informationen an, um eine neue Immobilie aufzulisten.",
+        "loading": "Immobiliendaten werden geladen",
+        "success": "Immobilie erfolgreich aktualisiert",
+        "addSuccess": "Immobilie erfolgreich hinzugefügt",
+        "error": "Fehler beim Aktualisieren der Immobilie",
+        "addError": "Fehler beim Hinzufügen der Immobilie",
+        "loadError": "Fehler beim Laden der Immobiliendaten",
+        "form": {
+            "basicInfo": "Grundinformationen",
+            "propertyTitle": "Immobilientitel",
+            "titlePlaceholder": "z.B. Modernes Apartment in der Innenstadt",
+            "propertyType": "Immobilientyp",
+            "selectType": "Immobilientyp auswählen",
+            "status": "Status",
+            "price": "Preis (€)",
+            "pricePlaceholder": "z.B. 250000",
+            "propertyDetails": "Immobiliendetails",
+            "bedrooms": "Schlafzimmer",
+            "bathrooms": "Badezimmer",
+            "area": "Fläche (m²)",
+            "yearBuilt": "Baujahr",
+            "parkingSpaces": "Parkplätze",
+            "address": "Adresse",
+            "fullAddress": "Vollständige Adresse",
+            "addressPlaceholder": "z.B. Hauptstraße 123, Musterstadt",
+            "propertyImage": "Immobilienbild",
+            "uploadImage": "Bild hochladen",
+            "imageSizeError": "Bildgröße sollte weniger als 5MB betragen",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Immobilienbeschreibung eingeben",
+            "features": "Ausstattung",
+            "featureList": {
+                "pool": "Schwimmbad",
+                "gym": "Fitnessstudio",
+                "parking": "Parkplatz",
+                "laundry": "Waschmaschine in der Einheit"
+            },
+            "cancel": "Abbrechen",
+            "update": "Immobilie aktualisieren",
+            "add": "Immobilie hinzufügen",
+            "validation": {
+                "titleRequired": "Titel ist erforderlich",
+                "typeRequired": "Typ ist erforderlich",
+                "statusRequired": "Status ist erforderlich",
+                "priceRequired": "Preis ist erforderlich",
+                "bedroomsRequired": "Schlafzimmer ist erforderlich",
+                "bathroomsRequired": "Badezimmer ist erforderlich",
+                "areaRequired": "Fläche ist erforderlich",
+                "addressRequired": "Adresse ist erforderlich",
+                "descriptionRequired": "Beschreibung ist erforderlich"
+            }
+        }
+    },
+    "unitDialog": {
+        "addTitle": "Neue Einheit hinzufügen",
+        "editTitle": "Einheit bearbeiten",
+        "addSubtitle": "Fügen Sie dieser Immobilie eine neue Einheit hinzu",
+        "editSubtitle": "Einheitsinformationen aktualisieren",
+        "unitNumber": "Einheitsnummer",
+        "unitNumberPlaceholder": "z.B. 101, A1, etc.",
+        "status": "Status",
+        "bedrooms": "Schlafzimmer",
+        "bathrooms": "Badezimmer",
+        "size": "Quadratmeter",
+        "sizePlaceholder": "z.B. 850",
+        "cancel": "Abbrechen",
+        "add": "Einheit hinzufügen",
+        "update": "Einheit aktualisieren",
+        "adding": "Hinzufügen...",
+        "updating": "Aktualisieren...",
+        "addSuccess": "Einheit erfolgreich hinzugefügt",
+        "updateSuccess": "Einheit erfolgreich aktualisiert",
+        "addError": "Fehler beim Hinzufügen der Einheit",
+        "updateError": "Fehler beim Aktualisieren der Einheit",
+        "statusOptions": {
+            "vacant": "Leerstehend",
+            "occupied": "Vermietet",
+            "maintenance": "Wartung"
+        }
+    },
+    "tenants": {
+        "title": "Mieter",
+        "subtitle": "Verwalten Sie Ihre Mieter und Mietverträge",
+        "addTenant": "Mieter hinzufügen",
+        "loading": "Mieter werden geladen",
+        "searchPlaceholder": "Suche nach Name, E-Mail oder Telefon...",
+        "filters": "Filter",
+        "showing": "Zeige",
+        "count_one": "Mieter",
+        "count_other": "Mieter",
+        "noTenants": "Keine Mieter gefunden",
+        "noTenantsDescSearch": "Versuchen Sie einen anderen Suchbegriff.",
+        "noTenantsDescEmpty": "Beginnen Sie, indem Sie Ihren ersten Mieter hinzufügen.",
+        "addFirstTenant": "Ersten Mieter hinzufügen",
+        "activeLease": "Aktiver Mietvertrag",
+        "lastPayment": "Letzte Zahlung:",
+        "viewProfile": "Profil ansehen",
+        "mockPaymentTime": "vor 2 Tagen"
+    },
+    "newTenant": {
+        "title": "Neuer Mieter",
+        "subtitle": "Fügen Sie Ihrer Immobilie einen neuen Mieter hinzu",
+        "uploadPhoto": "Foto hochladen",
+        "tabs": {
+            "primary": "Hauptmieter",
+            "occupants": "Bewohner"
+        },
+        "personalInfo": {
+            "title": "Persönliche Informationen",
+            "fullName": "Vollständiger Name",
+            "fullNamePlaceholder": "Vollständigen Namen eingeben",
+            "email": "E-Mail",
+            "emailPlaceholder": "E-Mail-Adresse eingeben",
+            "phone": "Telefonnummer",
+            "phonePlaceholder": "(555) 000-0000"
+        },
+        "emergencyContacts": {
+            "title": "Notfallkontakte",
+            "name": "Name des Kontakts",
+            "namePlaceholder": "Namen eingeben",
+            "phone": "Telefonnummer",
+            "phonePlaceholder": "(555) 000-0000",
+            "relation": "Beziehung",
+            "relationPlaceholder": "Beziehung auswählen",
+            "relations": {
+                "spouse": "Ehepartner",
+                "parent": "Elternteil",
+                "sibling": "Geschwister",
+                "friend": "Freund",
+                "other": "Andere"
+            }
+        },
+        "occupants": {
+            "title": "Bewohner hinzufügen",
+            "placeholder": "Namen des Bewohners eingeben"
+        },
+        "actions": {
+            "cancel": "Abbrechen",
+            "save": "Mieter speichern",
+            "creating": "Erstellen..."
+        },
+        "validation": {
+            "nameRequired": "Bitte geben Sie den Mieternamen ein",
+            "success": "Mieter erfolgreich erstellt!",
+            "error": "Fehler beim Erstellen des Mieters"
+        }
+    },
+    "editTenant": {
+        "title": "Mieter bearbeiten",
+        "subtitle": "Mieterinformationen aktualisieren",
+        "loading": "Mieterdaten werden geladen",
+        "actions": {
+            "update": "Mieter aktualisieren",
+            "updating": "Aktualisiere..."
+        },
+        "validation": {
+            "success": "Mieter erfolgreich aktualisiert!",
+            "error": "Fehler beim Aktualisieren des Mieters",
+            "idMissing": "Mieter-ID fehlt"
+        }
+    },
+    "tenantProfile": {
+        "title": "Mieterprofil",
+        "subtitle": "Mieterdetails anzeigen und verwalten",
+        "loading": "Mieterprofil wird geladen",
+        "actions": {
+            "back": "Zurück",
+            "message": "Nachricht",
+            "edit": "Mieter bearbeiten",
+            "sendEmail": "E-Mail senden",
+            "viewAll": "Alle anzeigen",
+            "uploadDocument": "Dokument hochladen",
+            "recordPayment": "Zahlung erfassen"
+        },
+        "header": {
+            "activeLease": "Aktiver Mietvertrag",
+            "memberSince": "Mitglied seit"
+        },
+        "contactInfo": {
+            "title": "Kontaktinformationen",
+            "email": "E-Mail-Adresse",
+            "phone": "Telefonnummer",
+            "emergencyContact": "Notfallkontakt",
+            "notProvided": "Nicht angegeben"
+        },
+        "leaseDetails": {
+            "title": "Mietvertragsdetails",
+            "activeLease_one": "Aktiver Mietvertrag",
+            "activeLease_other": "Aktive Mietverträge",
+            "noLease": "Keine Mietvertragsinformationen verfügbar",
+            "createLease": "Erstellen Sie einen Mietvertrag, um zu beginnen",
+            "startDate": "Startdatum",
+            "endDate": "Enddatum",
+            "monthlyRent": "Monatliche Miete",
+            "securityDeposit": "Kaution",
+            "unit": "Einheit",
+            "property": "Immobilie",
+            "addressNotAvailable": "Adresse nicht verfügbar"
+        },
+        "paymentHistory": {
+            "title": "Zahlungshistorie",
+            "noHistory": "Keine Zahlungshistorie",
+            "noHistoryDesc": "Zahlungen werden hier angezeigt, sobald sie erfasst wurden",
+            "paid": "Bezahlt",
+            "due": "Fällig"
+        },
+        "communications": {
+            "title": "Letzte Kommunikation",
+            "messages": "Nachrichten"
+        },
+        "documents": {
+            "title": "Dokumente"
+        }
+    },
+    "leases": {
+        "title": "Mietverträge",
+        "subtitle": "Mietverträge und Konditionen verwalten",
+        "loading": "Mietverträge werden geladen",
+        "createLease": "Mietvertrag erstellen",
+        "searchPlaceholder": "Mietverträge nach Mieter, Immobilie oder Einheit suchen...",
+        "filters": "Filter",
+        "showing": "Anzeige",
+        "leasesCount": "Mietverträge",
+        "noLeases": "Keine Mietverträge gefunden",
+        "noLeasesDescSearch": "Versuchen Sie einen anderen Suchbegriff.",
+        "noLeasesDescEmpty": "Beginnen Sie, indem Sie Ihren ersten Mietvertrag erstellen.",
+        "createFirstLease": "Ersten Mietvertrag erstellen",
+        "table": {
+            "tenantProperty": "Mieter & Immobilie",
+            "term": "Laufzeit",
+            "rentDeposit": "Miete & Kaution",
+            "status": "Status",
+            "actions": "Aktionen",
+            "unknownTenant": "Unbekannter Mieter",
+            "unit": "Einheit",
+            "monthlyRent": "/Monat",
+            "deposit": "Kaution:",
+            "duration": "12 Monate Laufzeit",
+            "viewAgreement": "Vertrag anzeigen"
+        }
+    },
+    "newLease": {
+        "title": "Neuer Mietvertrag",
+        "editTitle": "Mietvertrag bearbeiten",
+        "subtitle": "Neuen Mietvertrag erstellen",
+        "editSubtitle": "Mietvertragsdetails aktualisieren",
+        "loading": "Wird geladen...",
+        "propertyDetails": {
+            "title": "Immobiliendetails",
+            "property": "Immobilie",
+            "selectProperty": "Immobilie auswählen",
+            "unit": "Einheit",
+            "selectUnit": "Einheit auswählen",
+            "unitStatus": "Einheit {{number}} ({{status}})"
+        },
+        "tenant": {
+            "title": "Mieter",
+            "selectTenant": "Mieter auswählen",
+            "cantFind": "Mieter nicht gefunden?",
+            "addNew": "Neuen Mieter hinzufügen"
+        },
+        "termsFinancials": {
+            "title": "Konditionen & Finanzen",
+            "startDate": "Startdatum",
+            "endDate": "Enddatum",
+            "monthlyRent": "Monatliche Miete",
+            "securityDeposit": "Kaution",
+            "status": "Status",
+            "placeholder": "0,00"
+        },
+        "statusOptions": {
+            "active": "Aktiv",
+            "pending": "Ausstehend",
+            "expired": "Abgelaufen",
+            "terminated": "Beendet"
+        },
+        "actions": {
+            "cancel": "Abbrechen",
+            "create": "Mietvertrag erstellen",
+            "update": "Mietvertrag aktualisieren",
+            "saving": "Speichern..."
+        },
+        "validation": {
+            "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+            "createSuccess": "Mietvertrag erfolgreich erstellt",
+            "updateSuccess": "Mietvertrag erfolgreich aktualisiert",
+            "error": "Fehler beim Speichern des Mietvertrags",
+            "loadError": "Fehler beim Laden der Mietvertragsdetails",
+            "loadDataError": "Fehler beim Laden von Mietern oder Immobilien",
+            "loadUnitsError": "Fehler beim Laden der Einheiten"
+        }
+    },
+    "leaseAgreement": {
+        "title": "Mietvertrag",
+        "subtitle": "Digitalen Mietvertrag für {{tenant}} verwalten",
+        "backToLeases": "Zurück zu Mietverträgen",
+        "loading": "Wird geladen...",
+        "leaseNotFound": "Mietvertrag nicht gefunden",
+        "leaseInfo": {
+            "title": "Mietvertragsinformationen",
+            "tenant": "Mieter",
+            "property": "Immobilie",
+            "unit": "Einheit",
+            "rentAmount": "Mietbetrag",
+            "monthlyRent": "/Monat",
+            "leaseTerm": "Mietdauer",
+            "status": "Status"
+        },
+        "noAgreement": {
+            "title": "Kein Vertrag erstellt",
+            "description": "Erstellen Sie einen digitalen Mietvertrag, um ihn zur Unterschrift an den Mieter zu senden",
+            "previewPDF": "PDF-Vorschau",
+            "createAgreement": "Vertrag erstellen",
+            "creating": "Wird erstellt..."
+        },
+        "agreementStatus": {
+            "title": "Vertragsstatus",
+            "createdOn": "Erstellt am",
+            "signatures": "Unterschriften",
+            "expiresOn": "Läuft ab am"
+        },
+        "actions": {
+            "downloadPDF": "PDF herunterladen",
+            "sendToTenant": "An Mieter senden",
+            "sending": "Wird gesendet...",
+            "void": "Ungültig machen",
+            "cancel": "Abbrechen"
+        },
+        "messages": {
+            "createSuccess": "Mietvertrag erfolgreich erstellt",
+            "createError": "Fehler beim Erstellen des Vertrags",
+            "sendSuccess": "Vertrag zur Unterschrift an Mieter gesendet",
+            "sendError": "Fehler beim Senden des Vertrags",
+            "voidSuccess": "Vertrag erfolgreich ungültig gemacht",
+            "voidError": "Fehler beim Ungültigmachen des Vertrags",
+            "downloadSuccess": "PDF erfolgreich heruntergeladen",
+            "downloadError": "Fehler beim Herunterladen der PDF",
+            "previewSuccess": "PDF-Vorschau wird geöffnet",
+            "previewError": "Fehler beim Öffnen der PDF-Vorschau"
+        }
+    },
+    "workOrders": {
+        "title": "Arbeitsaufträge",
+        "subtitle": "Wartungsanfragen und Reparaturen verwalten",
+        "loading": "Arbeitsaufträge werden geladen",
+        "newWorkOrder": "Neuer Arbeitsauftrag",
+        "searchPlaceholder": "Nach Titel, Einheit oder Immobilie suchen...",
+        "showing": "Anzeige",
+        "requests": "Anfragen",
+        "noWorkOrders": "Keine Arbeitsaufträge gefunden",
+        "noWorkOrdersDescSearch": "Versuchen Sie einen anderen Suchbegriff.",
+        "noWorkOrdersDescFilter": "Keine Arbeitsaufträge entsprechen Ihrem aktuellen Filter.",
+        "createFirstWorkOrder": "Ersten Arbeitsauftrag erstellen",
+        "unit": "Einheit",
+        "status": {
+            "new": "Neu",
+            "assigned": "Zugewiesen",
+            "inProgress": "In Bearbeitung",
+            "onHold": "Pausiert",
+            "completed": "Abgeschlossen"
+        },
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Arbeitsaufträge"
+        }
+    },
+    "newWorkOrder": {
+        "title": "Neuer Arbeitsauftrag",
+        "editTitle": "Arbeitsauftrag bearbeiten",
+        "subtitle": "Neue Wartungsanfrage erstellen",
+        "editSubtitle": "Arbeitsauftragsdetails aktualisieren",
+        "loading": "Wird geladen...",
+        "locationDetails": {
+            "title": "Standortdetails",
+            "property": "Immobilie",
+            "selectProperty": "Immobilie auswählen",
+            "unit": "Einheit",
+            "selectUnit": "Einheit auswählen",
+            "unitStatus": "Einheit {{number}} ({{status}})"
+        },
+        "issueDetails": {
+            "title": "Problemdetails",
+            "titleLabel": "Titel",
+            "titlePlaceholder": "z.B. Undichter Wasserhahn in der Küche",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Beschreiben Sie das Problem im Detail..."
+        },
+        "assignmentStatus": {
+            "title": "Zuweisung & Status",
+            "assignVendor": "Dienstleister zuweisen",
+            "unassigned": "Nicht zugewiesen",
+            "status": "Status"
+        },
+        "statusOptions": {
+            "new": "Neu",
+            "assigned": "Zugewiesen",
+            "inProgress": "In Bearbeitung",
+            "onHold": "Pausiert",
+            "completed": "Abgeschlossen"
+        },
+        "actions": {
+            "cancel": "Abbrechen",
+            "create": "Arbeitsauftrag erstellen",
+            "update": "Arbeitsauftrag aktualisieren",
+            "saving": "Speichern..."
+        },
+        "validation": {
+            "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+            "createSuccess": "Arbeitsauftrag erfolgreich erstellt",
+            "updateSuccess": "Arbeitsauftrag erfolgreich aktualisiert",
+            "error": "Fehler beim Speichern des Arbeitsauftrags",
+            "loadError": "Fehler beim Laden der Arbeitsauftragsdetails",
+            "loadDataError": "Fehler beim Laden von Immobilien oder Dienstleistern",
+            "loadUnitsError": "Fehler beim Laden der Einheiten"
+        }
+    },
+    "vendors": {
+        "title": "Dienstleister",
+        "subtitle": "Dienstleister und Auftragnehmer verwalten",
+        "loading": "Dienstleister werden geladen",
+        "newVendor": "Neuer Dienstleister",
+        "searchPlaceholder": "Nach Name, Firma oder Kategorie suchen...",
+        "filters": "Filter",
+        "showing": "Anzeige",
+        "vendorsCount": "Dienstleister",
+        "noVendors": "Keine Dienstleister gefunden",
+        "noVendorsDescSearch": "Versuchen Sie einen anderen Suchbegriff.",
+        "noVendorsDescEmpty": "Fügen Sie Ihren ersten Dienstleister hinzu.",
+        "addVendor": "Dienstleister hinzufügen",
+        "insured": "Versichert",
+        "uninsured": "Nicht versichert",
+        "added": "Hinzugefügt",
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Dienstleister"
+        }
+    },
+    "newVendor": {
+        "title": "Neuer Dienstleister",
+        "editTitle": "Dienstleister bearbeiten",
+        "subtitle": "Neuen Dienstleister hinzufügen",
+        "editSubtitle": "Dienstleisterdetails aktualisieren",
+        "loading": "Wird geladen...",
+        "basicInfo": {
+            "title": "Grundinformationen",
+            "contactName": "Kontaktname",
+            "contactNamePlaceholder": "z.B. Max Mustermann",
+            "companyName": "Firmenname",
+            "companyNamePlaceholder": "z.B. Mustermann Sanitär GmbH",
+            "category": "Kategorie",
+            "selectCategory": "Kategorie auswählen"
+        },
+        "categories": {
+            "plumbing": "Sanitär",
+            "electrical": "Elektrik",
+            "hvac": "Heizung/Klima",
+            "generalContractor": "Generalunternehmer",
+            "cleaning": "Reinigung",
+            "landscaping": "Landschaftsbau",
+            "pestControl": "Schädlingsbekämpfung",
+            "other": "Sonstiges"
+        },
+        "contactDetails": {
+            "title": "Kontaktdaten",
+            "phoneNumber": "Telefonnummer",
+            "phonePlaceholder": "(555) 123-4567",
+            "emailAddress": "E-Mail-Adresse",
+            "emailPlaceholder": "dienstleister@beispiel.de",
+            "address": "Adresse",
+            "addressPlaceholder": "Musterstraße 123, Stadt, PLZ"
+        },
+        "additionalInfo": {
+            "title": "Zusätzliche Informationen",
+            "vendorInsured": "Dienstleister ist versichert",
+            "rateInfo": "Preisinformationen / Notizen",
+            "rateInfoPlaceholder": "z.B. 85€/Std. Standardpreis, 120€/Std. Notfall"
+        },
+        "actions": {
+            "cancel": "Abbrechen",
+            "create": "Dienstleister erstellen",
+            "update": "Dienstleister aktualisieren",
+            "saving": "Speichern..."
+        },
+        "validation": {
+            "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+            "createSuccess": "Dienstleister erfolgreich erstellt",
+            "updateSuccess": "Dienstleister erfolgreich aktualisiert",
+            "error": "Fehler beim Speichern des Dienstleisters",
+            "loadError": "Fehler beim Laden der Dienstleisterdetails"
+        }
+    },
+    "expenses": {
+        "title": "Ausgaben",
+        "subtitle": "Immobilienkosten und Wartungsgebühren verfolgen",
+        "loading": "Ausgaben werden geladen",
+        "logExpense": "Ausgabe erfassen",
+        "searchPlaceholder": "Nach Kategorie, Immobilie oder Notiz suchen...",
+        "totalExpenses": "Gesamtausgaben",
+        "showing": "Anzeige",
+        "records": "Einträge",
+        "noExpenses": "Keine Ausgaben gefunden",
+        "noExpensesDescSearch": "Versuchen Sie einen anderen Suchbegriff.",
+        "noExpensesDescEmpty": "Beginnen Sie mit der Verfolgung Ihrer Immobilienausgaben.",
+        "logFirstExpense": "Erste Ausgabe erfassen",
+        "table": {
+            "date": "Datum",
+            "category": "Kategorie",
+            "property": "Immobilie",
+            "description": "Beschreibung",
+            "amount": "Betrag",
+            "actions": "Aktionen",
+            "unknownProperty": "Unbekannte Immobilie"
+        },
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Ausgaben"
+        }
+    },
+    "newExpense": {
+        "title": "Ausgabe erfassen",
+        "editTitle": "Ausgabe bearbeiten",
+        "subtitle": "Neue Immobilienausgabe erfassen",
+        "editSubtitle": "Ausgabendetails aktualisieren",
+        "loading": "Wird geladen...",
+        "expenseDetails": {
+            "title": "Ausgabendetails",
+            "property": "Immobilie",
+            "selectProperty": "Immobilie auswählen",
+            "amount": "Betrag",
+            "amountPlaceholder": "0.00",
+            "category": "Kategorie",
+            "selectCategory": "Kategorie auswählen",
+            "dateIncurred": "Datum der Ausgabe",
+            "descriptionNote": "Beschreibung / Notiz",
+            "descriptionPlaceholder": "Fügen Sie Details zu dieser Ausgabe hinzu..."
+        },
+        "categories": {
+            "maintenance": "Wartung",
+            "repairs": "Reparaturen",
+            "utilities": "Nebenkosten",
+            "insurance": "Versicherung",
+            "taxes": "Steuern",
+            "managementFees": "Verwaltungsgebühren",
+            "supplies": "Material",
+            "other": "Sonstiges"
+        },
+        "actions": {
+            "cancel": "Abbrechen",
+            "log": "Ausgabe erfassen",
+            "update": "Ausgabe aktualisieren",
+            "saving": "Speichern..."
+        },
+        "validation": {
+            "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+            "logSuccess": "Ausgabe erfolgreich erfasst",
+            "updateSuccess": "Ausgabe erfolgreich aktualisiert",
+            "error": "Fehler beim Speichern der Ausgabe",
+            "loadError": "Fehler beim Laden der Ausgabendetails",
+            "loadPropertiesError": "Fehler beim Laden der Immobilien"
+        }
+    },
+    "payments": {
+        "title": "Zahlungen",
+        "subtitle": "Mietzahlungen und Quittungen verwalten",
+        "loading": "Zahlungen werden geladen...",
+        "allStatuses": "Alle Status",
+        "noPayments": "Keine Zahlungen gefunden",
+        "table": {
+            "tenant": "Mieter",
+            "property": "Immobilie",
+            "amount": "Betrag",
+            "dueDate": "Fälligkeitsdatum",
+            "status": "Status",
+            "receiptNumber": "Quittungsnr.",
+            "actions": "Aktionen"
+        },
+        "status": {
+            "pending": "Ausstehend",
+            "paid": "Bezahlt",
+            "overdue": "Überfällig"
+        },
+        "actions": {
+            "recordPayment": "Zahlung erfassen",
+            "receipt": "Quittung",
+            "paid": "Bezahlt"
+        },
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Zahlungen",
+            "downloadReceiptFailed": "Fehler beim Herunterladen der Quittung"
+        },
+        "success": {
+            "receiptDownloaded": "Quittung erfolgreich heruntergeladen"
+        }
+    },
+    "calendar": {
+        "title": "Kalender",
+        "subtitle": "Immobilienereignisse anzeigen und verwalten",
+        "loading": "Kalender wird geladen...",
+        "scheduleMeeting": "Meeting planen",
+        "joinMeeting": "Meeting beitreten",
+        "navigation": {
+            "today": "Heute",
+            "previous": "Zurück",
+            "next": "Weiter",
+            "month": "Monat",
+            "week": "Woche",
+            "day": "Tag",
+            "agenda": "Agenda"
+        },
+        "eventTypes": {
+            "leaseStart": "Mietbeginn",
+            "leaseEnd": "Mietende",
+            "paymentDue": "Zahlung fällig",
+            "followUps": "Nachverfolgungen",
+            "meetings": "Meetings"
+        },
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Kalenderereignisse"
+        },
+        "meetingDialog": {
+            "title": "Meeting planen",
+            "description": "Erstellen Sie ein Videomeeting mit Ihrem bevorzugten Anbieter.",
+            "googleMeet": "Google Meet",
+            "microsoftTeams": "Microsoft Teams",
+            "notConfigured": "Nicht konfiguriert",
+            "googleNotConfigured": "Die Google Meet-Integration erfordert eine gültige Client-ID.",
+            "teamsNotConfigured": "Die Microsoft Teams-Integration erfordert eine gültige Client-ID.",
+            "envHint": "Setzen Sie",
+            "envVariable": "in Ihrer .env-Datei.",
+            "connectAccount": "Konto verbinden",
+            "signInPrompt": "Melden Sie sich bei {{provider}} an, um Meetings zu planen.",
+            "signInButton": "Anmelden mit {{provider}}",
+            "connecting": "Verbinden...",
+            "meetingTitle": "Meeting-Titel",
+            "titlePlaceholder": "z.B. Mietvertragsbesprechung",
+            "date": "Datum",
+            "time": "Uhrzeit",
+            "duration": "Dauer (Minuten)",
+            "attendees": "Teilnehmer (durch Kommas getrennte E-Mails)",
+            "attendeesPlaceholder": "mieter@beispiel.de, eigentümer@beispiel.de",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Meeting-Agenda...",
+            "cancel": "Abbrechen",
+            "createMeeting": "Meeting erstellen",
+            "creating": "Erstellen...",
+            "meetingCreated": "Meeting erstellt!",
+            "meetingScheduled": "Ihr Meeting wurde erfolgreich geplant.",
+            "meetingLink": "Meeting-Link",
+            "close": "Schließen",
+            "validation": {
+                "signInFailed": "Anmeldung bei {{provider}} fehlgeschlagen",
+                "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus",
+                "createFailed": "Fehler beim Erstellen des Meetings"
+            },
+            "messages": {
+                "created": "Meeting erfolgreich erstellt!",
+                "linkCopied": "Meeting-Link kopiert!"
+            }
+        }
+    },
+    "reports": {
+        "title": "Berichte & Analysen",
+        "subtitle": "Leistung und Erkenntnisse verfolgen",
+        "loading": "Berichte werden geladen",
+        "exportReport": "Bericht exportieren",
+        "allProperties": "Alle Immobilien",
+        "pickDate": "Datum wählen",
+        "tabs": {
+            "financial": "Finanzen",
+            "occupancy": "Belegung",
+            "maintenance": "Wartung"
+        },
+        "financial": {
+            "projectedIncome": "Prognostizierte Einnahmen",
+            "monthlyProjection": "Monatliche Prognose",
+            "totalExpenses": "Gesamtausgaben",
+            "allTime": "Gesamt",
+            "netProfit": "Nettogewinn",
+            "estimate": "Schätzung",
+            "incomeVsExpenses": "Einnahmen vs. Ausgaben",
+            "chartComingSoon": "Diagrammvisualisierung folgt in Kürze (erfordert historische Daten)"
+        },
+        "occupancy": {
+            "totalProperties": "Immobilien gesamt",
+            "occupiedUnits": "Belegte Einheiten",
+            "occupancyRate": "Belegungsrate",
+            "vacantUnits": "Leerstehende Einheiten",
+            "vacancyRate": "Leerstandsrate",
+            "occupancyStatus": "Belegungsstatus",
+            "occupied": "Belegt",
+            "vacant": "Leer"
+        },
+        "maintenance": {
+            "pendingRequests": "Ausstehende Anfragen",
+            "inProgress": "In Bearbeitung",
+            "completed": "Abgeschlossen",
+            "recentRequests": "Aktuelle Wartungsanfragen",
+            "statusDistribution": "Statusverteilung",
+            "unknownProperty": "Unbekannte Immobilie",
+            "noWorkOrders": "Keine Arbeitsaufträge gefunden.",
+            "workOrders": "Arbeitsaufträge",
+            "pending": "Ausstehend"
+        },
+        "errors": {
+            "loadFailed": "Fehler beim Laden der Berichtsdaten"
+        }
+    },
+    "communications": {
+        "title": "Kommunikation",
+        "tenantTitle": "Mieter-Kommunikation",
+        "subtitle": "Kommunikation anzeigen und verwalten",
+        "tenantSubtitle": "Kommunikation mit diesem Mieter verwalten",
+        "selectTenant": "Mieter auswählen...",
+        "selectTenantTitle": "Mieter auswählen",
+        "selectTenantMessage": "Bitte wählen Sie einen Mieter aus, um dessen Nachrichten anzuzeigen.",
+        "searchPlaceholder": "Kommunikation durchsuchen...",
+        "clear": "Löschen",
+        "tabs": {
+            "messages": "Nachrichten",
+            "emails": "E-Mails",
+            "calls": "Anrufe",
+            "meetings": "Besprechungen",
+            "notes": "Notizen",
+            "followUps": "Nachverfolgungen"
+        },
+        "headers": {
+            "allCommunications": "Alle Kommunikationen",
+            "emailHistory": "E-Mail-Verlauf",
+            "callLogs": "Anrufprotokolle",
+            "meetingNotes": "Besprechungsnotizen",
+            "internalNotes": "Interne Notizen",
+            "pendingFollowUps": "Ausstehende Nachverfolgungen"
+        },
+        "actions": {
+            "logEmail": "E-Mail protokollieren",
+            "logCall": "Anruf protokollieren",
+            "logMeeting": "Besprechung protokollieren",
+            "addNote": "Notiz hinzufügen"
+        },
+        "filters": {
+            "title": "Filter:",
+            "from": "Von:",
+            "to": "bis"
+        },
+        "errors": {
+            "tenantNotFound": "Mieter nicht gefunden",
+            "loadTenantsFailed": "Fehler beim Laden der Mieter"
+        }
+    },
+    "templates": {
+        "title": "Vorlagen",
+        "subtitle": "Kommunikations- und Dokumentvorlagen verwalten",
+        "newTemplate": "Neue Vorlage",
+        "searchPlaceholder": "Vorlagen durchsuchen...",
+        "tabs": {
+            "emails": "E-Mails",
+            "agreements": "Vereinbarungen",
+            "invoices": "Rechnungen"
+        },
+        "labels": {
+            "subject": "Betreff",
+            "preview": "Vorschau",
+            "inactive": "Inaktiv"
+        },
+        "actions": {
+            "preview": "Vorschau",
+            "edit": "Bearbeiten",
+            "delete": "Löschen"
+        },
+        "empty": {
+            "message": "Keine {{type}}-Vorlagen gefunden. Erstellen Sie eine, um loszulegen!"
+        },
+        "delete": {
+            "title": "Vorlage löschen",
+            "description": "Möchten Sie \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+        },
+        "messages": {
+            "deleteSuccess": "Vorlage erfolgreich gelöscht",
+            "deleteFailed": "Fehler beim Löschen der Vorlage",
+            "loadFailed": "Fehler beim Laden der Vorlagen"
+        },
+        "preview": {
+            "title": "Vorschau: {{name}}",
+            "subtitle": "Vorschau mit Beispieldaten",
+            "subject": "Betreff:",
+            "closePreview": "Vorschau schließen",
+            "description": "Beschreibung",
+            "amount": "Betrag",
+            "monthlyRent": "Monatliche Miete"
+        },
+        "dialog": {
+            "createTitle": "{{type}}-Vorlage erstellen",
+            "editTitle": "Vorlage bearbeiten",
+            "createSubtitle": "Neue {{type}}-Vorlage erstellen",
+            "editSubtitle": "Vorlagendetails aktualisieren",
+            "name": "Vorlagenname",
+            "namePlaceholder": "z.B. Standard-Mietvertrag",
+            "category": "Kategorie",
+            "selectCategory": "Kategorie auswählen",
+            "subject": "Betreffzeile",
+            "subjectPlaceholder": "E-Mail-Betreff",
+            "content": "Vorlageninhalt",
+            "contentPlaceholder": "Vorlageninhalt...",
+            "variables": "Variablen",
+            "clickToCopy": "Klicken zum Kopieren",
+            "active": "Aktive Vorlage",
+            "available": "Zur Verwendung verfügbar",
+            "cancel": "Abbrechen",
+            "create": "Vorlage erstellen",
+            "update": "Vorlage aktualisieren",
+            "copied": "{{text}} kopiert",
+            "successCreate": "Vorlage erfolgreich erstellt",
+            "successUpdate": "Vorlage erfolgreich aktualisiert",
+            "error": "Fehler beim Speichern der Vorlage",
+            "variableDesc": {
+                "fullName": "Vollständiger Name",
+                "email": "E-Mail-Adresse",
+                "propertyName": "Immobilienname",
+                "unitNumber": "Einheitsnummer",
+                "dueDate": "Fälligkeitsdatum",
+                "amount": "Betrag",
+                "tenantName": "Mietername",
+                "landlordName": "Vermietername",
+                "propertyAddress": "Immobilienadresse",
+                "startDate": "Startdatum",
+                "endDate": "Enddatum",
+                "rentAmount": "Mietbetrag",
+                "securityDeposit": "Kaution",
+                "invoiceNumber": "Rechnungsnr.",
+                "issueDate": "Ausstellungsdatum",
+                "totalAmount": "Gesamtbetrag",
+                "lineItems": "Positionstabelle"
+            },
+            "categories": {
+                "general": "Allgemein",
+                "rentReminder": "Mietzahlungserinnerung",
+                "welcome": "Willkommen",
+                "maintenance": "Wartung",
+                "lease": "Mietvertrag",
+                "addendum": "Nachtrag",
+                "rent": "Miete",
+                "utility": "Nebenkosten",
+                "fee": "Gebühr"
+            }
+        }
+    },
+    "gdpr": {
+        "title": "DSGVO-Datenverwaltung",
+        "subtitle": "Benutzerdatenstandorte anzeigen und verwalten",
+        "loading": "Benutzer werden geladen",
+        "allUsers": "Alle Benutzer",
+        "searchPlaceholder": "Benutzer suchen...",
+        "noUsers": "Keine Benutzer gefunden",
+        "roles": {
+            "ADMIN": "ADMIN",
+            "MANAGER": "MANAGER",
+            "TENANT": "MIETER",
+            "CARE_TAKER": "HAUSMEISTER",
+            "HOUSE_OWNER": "HAUSEIGENTÜMER"
+        },
+        "tenant": "Mieter: {{name}}",
+        "noName": "Kein Name",
+        "dataLocations": {
+            "title": "Datenstandorte",
+            "found": "{{count}} Datenstandorte gefunden",
+            "noData": "Keine Datenstandorte für diesen Benutzer gefunden",
+            "loading": "Datenstandorte werden geladen...",
+            "selectUser": "Benutzer auswählen",
+            "selectUserDesc": "Wählen Sie einen Benutzer aus der Liste, um dessen Datenstandorte anzuzeigen"
+        },
+        "anonymize": {
+            "button": "Benutzerdaten anonymisieren",
+            "processing": "Anonymisiere...",
+            "confirmTitle": "Anonymisierung bestätigen",
+            "confirmSubtitle": "Diese Aktion kann nicht rückgängig gemacht werden",
+            "confirmText": "Sind Sie sicher, dass Sie alle Daten für",
+            "consequences": {
+                "personalInfo": "E-Mail, Name und Telefon durch anonymisierte Werte ersetzen",
+                "content": "Inhalte in Kommunikation und Beiträgen entfernen oder anonymisieren",
+                "signatures": "Mietvertragsunterschriften anonymisieren",
+                "irreversible": "Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden"
+            },
+            "cancel": "Abbrechen",
+            "confirm": "Anonymisierung bestätigen",
+            "success": "Benutzerdaten wurden erfolgreich anonymisiert",
+            "error": "Fehler beim Anonymisieren der Benutzerdaten",
+            "loadError": "Fehler beim Laden der Benutzerdatenstandorte"
+        },
+        "models": {
+            "User": "Benutzer",
+            "Tenant": "Mieter",
+            "Communication": "Kommunikation",
+            "Post": "Beitrag",
+            "LeaseSignature": "Mietvertragsunterschrift",
+            "AmenityBooking": "Ausstattungsbuchung",
+            "AuditLog": "Audit-Protokoll"
+        },
+        "fields": {
+            "email": "E-Mail",
+            "phone": "Telefon",
+            "name": "Name",
+            "firstName": "Vorname",
+            "lastName": "Nachname",
+            "content": "Inhalt",
+            "subject": "Betreff",
+            "body": "Inhalt"
+        }
+    }
+}

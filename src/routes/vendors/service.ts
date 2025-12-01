@@ -6,15 +6,36 @@ export async function listVendors(opts?: { skip?: number; take?: number }) {
 }
 
 export async function createVendor(data: CreateVendorInput) {
-  return prisma.vendor.create({ data });
+  const { propertyIds, unitIds, ...rest } = data;
+  return prisma.vendor.create({
+    data: {
+      ...rest,
+      properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
+      units: unitIds ? { connect: unitIds.map(id => ({ id })) } : undefined
+    }
+  });
 }
 
 export async function getVendor(id: string) {
-  return prisma.vendor.findUnique({ where: { id } });
+  return prisma.vendor.findUnique({
+    where: { id },
+    include: {
+      properties: { select: { id: true, name: true } },
+      units: { select: { id: true, unitNumber: true } }
+    }
+  });
 }
 
 export async function updateVendor(id: string, data: UpdateVendorInput) {
-  return prisma.vendor.update({ where: { id }, data });
+  const { propertyIds, unitIds, ...rest } = data;
+  return prisma.vendor.update({
+    where: { id },
+    data: {
+      ...rest,
+      properties: propertyIds ? { set: propertyIds.map(id => ({ id })) } : undefined,
+      units: unitIds ? { set: unitIds.map(id => ({ id })) } : undefined
+    }
+  });
 }
 
 export async function deleteVendor(id: string) {

@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 
-export type EventType = 'LEASE_START' | 'LEASE_END' | 'PAYMENT_DUE' | 'WORK_ORDER' | 'FOLLOW_UP';
+export type EventType = 'LEASE_START' | 'LEASE_END' | 'PAYMENT_DUE' | 'WORK_ORDER' | 'FOLLOW_UP' | 'MEETING';
 
 export type CalendarEvent = {
     id: string;
@@ -9,7 +9,13 @@ export type CalendarEvent = {
     start: Date;
     end: Date;
     allDay: boolean;
-    metadata: any;
+    metadata?: {
+        meetingUrl?: string;
+        provider?: 'google' | 'teams';
+        description?: string;
+        attendees?: string[];
+        [key: string]: any;
+    };
 };
 
 export const calendarService = {

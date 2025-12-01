@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart3, PieChart, LineChart, Download, Filter, Building2, DollarSign, Users, Home, User, Bell, Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
 import { NotificationBell } from '../components/layout/NotificationBell';
 import { DateRange } from 'react-day-picker';
@@ -50,6 +51,7 @@ type Unit = {
 };
 
 const ReportsPage = () => {
+  const { t } = useTranslation();
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(new Date().setDate(new Date().getDate() - 30)),
     to: new Date(),
@@ -84,7 +86,7 @@ const ReportsPage = () => {
       setUnits(unitsData.items || []);
     } catch (error) {
       console.error('Failed to load report data:', error);
-      toast.error('Failed to load report data');
+      toast.error(t('reports.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ const ReportsPage = () => {
 
   // --- Charts Data ---
   const occupancyChartData = {
-    labels: ['Occupied', 'Vacant'],
+    labels: [t('reports.occupancy.occupied'), t('reports.occupancy.vacant')],
     datasets: [
       {
         data: [occupiedUnits, vacantUnits],
@@ -125,10 +127,10 @@ const ReportsPage = () => {
   };
 
   const maintenanceChartData = {
-    labels: ['Pending', 'In Progress', 'Completed'],
+    labels: [t('reports.maintenance.pending'), t('reports.maintenance.inProgress'), t('reports.maintenance.completed')],
     datasets: [
       {
-        label: 'Work Orders',
+        label: t('reports.maintenance.workOrders'),
         data: [pendingRequests, inProgressRequests, completedRequests],
         backgroundColor: [
           'rgba(245, 158, 11, 0.6)',
@@ -151,52 +153,52 @@ const ReportsPage = () => {
         return (
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Projected Income</h3>
-                  <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('reports.financial.projectedIncome')}</h3>
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">${monthlyIncome.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-foreground">${monthlyIncome.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs text-gray-400">Monthly Projection</span>
+                  <span className="text-xs text-muted-foreground">{t('reports.financial.monthlyProjection')}</span>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Total Expenses</h3>
-                  <div className="p-2 bg-red-50 rounded-lg text-red-600">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('reports.financial.totalExpenses')}</h3>
+                  <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400">
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">${totalExpenses.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-foreground">${totalExpenses.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs text-gray-400">All Time</span>
+                  <span className="text-xs text-muted-foreground">{t('reports.financial.allTime')}</span>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Net Profit</h3>
-                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('reports.financial.netProfit')}</h3>
+                  <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                     <DollarSign className="h-5 w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">${netProfit.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-foreground">${netProfit.toLocaleString()}</div>
                 <div className="flex items-center mt-2">
-                  <span className="text-xs text-gray-400">Estimate</span>
+                  <span className="text-xs text-muted-foreground">{t('reports.financial.estimate')}</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Income vs Expenses</h3>
+                <h3 className="text-lg font-bold text-foreground">{t('reports.financial.incomeVsExpenses')}</h3>
               </div>
-              <div className="h-80 flex justify-center items-center text-gray-400 bg-gray-50/50 rounded-xl border border-gray-100">
-                <p>Chart visualization coming soon (requires historical data)</p>
+              <div className="h-80 flex justify-center items-center text-muted-foreground bg-muted/50 rounded-xl border border-border">
+                <p>{t('reports.financial.chartComingSoon')}</p>
               </div>
             </div>
           </div>
@@ -346,88 +348,88 @@ const ReportsPage = () => {
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-500 animate-spin"></div>
           </div>
-          <h2 className="text-xl font-bold text-gray-800">Loading Reports</h2>
+          <h2 className="text-xl font-bold text-foreground">{t('reports.loading')}</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Professional Sticky Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                  <User className="w-6 h-6 text-gray-600" />
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border border-border">
+                  <User className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Reports & Analytics</h1>
-                <p className="text-sm text-gray-500">Track performance and insights</p>
+                <h1 className="text-xl font-bold text-foreground">{t('reports.title')}</h1>
+                <p className="text-sm text-muted-foreground">{t('reports.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <NotificationBell />
-              <div className="h-8 w-px bg-gray-200 mx-1"></div>
+              <div className="h-8 w-px bg-border mx-1"></div>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                Export Report
+                {t('reports.exportReport')}
               </Button>
             </div>
           </div>
 
           {/* Controls Bar */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl border border-gray-200">
+            <div className="flex items-center space-x-1 bg-muted/50 p-1 rounded-xl border border-border">
               <button
                 onClick={() => setReportType('financial')}
                 className={cn(
                   "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   reportType === 'financial'
-                    ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                    ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
                 <DollarSign className="mr-2 h-4 w-4" />
-                Financial
+                {t('reports.tabs.financial')}
               </button>
               <button
                 onClick={() => setReportType('occupancy')}
                 className={cn(
                   "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   reportType === 'occupancy'
-                    ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                    ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
                 <Home className="mr-2 h-4 w-4" />
-                Occupancy
+                {t('reports.tabs.occupancy')}
               </button>
               <button
                 onClick={() => setReportType('maintenance')}
                 className={cn(
                   "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   reportType === 'maintenance'
-                    ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                    ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
                 <Users className="mr-2 h-4 w-4" />
-                Maintenance
+                {t('reports.tabs.maintenance')}
               </button>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <Select value={propertyFilter} onValueChange={(value) => setPropertyFilter(value)}>
-                <SelectTrigger className="w-full sm:w-[200px] bg-white">
+                <SelectTrigger className="w-full sm:w-[200px] bg-background">
                   <SelectValue placeholder="Select property" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Properties</SelectItem>
+                  <SelectItem value="all">{t('reports.allProperties')}</SelectItem>
                   {properties.map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                   ))}
@@ -440,7 +442,7 @@ const ReportsPage = () => {
                     id="date"
                     variant="outline"
                     className={cn(
-                      'w-full sm:w-[240px] justify-start text-left font-normal bg-white',
+                      'w-full sm:w-[240px] justify-start text-left font-normal bg-background',
                       !date && 'text-muted-foreground'
                     )}
                   >
@@ -455,7 +457,7 @@ const ReportsPage = () => {
                         format(date.from, 'LLL dd, y')
                       )
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('reports.pickDate')}</span>
                     )}
                   </Button>
                 </PopoverTrigger>

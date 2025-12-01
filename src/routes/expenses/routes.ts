@@ -9,7 +9,11 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   const propertyId = req.query.propertyId ? z.string().cuid().parse(req.query.propertyId) : undefined;
   const { skip, take } = parsePagination(req.query as any);
-  const items = await listExpenses(propertyId, { skip, take });
+
+  const user = (req as any).user;
+  const userId = user?.role === 'MANAGER' ? user.id : undefined;
+
+  const items = await listExpenses(propertyId, { skip, take, userId });
   res.json({ items, page: Number(req.query.page ?? 1), limit: take });
 });
 

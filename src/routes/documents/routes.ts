@@ -10,8 +10,18 @@ router.get('/', async (req: Request, res: Response) => {
     const tenantId = req.query.tenantId as string | undefined;
     const leaseId = req.query.leaseId as string | undefined;
     const unitId = req.query.unitId as string | undefined;
+    const search = req.query.search as string | undefined;
 
-    const items = await listDocuments(propertyId, leaseId, tenantId, unitId);
+    const user = (req as any).user;
+    const userContext = {
+        userId: user?.id,
+        role: user?.role,
+        tenantId: user?.tenantId,
+        caretakerId: user?.caretakerId,
+        houseOwnerId: user?.houseOwnerId
+    };
+
+    const items = await listDocuments(propertyId, leaseId, tenantId, unitId, userContext, search);
     res.json({ items });
 });
 

@@ -9,6 +9,8 @@ export interface AuthRequest extends Request {
     name: string | null;
     role: Role;
     tenantId?: string | null;
+    caretakerId?: string | null;
+    houseOwnerId?: string | null;
   };
 }
 
@@ -23,7 +25,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, name: true, role: true, tenantId: true },
+      select: { id: true, name: true, role: true, tenantId: true, caretakerId: true, houseOwnerId: true },
     });
 
     if (!user) {

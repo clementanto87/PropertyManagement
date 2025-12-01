@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    google?: {
+    google: {
       accounts: {
         id: {
           initialize: (config: {
@@ -28,13 +28,15 @@ declare global {
           initTokenClient: (config: {
             client_id: string;
             scope: string;
-            callback: (response: { access_token: string }) => void;
+            callback: (response: any) => void;
+            error_callback?: (error: any) => void;
           }) => {
-            requestAccessToken: () => void;
+            requestAccessToken: (options?: { prompt?: string }) => void;
           };
         };
       };
     };
+    gapi: any;
   }
 }
 
@@ -100,7 +102,7 @@ export function renderGoogleButton(
   try {
     // Initialize first
     initializeGoogleSignIn(clientId, onSuccess, onError);
-    
+
     // Render the button
     window.google.accounts.id.renderButton(element, {
       theme: 'outline',

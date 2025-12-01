@@ -10,7 +10,12 @@ router.get('/', async (req: Request, res: Response) => {
   const unitId = req.query.unitId ? z.string().cuid().parse(req.query.unitId) : undefined;
   const status = req.query.status ? workOrderStatusEnum.parse(req.query.status) : undefined;
   const { skip, take } = parsePagination(req.query as any);
-  const items = await listWorkOrders(unitId, status, { skip, take });
+
+  const user = (req as any).user;
+  const caretakerId = user?.role === 'CARETAKER' ? user.caretakerId : undefined;
+  const houseOwnerId = user?.role === 'HOUSEOWNER' ? user.houseOwnerId : undefined;
+
+  const items = await listWorkOrders(unitId, status, { skip, take, caretakerId, houseOwnerId });
   res.json({ items, page: Number(req.query.page ?? 1), limit: take });
 });
 

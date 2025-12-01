@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   Plus,
@@ -23,6 +24,7 @@ import { tenantService, type Tenant } from '@/api/tenantService';
 type CommunicationType = 'all' | 'email' | 'call' | 'meeting' | 'note' | 'follow-up' | 'message';
 
 export function CommunicationsPage() {
+  const { t } = useTranslation();
   const { tenantId } = useParams<{ tenantId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,17 +62,17 @@ export function CommunicationsPage() {
 
   // If not in dashboard context and no tenantId, show error (though routing should prevent this)
   if (!tenantId && !location.pathname.includes('/communications')) {
-    return <div>Tenant not found</div>;
+    return <div>{t('communications.errors.tenantNotFound')}</div>;
   }
 
   const tabs = [
     // 'All' tab removed as per user request
-    { id: 'message', label: 'Messages', icon: Send },
-    { id: 'email', label: 'Emails', icon: Mail },
-    { id: 'call', label: 'Calls', icon: Phone },
-    { id: 'meeting', label: 'Meetings', icon: Calendar },
-    { id: 'note', label: 'Notes', icon: FileText },
-    { id: 'follow-up', label: 'Follow-ups', icon: Clock },
+    { id: 'message', label: t('communications.tabs.messages'), icon: Send },
+    { id: 'email', label: t('communications.tabs.emails'), icon: Mail },
+    { id: 'call', label: t('communications.tabs.calls'), icon: Phone },
+    { id: 'meeting', label: t('communications.tabs.meetings'), icon: Calendar },
+    { id: 'note', label: t('communications.tabs.notes'), icon: FileText },
+    { id: 'follow-up', label: t('communications.tabs.followUps'), icon: Clock },
   ];
 
   // Always show all tabs
@@ -88,35 +90,35 @@ export function CommunicationsPage() {
   const effectiveTenantId = tenantId || selectedTenantId;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Professional Sticky Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-card border-b border-border sticky top-0 z-40">
         <div className="px-6 py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               {tenantId && (
                 <button
                   onClick={() => navigate(`/dashboard/tenants/${tenantId}`)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   title="Back to Tenant Profile"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
               )}
               <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                  <User className="w-6 h-6 text-gray-600" />
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border border-border">
+                  <User className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  {tenantId ? 'Tenant Communications' : 'Communications'}
+                <h1 className="text-xl font-bold text-foreground">
+                  {tenantId ? t('communications.tenantTitle') : t('communications.title')}
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {tenantId
-                    ? 'Manage communications with this tenant'
-                    : 'View and manage communications'}
+                    ? t('communications.tenantSubtitle')
+                    : t('communications.subtitle')}
                 </p>
               </div>
             </div>
@@ -127,9 +129,9 @@ export function CommunicationsPage() {
                 <select
                   value={selectedTenantId}
                   onChange={(e) => setSelectedTenantId(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-foreground"
                 >
-                  <option value="">Select a Tenant...</option>
+                  <option value="">{t('communications.selectTenant')}</option>
                   {tenants.map((tenant) => (
                     <option key={tenant.id} value={tenant.id}>
                       {tenant.name}
@@ -148,17 +150,17 @@ export function CommunicationsPage() {
 
           {/* Tabs and Search */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl overflow-x-auto max-w-full border border-gray-200 no-scrollbar">
+            <div className="flex items-center space-x-1 bg-muted/50 p-1 rounded-xl overflow-x-auto max-w-full border border-border no-scrollbar">
               {visibleTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as CommunicationType)}
                   className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.id
-                    ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                    ? 'bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
-                  <tab.icon className={`w-4 h-4 mr-2 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <tab.icon className={`w-4 h-4 mr-2 ${activeTab === tab.id ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`} />
                   {tab.label}
                 </button>
               ))}
@@ -166,20 +168,20 @@ export function CommunicationsPage() {
 
             <div className="flex items-center space-x-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-none">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search communications..."
+                  placeholder={t('communications.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full sm:w-64 bg-gray-50 focus:bg-white transition-colors"
+                  className="pl-9 pr-4 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full sm:w-64 bg-background focus:bg-card transition-colors text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`px-3 py-2 border rounded-lg text-gray-600 bg-white transition-colors ${showFilters
-                  ? 'border-blue-500 bg-blue-50 text-blue-600'
-                  : 'border-gray-200 hover:bg-gray-50'
+                className={`px-3 py-2 border rounded-lg text-muted-foreground bg-card transition-colors ${showFilters
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                  : 'border-border hover:bg-muted'
                   }`}
               >
                 <Filter className="w-4 h-4" />
@@ -187,11 +189,11 @@ export function CommunicationsPage() {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1"
+                  className="px-3 py-2 border border-border rounded-lg text-muted-foreground bg-card hover:bg-muted transition-colors flex items-center gap-1"
                   title="Clear filters"
                 >
                   <X className="w-4 h-4" />
-                  <span className="text-sm">Clear</span>
+                  <span className="text-sm">{t('communications.clear')}</span>
                 </button>
               )}
             </div>
@@ -205,24 +207,24 @@ export function CommunicationsPage() {
           effectiveTenantId ? (
             <MessagesView tenantId={effectiveTenantId} />
           ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                <User className="w-8 h-8 text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-[400px] bg-card rounded-xl border border-border shadow-sm">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <User className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Select a Tenant</h3>
-              <p className="text-gray-500 mt-1">Please select a tenant to view their messages.</p>
+              <h3 className="text-lg font-medium text-foreground">{t('communications.selectTenantTitle')}</h3>
+              <p className="text-muted-foreground mt-1">{t('communications.selectTenantMessage')}</p>
             </div>
           )
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-h-[400px]">
-            <div className="p-6 border-b border-gray-200 bg-gray-50/30 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900">
-                {activeTab === 'all' && 'All Communications'}
-                {activeTab === 'email' && 'Email History'}
-                {activeTab === 'call' && 'Call Logs'}
-                {activeTab === 'meeting' && 'Meeting Notes'}
-                {activeTab === 'note' && 'Internal Notes'}
-                {activeTab === 'follow-up' && 'Pending Follow-ups'}
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden min-h-[400px]">
+            <div className="p-6 border-b border-border bg-muted/30 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-foreground">
+                {activeTab === 'all' && t('communications.headers.allCommunications')}
+                {activeTab === 'email' && t('communications.headers.emailHistory')}
+                {activeTab === 'call' && t('communications.headers.callLogs')}
+                {activeTab === 'meeting' && t('communications.headers.meetingNotes')}
+                {activeTab === 'note' && t('communications.headers.internalNotes')}
+                {activeTab === 'follow-up' && t('communications.headers.pendingFollowUps')}
               </h2>
 
               {effectiveTenantId && (
@@ -231,7 +233,7 @@ export function CommunicationsPage() {
                     <Link to={`/dashboard/tenants/${effectiveTenantId}/communications/new?type=email`}>
                       <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
                         <Mail className="w-4 h-4" />
-                        Log Email
+                        {t('communications.actions.logEmail')}
                       </button>
                     </Link>
                   )}
@@ -239,7 +241,7 @@ export function CommunicationsPage() {
                     <Link to={`/dashboard/tenants/${effectiveTenantId}/communications/new?type=call`}>
                       <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
                         <Phone className="w-4 h-4" />
-                        Log Call
+                        {t('communications.actions.logCall')}
                       </button>
                     </Link>
                   )}
@@ -247,15 +249,15 @@ export function CommunicationsPage() {
                     <Link to={`/dashboard/tenants/${effectiveTenantId}/communications/new?type=meeting`}>
                       <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors shadow-sm">
                         <Calendar className="w-4 h-4" />
-                        Log Meeting
+                        {t('communications.actions.logMeeting')}
                       </button>
                     </Link>
                   )}
                   {activeTab === 'note' && (
                     <Link to={`/dashboard/tenants/${effectiveTenantId}/communications/new?type=note`}>
-                      <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm">
+                      <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors shadow-sm">
                         <FileText className="w-4 h-4" />
-                        Add Note
+                        {t('communications.actions.addNote')}
                       </button>
                     </Link>
                   )}
@@ -263,23 +265,23 @@ export function CommunicationsPage() {
               )}
             </div>
             {showFilters && (
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+              <div className="px-6 py-4 border-b border-border bg-muted/50">
                 <div className="flex items-center gap-4 flex-wrap">
-                  <div className="text-sm font-medium text-gray-700">Filters:</div>
+                  <div className="text-sm font-medium text-foreground">{t('communications.filters.title')}</div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-gray-600">From:</label>
+                    <label className="text-xs text-muted-foreground">{t('communications.filters.from')}</label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="px-3 py-1.5 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-background text-foreground"
                     />
-                    <span className="text-xs text-gray-400">to</span>
+                    <span className="text-xs text-muted-foreground">{t('communications.filters.to')}</span>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="px-3 py-1.5 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-background text-foreground"
                     />
                   </div>
                 </div>

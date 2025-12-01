@@ -8,7 +8,11 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   const { skip, take } = parsePagination(req.query as any);
-  const items = await listTenants({ skip, take });
+
+  const user = (req as any).user;
+  const userId = user?.role === 'MANAGER' ? user.id : undefined;
+
+  const items = await listTenants({ skip, take, userId });
   res.json({ items, page: Number(req.query.page ?? 1), limit: take });
 });
 

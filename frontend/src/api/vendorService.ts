@@ -14,6 +14,8 @@ export type Vendor = {
     email?: string;
     phone?: string;
     address?: string;
+    properties?: { id: string; name: string }[];
+    units?: { id: string; unitNumber: string }[];
 };
 
 export type CreateVendorInput = {
@@ -21,6 +23,8 @@ export type CreateVendorInput = {
     contact?: string;
     rateInfo?: string;
     insured?: boolean;
+    propertyIds?: string[];
+    unitIds?: string[];
 };
 
 export type UpdateVendorInput = Partial<CreateVendorInput>;

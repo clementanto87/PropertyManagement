@@ -1,11 +1,12 @@
-// Google OAuth2 Configuration
+// Google OAuth2 Configuration (using Google Identity Services)
+// Only requires Client ID - API Key is not needed with GIS
 export const googleConfig = {
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
-  apiKey: import.meta.env.VITE_GOOGLE_API_KEY || '',
   discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
   scope: 'https://www.googleapis.com/auth/calendar',
   get isConfigured() {
-    return Boolean(this.clientId && this.apiKey);
+    // Check for valid client ID format
+    return Boolean(this.clientId && this.clientId.includes('.apps.googleusercontent.com'));
   }
 };
 

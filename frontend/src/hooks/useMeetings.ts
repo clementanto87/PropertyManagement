@@ -10,6 +10,7 @@ interface UseMeetingsReturn {
   isTeamsSignedIn: boolean;
   isGoogleConfigured: boolean;
   isTeamsConfigured: boolean;
+  isGoogleInitialized: boolean;
   signIn: (provider: Provider) => Promise<void>;
   signOut: (provider: Provider) => Promise<void>;
   createMeeting: (
@@ -36,6 +37,7 @@ export function useMeetings(): UseMeetingsReturn {
   const [isTeamsSignedIn, setIsTeamsSignedIn] = useState(false);
   const [isGoogleConfigured, setIsGoogleConfigured] = useState(false);
   const [isTeamsConfigured, setIsTeamsConfigured] = useState(false);
+  const [isGoogleInitialized, setIsGoogleInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +47,6 @@ export function useMeetings(): UseMeetingsReturn {
       // Check if Google is configured
       if (!googleMeetService.isConfigured()) {
         setIsGoogleConfigured(false);
-        console.info('Google Meet not configured - skipping initialization');
         return;
       }
 
@@ -54,9 +55,10 @@ export function useMeetings(): UseMeetingsReturn {
         await googleMeetService.initialize((isSignedIn: boolean) => {
           setIsGoogleSignedIn(isSignedIn);
         });
+        setIsGoogleInitialized(true);
       } catch (err) {
         console.error('Failed to initialize Google Meet', err);
-        // Don't set error for missing config - it's expected in dev
+        setError('Failed to initialize Google Meet');
       }
     };
 
@@ -200,6 +202,7 @@ export function useMeetings(): UseMeetingsReturn {
     isTeamsSignedIn,
     isGoogleConfigured,
     isTeamsConfigured,
+    isGoogleInitialized,
     signIn,
     signOut,
     createMeeting,

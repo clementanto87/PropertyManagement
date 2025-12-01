@@ -39,12 +39,12 @@ class TeamsService {
       throw new Error('Microsoft Teams not configured');
     }
     if (!this.msalInstance) throw new Error('MSAL not initialized');
-    
+
     try {
       const loginResponse = await this.msalInstance.loginPopup({
         scopes: microsoftConfig.scopes,
       });
-      
+
       if (loginResponse.accessToken) {
         this.accessToken = loginResponse.accessToken;
         return true;
@@ -58,7 +58,7 @@ class TeamsService {
 
   async signOut() {
     if (!this.msalInstance) return;
-    
+
     try {
       const accounts = this.msalInstance.getAllAccounts();
       if (accounts.length > 0) {
@@ -81,7 +81,7 @@ class TeamsService {
 
   private async getAccessToken(): Promise<string> {
     if (!this.msalInstance) throw new Error('MSAL not initialized');
-    
+
     if (this.accessToken) return this.accessToken;
 
     try {
@@ -114,7 +114,7 @@ class TeamsService {
 
   private async graphRequest(endpoint: string, options: RequestInit = {}) {
     const token = await this.getAccessToken();
-    
+
     const defaultHeaders = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -170,16 +170,12 @@ class TeamsService {
         body: JSON.stringify(event),
       });
 
-      // Get the online meeting details
-      const meetingResponse = await this.graphRequest(`me/onlineMeetings?$filter=joinWebUrl eq '${response.onlineMeeting.joinUrl}'`);
-      const meeting = meetingResponse.value[0];
-
       return {
         id: response.id,
         title: response.subject,
         startTime: response.start.dateTime,
         endTime: response.end.dateTime,
-        joinUrl: meeting.joinWebUrl,
+        joinUrl: response.onlineMeeting.joinUrl,
         organizer: response.organizer?.emailAddress?.address || '',
         type: 'teams' as const,
       };
